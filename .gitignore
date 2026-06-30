@@ -1,17 +1,43 @@
-﻿node_modules/
-dist/
-target/
+﻿# Java
 *.class
+*.jar
+*.war
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Node
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.env
 venv/
+.venv/
+*.egg-info/
+
+# IDE
 .idea/
+*.iml
 .vscode/
-logs/
-*.log
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
 Thumbs.db
-uploads/
-*.db
-temp/
-tmp/
+
+# Project specific
+backend/target/
+frontend/dist/
+frontend/node_modules/
+ai-service/venv/
+ai-service/__pycache__/
+deploy/*.tar.gz
+video/
+ppt/
