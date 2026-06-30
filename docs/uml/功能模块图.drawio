@@ -1,0 +1,75 @@
+﻿<mxfile host="app.diagrams.net">
+  <diagram name="功能模块图" id="0">
+    <mxGraphModel dx="2" dy="2" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2000" pageHeight="1800" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="root" value="智聘星图" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a73e8;fontColor=#ffffff;fontSize=18;fontStyle=1" vertex="1" parent="1"><mxGeometry x="700" y="20" width="240" height="50" /></mxCell>
+        <mxCell id="m1" value="认证中心" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4CAF50;fontColor=#ffffff;fontSize=14" vertex="1" parent="1"><mxGeometry x="100" y="130" width="150" height="45" /></mxCell>
+        <mxCell id="m2" value="简历中心" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2196F3;fontColor=#ffffff;fontSize=14" vertex="1" parent="1"><mxGeometry x="330" y="130" width="150" height="45" /></mxCell>
+        <mxCell id="m3" value="岗位中心" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9800;fontColor=#ffffff;fontSize=14" vertex="1" parent="1"><mxGeometry x="560" y="130" width="150" height="45" /></mxCell>
+        <mxCell id="m4" value="AI解析中心" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#9C27B0;fontColor=#ffffff;fontSize=14" vertex="1" parent="1"><mxGeometry x="790" y="130" width="150" height="45" /></mxCell>
+        <mxCell id="m5" value="能力图谱中心" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E91E63;fontColor=#ffffff;fontSize=14" vertex="1" parent="1"><mxGeometry x="1020" y="130" width="150" height="45" /></mxCell>
+        <mxCell id="m6" value="推荐中心" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#00BCD4;fontColor=#ffffff;fontSize=14" vertex="1" parent="1"><mxGeometry x="1250" y="130" width="150" height="45" /></mxCell>
+        <mxCell id="m7" value="职业规划中心" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF5722;fontColor=#ffffff;fontSize=14" vertex="1" parent="1"><mxGeometry x="1480" y="130" width="150" height="45" /></mxCell>
+        <mxCell id="m8" value="后台管理中心" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#607D8B;fontColor=#ffffff;fontSize=14" vertex="1" parent="1"><mxGeometry x="1710" y="130" width="150" height="45" /></mxCell>
+        <mxCell id="er1" style="orthogonalEdgeStyle" edge="1" source="root" target="m1" parent="1" />
+        <mxCell id="er2" style="orthogonalEdgeStyle" edge="1" source="root" target="m2" parent="1" />
+        <mxCell id="er3" style="orthogonalEdgeStyle" edge="1" source="root" target="m3" parent="1" />
+        <mxCell id="er4" style="orthogonalEdgeStyle" edge="1" source="root" target="m4" parent="1" />
+        <mxCell id="er5" style="orthogonalEdgeStyle" edge="1" source="root" target="m5" parent="1" />
+        <mxCell id="er6" style="orthogonalEdgeStyle" edge="1" source="root" target="m6" parent="1" />
+        <mxCell id="er7" style="orthogonalEdgeStyle" edge="1" source="root" target="m7" parent="1" />
+        <mxCell id="er8" style="orthogonalEdgeStyle" edge="1" source="root" target="m8" parent="1" />
+        <mxCell id="m1-1" value="注册" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="40" y="220" width="110" height="40" /></mxCell>
+        <mxCell id="m1-2" value="登录" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="160" y="220" width="110" height="40" /></mxCell>
+        <mxCell id="m1-3" value="权限控制" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="100" y="280" width="110" height="40" /></mxCell>
+        <mxCell id="em1-1" style="orthogonalEdgeStyle" edge="1" source="m1" target="m1-1" parent="1" />
+        <mxCell id="em1-2" style="orthogonalEdgeStyle" edge="1" source="m1" target="m1-2" parent="1" />
+        <mxCell id="em1-3" style="orthogonalEdgeStyle" edge="1" source="m1" target="m1-3" parent="1" />
+        <mxCell id="m2-1" value="上传简历" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="270" y="220" width="110" height="40" /></mxCell>
+        <mxCell id="m2-2" value="简历列表" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="390" y="220" width="110" height="40" /></mxCell>
+        <mxCell id="m2-3" value="重新解析" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="330" y="280" width="110" height="40" /></mxCell>
+        <mxCell id="em2-1" style="orthogonalEdgeStyle" edge="1" source="m2" target="m2-1" parent="1" />
+        <mxCell id="em2-2" style="orthogonalEdgeStyle" edge="1" source="m2" target="m2-2" parent="1" />
+        <mxCell id="em2-3" style="orthogonalEdgeStyle" edge="1" source="m2" target="m2-3" parent="1" />
+        <mxCell id="m3-1" value="发布岗位" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="500" y="220" width="110" height="40" /></mxCell>
+        <mxCell id="m3-2" value="岗位编辑" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="620" y="220" width="110" height="40" /></mxCell>
+        <mxCell id="m3-3" value="上下架" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="560" y="280" width="110" height="40" /></mxCell>
+        <mxCell id="em3-1" style="orthogonalEdgeStyle" edge="1" source="m3" target="m3-1" parent="1" />
+        <mxCell id="em3-2" style="orthogonalEdgeStyle" edge="1" source="m3" target="m3-2" parent="1" />
+        <mxCell id="em3-3" style="orthogonalEdgeStyle" edge="1" source="m3" target="m3-3" parent="1" />
+        <mxCell id="m4-1" value="简历解析" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="730" y="220" width="110" height="40" /></mxCell>
+        <mxCell id="m4-2" value="岗位解析" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="850" y="220" width="110" height="40" /></mxCell>
+        <mxCell id="m4-3" value="技能抽取" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="790" y="280" width="110" height="40" /></mxCell>
+        <mxCell id="em4-1" style="orthogonalEdgeStyle" edge="1" source="m4" target="m4-1" parent="1" />
+        <mxCell id="em4-2" style="orthogonalEdgeStyle" edge="1" source="m4" target="m4-2" parent="1" />
+        <mxCell id="em4-3" style="orthogonalEdgeStyle" edge="1" source="m4" target="m4-3" parent="1" />
+        <mxCell id="m5-1" value="个人图谱" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="960" y="220" width="110" height="40" /></mxCell>
+        <mxCell id="m5-2" value="岗位图谱" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="1080" y="220" width="110" height="40" /></mxCell>
+        <mxCell id="m5-3" value="技能对比" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="1020" y="280" width="110" height="40" /></mxCell>
+        <mxCell id="em5-1" style="orthogonalEdgeStyle" edge="1" source="m5" target="m5-1" parent="1" />
+        <mxCell id="em5-2" style="orthogonalEdgeStyle" edge="1" source="m5" target="m5-2" parent="1" />
+        <mxCell id="em5-3" style="orthogonalEdgeStyle" edge="1" source="m5" target="m5-3" parent="1" />
+        <mxCell id="m6-1" value="岗位推荐" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="1190" y="220" width="110" height="40" /></mxCell>
+        <mxCell id="m6-2" value="人才推荐" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="1310" y="220" width="110" height="40" /></mxCell>
+        <mxCell id="m6-3" value="匹配评分" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="1250" y="280" width="110" height="40" /></mxCell>
+        <mxCell id="em6-1" style="orthogonalEdgeStyle" edge="1" source="m6" target="m6-1" parent="1" />
+        <mxCell id="em6-2" style="orthogonalEdgeStyle" edge="1" source="m6" target="m6-2" parent="1" />
+        <mxCell id="em6-3" style="orthogonalEdgeStyle" edge="1" source="m6" target="m6-3" parent="1" />
+        <mxCell id="m7-1" value="技能缺口" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="1420" y="220" width="110" height="40" /></mxCell>
+        <mxCell id="m7-2" value="学习路线" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="1540" y="220" width="110" height="40" /></mxCell>
+        <mxCell id="m7-3" value="职业路径" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="1480" y="280" width="110" height="40" /></mxCell>
+        <mxCell id="em7-1" style="orthogonalEdgeStyle" edge="1" source="m7" target="m7-1" parent="1" />
+        <mxCell id="em7-2" style="orthogonalEdgeStyle" edge="1" source="m7" target="m7-2" parent="1" />
+        <mxCell id="em7-3" style="orthogonalEdgeStyle" edge="1" source="m7" target="m7-3" parent="1" />
+        <mxCell id="m8-1" value="用户管理" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="1650" y="220" width="110" height="40" /></mxCell>
+        <mxCell id="m8-2" value="企业管理" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="1770" y="220" width="110" height="40" /></mxCell>
+        <mxCell id="m8-3" value="数据统计" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12" vertex="1" parent="1"><mxGeometry x="1710" y="280" width="110" height="40" /></mxCell>
+        <mxCell id="em8-1" style="orthogonalEdgeStyle" edge="1" source="m8" target="m8-1" parent="1" />
+        <mxCell id="em8-2" style="orthogonalEdgeStyle" edge="1" source="m8" target="m8-2" parent="1" />
+        <mxCell id="em8-3" style="orthogonalEdgeStyle" edge="1" source="m8" target="m8-3" parent="1" />
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

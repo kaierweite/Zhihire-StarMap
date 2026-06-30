@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="drawio">
+  <diagram name="业务流程图">
+    <mxGraphModel dx="2" dy="2" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2000" pageHeight="1800" background="#ffffff">
+      <root><mxCell id="0"/><mxCell id="1" parent="0"/>
+        <mxCell id="t1" value="求职者业务流程" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a73e8;fontColor=#ffffff;fontSize=16;fontStyle=1" vertex="1" parent="1"><mxGeometry x="180" y="30" width="280" height="45"/></mxCell>
+        <mxCell id="t2" value="企业业务流程" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a73e8;fontColor=#ffffff;fontSize=16;fontStyle=1" vertex="1" parent="1"><mxGeometry x="1100" y="30" width="280" height="45"/></mxCell>
+        <mxCell id="s1" value="注册 / 登录" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=13" vertex="1" parent="1"><mxGeometry x="180" y="120" width="280" height="50"/></mxCell>
+        <mxCell id="s2" value="上传简历（PDF/DOC/DOCX）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=13" vertex="1" parent="1"><mxGeometry x="180" y="230" width="280" height="50"/></mxCell>
+        <mxCell id="s3" value="AI 解析简历" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=13" vertex="1" parent="1"><mxGeometry x="180" y="350" width="280" height="50"/></mxCell>
+        <mxCell id="s4" value="生成个人能力图谱" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=13" vertex="1" parent="1"><mxGeometry x="180" y="470" width="280" height="50"/></mxCell>
+        <mxCell id="s5" value="查看岗位推荐" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F7FA;strokeColor=#006064;fontSize=13" vertex="1" parent="1"><mxGeometry x="180" y="590" width="280" height="50"/></mxCell>
+        <mxCell id="s6" value="AI 职业规划建议" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FBE9E7;strokeColor=#BF360C;fontSize=13" vertex="1" parent="1"><mxGeometry x="180" y="710" width="280" height="50"/></mxCell>
+        <mxCell id="s7" value="投递简历 / 结束" style="shape=parallelogram;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#2E7D32;fontSize=13" vertex="1" parent="1"><mxGeometry x="180" y="830" width="280" height="50"/></mxCell>
+        <mxCell id="c1" value="注册 / 登录" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=13" vertex="1" parent="1"><mxGeometry x="1100" y="120" width="280" height="50"/></mxCell>
+        <mxCell id="c2" value="发布岗位（上传JD/手动填写）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=13" vertex="1" parent="1"><mxGeometry x="1100" y="230" width="280" height="50"/></mxCell>
+        <mxCell id="c3" value="AI 解析岗位需求" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=13" vertex="1" parent="1"><mxGeometry x="1100" y="350" width="280" height="50"/></mxCell>
+        <mxCell id="c4" value="生成岗位能力图谱" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=13" vertex="1" parent="1"><mxGeometry x="1100" y="470" width="280" height="50"/></mxCell>
+        <mxCell id="c5" value="查看人才推荐" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F7FA;strokeColor=#006064;fontSize=13" vertex="1" parent="1"><mxGeometry x="1100" y="590" width="280" height="50"/></mxCell>
+        <mxCell id="c6" value="查看匹配详情 / 联系候选人" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=13" vertex="1" parent="1"><mxGeometry x="1100" y="710" width="280" height="50"/></mxCell>
+        <mxCell id="c7" value="结束" style="shape=parallelogram;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#2E7D32;fontSize=13" vertex="1" parent="1"><mxGeometry x="1100" y="830" width="280" height="50"/></mxCell>
+        <mxCell id="a1" style="orthogonalEdgeStyle" edge="1" parent="1" source="s1" target="s2"/>
+        <mxCell id="a2" style="orthogonalEdgeStyle" edge="1" parent="1" source="s2" target="s3"/>
+        <mxCell id="a3" style="orthogonalEdgeStyle" edge="1" parent="1" source="s3" target="s4"/>
+        <mxCell id="a4" style="orthogonalEdgeStyle" edge="1" parent="1" source="s4" target="s5"/>
+        <mxCell id="a5" style="orthogonalEdgeStyle" edge="1" parent="1" source="s5" target="s6"/>
+        <mxCell id="a6" style="orthogonalEdgeStyle" edge="1" parent="1" source="s6" target="s7"/>
+        <mxCell id="b1" style="orthogonalEdgeStyle" edge="1" parent="1" source="c1" target="c2"/>
+        <mxCell id="b2" style="orthogonalEdgeStyle" edge="1" parent="1" source="c2" target="c3"/>
+        <mxCell id="b3" style="orthogonalEdgeStyle" edge="1" parent="1" source="c3" target="c4"/>
+        <mxCell id="b4" style="orthogonalEdgeStyle" edge="1" parent="1" source="c4" target="c5"/>
+        <mxCell id="b5" style="orthogonalEdgeStyle" edge="1" parent="1" source="c5" target="c6"/>
+        <mxCell id="b6" style="orthogonalEdgeStyle" edge="1" parent="1" source="c6" target="c7"/>
+        <mxCell id="ai" value="AI 微服务&#xa;（FastAPI + LLM）" style="shape=cylinder;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;fontSize=12;fontStyle=1" vertex="1" parent="1"><mxGeometry x="660" y="345" width="180" height="60"/></mxCell>
+        <mxCell id="ail1" style="orthogonalEdgeStyle;dashed=1;fontSize=10;label=调用" edge="1" parent="1" source="ai" target="s3"/>
+        <mxCell id="ail2" style="orthogonalEdgeStyle;dashed=1;fontSize=10;label=调用" edge="1" parent="1" source="ai" target="c3"/>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

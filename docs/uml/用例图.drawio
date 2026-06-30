@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="drawio">
+  <diagram name="用例图">
+    <mxGraphModel dx="2" dy="2" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2000" pageHeight="1800" background="#ffffff">
+      <root><mxCell id="0"/><mxCell id="1" parent="0"/>
+        <mxCell id="sys" value="智聘星图系统" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;dashed=1;arcSize=20;fontSize=16;fontStyle=1;fillColor=none;strokeColor=#1a73e8;strokeWidth=2;verticalAlign=top;align=center;spacingTop=-20" vertex="1" parent="1"><mxGeometry x="260" y="80" width="700" height="800"/></mxCell>
+        <mxCell id="au" value="求职者" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#1565C0;fontColor=#ffffff;fontSize=14" vertex="1" parent="1"><mxGeometry x="80" y="200" width="70" height="90"/></mxCell>
+        <mxCell id="ac" value="企业用户" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#2E7D32;fontColor=#ffffff;fontSize=14" vertex="1" parent="1"><mxGeometry x="80" y="430" width="70" height="90"/></mxCell>
+        <mxCell id="aa" value="管理员" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#F57F17;fontColor=#ffffff;fontSize=14" vertex="1" parent="1"><mxGeometry x="80" y="680" width="70" height="90"/></mxCell>
+        <mxCell id="u1" value="注册" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=12" vertex="1" parent="1"><mxGeometry x="420" y="120" width="130" height="45"/></mxCell>
+        <mxCell id="u2" value="登录" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=12" vertex="1" parent="1"><mxGeometry x="420" y="200" width="130" height="45"/></mxCell>
+        <mxCell id="u3" value="上传简历" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=12" vertex="1" parent="1"><mxGeometry x="620" y="120" width="130" height="45"/></mxCell>
+        <mxCell id="u4" value="查看能力图谱" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=12" vertex="1" parent="1"><mxGeometry x="620" y="200" width="140" height="45"/></mxCell>
+        <mxCell id="u5" value="查看岗位推荐" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=12" vertex="1" parent="1"><mxGeometry x="420" y="290" width="140" height="45"/></mxCell>
+        <mxCell id="u6" value="查看职业规划" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=12" vertex="1" parent="1"><mxGeometry x="620" y="290" width="140" height="45"/></mxCell>
+        <mxCell id="c1" value="注册" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=12" vertex="1" parent="1"><mxGeometry x="420" y="410" width="130" height="45"/></mxCell>
+        <mxCell id="c2" value="登录" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=12" vertex="1" parent="1"><mxGeometry x="420" y="490" width="130" height="45"/></mxCell>
+        <mxCell id="c3" value="发布岗位" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=12" vertex="1" parent="1"><mxGeometry x="620" y="410" width="130" height="45"/></mxCell>
+        <mxCell id="c4" value="查看人才推荐" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=12" vertex="1" parent="1"><mxGeometry x="620" y="490" width="140" height="45"/></mxCell>
+        <mxCell id="a1" value="用户管理" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;fontSize=12" vertex="1" parent="1"><mxGeometry x="500" y="680" width="130" height="45"/></mxCell>
+        <mxCell id="a2" value="企业管理" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;fontSize=12" vertex="1" parent="1"><mxGeometry x="500" y="760" width="130" height="45"/></mxCell>
+        <mxCell id="a3" value="数据统计" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;fontSize=12" vertex="1" parent="1"><mxGeometry x="690" y="680" width="130" height="45"/></mxCell>
+        <mxCell id="p1" value="AI文档解析" style="ellipse;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=11" vertex="1" parent="1"><mxGeometry x="800" y="120" width="130" height="40"/></mxCell>
+        <mxCell id="p2" value="多维度匹配评分" style="ellipse;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=11" vertex="1" parent="1"><mxGeometry x="800" y="280" width="140" height="40"/></mxCell>
+        <mxCell id="lu1" style="orthogonalEdgeStyle" edge="1" parent="1" source="au" target="u1"/>
+        <mxCell id="lu2" style="orthogonalEdgeStyle" edge="1" parent="1" source="au" target="u2"/>
+        <mxCell id="lu3" style="orthogonalEdgeStyle" edge="1" parent="1" source="au" target="u3"/>
+        <mxCell id="lu4" style="orthogonalEdgeStyle" edge="1" parent="1" source="au" target="u4"/>
+        <mxCell id="lu5" style="orthogonalEdgeStyle" edge="1" parent="1" source="au" target="u5"/>
+        <mxCell id="lu6" style="orthogonalEdgeStyle" edge="1" parent="1" source="au" target="u6"/>
+        <mxCell id="lc1" style="orthogonalEdgeStyle" edge="1" parent="1" source="ac" target="c1"/>
+        <mxCell id="lc2" style="orthogonalEdgeStyle" edge="1" parent="1" source="ac" target="c2"/>
+        <mxCell id="lc3" style="orthogonalEdgeStyle" edge="1" parent="1" source="ac" target="c3"/>
+        <mxCell id="lc4" style="orthogonalEdgeStyle" edge="1" parent="1" source="ac" target="c4"/>
+        <mxCell id="la1" style="orthogonalEdgeStyle" edge="1" parent="1" source="aa" target="a1"/>
+        <mxCell id="la2" style="orthogonalEdgeStyle" edge="1" parent="1" source="aa" target="a2"/>
+        <mxCell id="la3" style="orthogonalEdgeStyle" edge="1" parent="1" source="aa" target="a3"/>
+        <mxCell id="ip1" style="dashed=1;fontSize=10;label=&lt;&lt;include&gt;&gt;" edge="1" parent="1" source="u3" target="p1"/>
+        <mxCell id="ip2" style="dashed=1;fontSize=10;label=&lt;&lt;include&gt;&gt;" edge="1" parent="1" source="u5" target="p2"/>
+        <mxCell id="ip3" style="dashed=1;fontSize=10;label=&lt;&lt;include&gt;&gt;" edge="1" parent="1" source="c4" target="p2"/>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

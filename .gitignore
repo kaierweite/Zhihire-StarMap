@@ -1,0 +1,17 @@
+﻿node_modules/
+dist/
+target/
+*.class
+__pycache__/
+*.pyc
+venv/
+.idea/
+.vscode/
+logs/
+*.log
+.DS_Store
+Thumbs.db
+uploads/
+*.db
+temp/
+tmp/
