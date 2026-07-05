@@ -6,35 +6,31 @@ import com.zhihire.starmap.module.user.dto.CompanyProfileDTO;
 import com.zhihire.starmap.module.user.dto.UserProfileDTO;
 import com.zhihire.starmap.module.user.entity.Company;
 import com.zhihire.starmap.module.user.entity.UserProfile;
+import com.zhihire.starmap.module.user.entity.UserSkill;
 import com.zhihire.starmap.module.user.mapper.CompanyMapper;
 import com.zhihire.starmap.module.user.mapper.UserProfileMapper;
+import com.zhihire.starmap.module.user.mapper.UserSkillMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * 用户档案服务
- *
- * 职责：求职者档案 + 企业档案的查询与更新
- */
 @Slf4j
 @Service
 public class UserProfileService {
 
     private final UserProfileMapper userProfileMapper;
     private final CompanyMapper companyMapper;
+    private final UserSkillMapper userSkillMapper;
 
     public UserProfileService(UserProfileMapper userProfileMapper,
-                              CompanyMapper companyMapper) {
+                              CompanyMapper companyMapper,
+                              UserSkillMapper userSkillMapper) {
         this.userProfileMapper = userProfileMapper;
         this.companyMapper = companyMapper;
+        this.userSkillMapper = userSkillMapper;
     }
 
-    /**
-     * 获取求职者档案
-     * 若不存在则自动创建空档案
-     */
     public UserProfileDTO getUserProfile(Long userId) {
         UserProfile profile = getOrCreateProfile(userId);
         UserProfileDTO dto = new UserProfileDTO();
@@ -42,45 +38,40 @@ public class UserProfileService {
         return dto;
     }
 
-    /**
-     * 更新求职者档案
-     */
     @Transactional(rollbackFor = Exception.class)
     public void updateUserProfile(Long userId, UserProfileDTO dto) {
         UserProfile profile = getOrCreateProfile(userId);
         BeanUtils.copyProperties(dto, profile, "id", "userId", "createdAt", "updatedAt", "deletedAt");
-        // 计算完成度
-        profile.setProfileCompleteness(calculateCompleteness(profile));
+        profile.setProfileCompleteness(calculateCompleteness(profile, userId));
         userProfileMapper.updateById(profile);
         log.info("求职者档案更新：userId={}, completeness={}", userId, profile.getProfileCompleteness());
     }
 
     /**
-     * 获取企业档案
+     * 重新计算并更新档案完成度（含技能数）
      */
+    public void recalculateCompleteness(Long userId) {
+        UserProfile profile = getOrCreateProfile(userId);
+        int score = calculateCompleteness(profile, userId);
+        profile.setProfileCompleteness(score);
+        userProfileMapper.updateById(profile);
+        log.info("档案完成度重算：userId={}, completeness={}", userId, score);
+    }
+
     public CompanyProfileDTO getCompanyProfile(Long userId) {
         Company company = companyMapper.selectOne(
                 new LambdaQueryWrapper<Company>().eq(Company::getUserId, userId));
-        if (company == null) {
-            throw new BusinessException(404, "企业档案不存在");
-        }
+        if (company == null) throw new BusinessException(404, "企业档案不存在");
         CompanyProfileDTO dto = new CompanyProfileDTO();
         BeanUtils.copyProperties(company, dto);
         return dto;
     }
 
-    /**
-     * 更新企业档案
-     * 审核状态和审核原因不允许前端修改
-     */
     @Transactional(rollbackFor = Exception.class)
     public void updateCompanyProfile(Long userId, CompanyProfileDTO dto) {
         Company company = companyMapper.selectOne(
                 new LambdaQueryWrapper<Company>().eq(Company::getUserId, userId));
-        if (company == null) {
-            throw new BusinessException(404, "企业档案不存在");
-        }
-        // 只更新允许修改的字段
+        if (company == null) throw new BusinessException(404, "企业档案不存在");
         company.setCompanyName(dto.getCompanyName());
         company.setIndustry(dto.getIndustry());
         company.setScale(dto.getScale());
@@ -95,9 +86,6 @@ public class UserProfileService {
         log.info("企业档案更新：userId={}", userId);
     }
 
-    /**
-     * 获取或创建求职者档案
-     */
     private UserProfile getOrCreateProfile(Long userId) {
         UserProfile profile = userProfileMapper.selectOne(
                 new LambdaQueryWrapper<UserProfile>().eq(UserProfile::getUserId, userId));
@@ -110,11 +98,7 @@ public class UserProfileService {
         return profile;
     }
 
-    /**
-     * 计算简历完成度（0~100）
-     * 每个关键字段占一定权重
-     */
-    private int calculateCompleteness(UserProfile p) {
+    private int calculateCompleteness(UserProfile p, Long userId) {
         int score = 0;
         if (p.getRealName() != null && !p.getRealName().isEmpty()) score += 15;
         if (p.getGender() != null) score += 5;
@@ -125,7 +109,10 @@ public class UserProfileService {
         if (p.getCurrentCity() != null && !p.getCurrentCity().isEmpty()) score += 10;
         if (p.getExpectedCity() != null && !p.getExpectedCity().isEmpty()) score += 10;
         if (p.getExpectedSalaryMin() != null) score += 10;
-        if (p.getBio() != null && !p.getBio().isEmpty()) score += 10;
+        long skillCount = userSkillMapper.selectCount(
+                new LambdaQueryWrapper<UserSkill>().eq(UserSkill::getUserId, userId));
+        if (skillCount >= 3) score += 10;
+        else if (skillCount >= 1) score += 5;
         return Math.min(score, 100);
     }
 }
