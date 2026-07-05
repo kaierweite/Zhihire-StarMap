@@ -46,6 +46,7 @@ public class SecurityConfig {
                                 "/doc.html/**", "/webjars/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/job/public/**").permitAll()
+                        .requestMatchers("/api/career/roles").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
