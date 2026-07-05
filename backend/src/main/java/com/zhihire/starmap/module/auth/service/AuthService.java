@@ -11,6 +11,8 @@ import com.zhihire.starmap.module.user.entity.Company;
 import com.zhihire.starmap.module.user.entity.User;
 import com.zhihire.starmap.module.user.mapper.CompanyMapper;
 import com.zhihire.starmap.module.user.mapper.UserMapper;
+import com.zhihire.starmap.module.system.entity.LoginLog;
+import com.zhihire.starmap.module.system.mapper.LoginLogMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ public class AuthService {
 
     private final UserMapper userMapper;
     private final CompanyMapper companyMapper;
+    private final LoginLogMapper loginLogMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
 
@@ -39,10 +42,11 @@ public class AuthService {
      * @param jwtUtils        JWT 工具类
      */
     public AuthService(UserMapper userMapper, CompanyMapper companyMapper,
-                       PasswordEncoder passwordEncoder, JwtUtils jwtUtils) {
+                       PasswordEncoder passwordEncoder, LoginLogMapper loginLogMapper, JwtUtils jwtUtils) {
         this.userMapper = userMapper;
         this.companyMapper = companyMapper;
         this.passwordEncoder = passwordEncoder;
+        this.loginLogMapper = loginLogMapper;
         this.jwtUtils = jwtUtils;
     }
 
@@ -125,7 +129,12 @@ public class AuthService {
         String token = jwtUtils.generateToken(user.getId(), user.getUsername(), user.getRole());
         log.info("用户登录成功：username={}, role={}", user.getUsername(), user.getRole());
 
-        // 5. 返回登录响应
+        // 5. 记录登录日志
+        LoginLog loginLog = new LoginLog();
+        loginLog.setUserId(user.getId());
+        loginLogMapper.insert(loginLog);
+
+        // 6. 返回登录响应
         return LoginResponse.builder()
                 .token(token)
                 .role(user.getRole())
