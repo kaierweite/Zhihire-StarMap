@@ -1,4 +1,4 @@
-﻿-- ============================================================
+-- ============================================================
 -- 智聘星图种子数据（03_seed.sql）
 -- 执行顺序：在 01_schema.sql + 02_index.sql 之后
 -- 数据规模：
@@ -13,7 +13,7 @@
 -- ==================== 1. Admin 账号 ====================
 -- 密码：admin123（BCrypt 加密）
 INSERT INTO "user" (username, password, email, phone, role, status)
-VALUES ('admin', '$2a$10$iTqJbcM.EgZQnklereeHTexX9qo8rXX4z6cFjZGfmtlr6kCqXdg2i', 'admin@zhihire.com', '13800000000', 'ADMIN', 'NORMAL');
+VALUES ('admin', '$2a$10$4Bc2m1tCycQs00D3qibHfuMTI8J1G4CceQWzQND6911e0Evsf8/ne', 'admin@zhihire.com', '13800000000', 'ADMIN', 'NORMAL');
 
 -- ==================== 2. 技能字典（100 条 ACTIVE） ====================
 
