@@ -45,3 +45,9 @@ ppt/
 # Maven local repo (项目内缓存)
 .mvn-repo/
 
+
+# 临时文件与日志
+*.log
+data/
+test_*.pdf
+
