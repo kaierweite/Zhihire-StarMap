@@ -1,14 +1,11 @@
 package com.zhihire.starmap.config;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+import com.zhihire.starmap.module.auth.util.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,9 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.crypto.SecretKey;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,19 +23,26 @@ import java.util.List;
  *
  * 职责：从请求头提取 JWT Token，解析验证后设置 Spring Security 上下文
  * 继承 OncePerRequestFilter 保证每次请求只执行一次
- *
- * 当前为骨架实现，day03 会补充完整 Token 刷新/过期处理逻辑
+ * 使用 JwtUtils 统一处理 Token 解析与校验
  */
 @Slf4j
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    /** JWT 密钥（从 application.yml 读取） */
-    @Value("${jwt.secret}")
-    private String jwtSecret;
+    /** JWT 工具类（构造注入） */
+    private final JwtUtils jwtUtils;
 
     /** Authorization 请求头前缀 */
     private static final String BEARER_PREFIX = "Bearer ";
+
+    /**
+     * 构造注入
+     *
+     * @param jwtUtils JWT 工具类
+     */
+    public JwtAuthenticationFilter(JwtUtils jwtUtils) {
+        this.jwtUtils = jwtUtils;
+    }
 
     /**
      * 核心过滤逻辑：提取并验证 JWT
@@ -61,12 +63,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = extractToken(request);
 
             // Token 有效则解析并设置认证上下文
-            if (StringUtils.hasText(token) && validateToken(token)) {
-                Claims claims = parseToken(token);
-
-                // 从 claims 提取用户名和角色
-                String username = claims.getSubject();
-                String role = claims.get("role", String.class);
+            if (StringUtils.hasText(token) && jwtUtils.validateToken(token)) {
+                // 从 Token 提取 userId 和角色
+                Long userId = jwtUtils.getUserId(token);
+                String role = jwtUtils.getRole(token);
 
                 // 构建 Spring Security 认证对象
                 // 角色以大写存储（ADMIN/USER/COMPANY），加 ROLE_ 前缀供 Spring Security 识别
@@ -74,13 +74,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         ? List.of(new SimpleGrantedAuthority("ROLE_" + role))
                         : Collections.emptyList();
 
+                // principal 存 userId，后续 Controller 可通过 @AuthenticationPrincipal 获取
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
-                                username, null, authorities);
+                                userId, null, authorities);
                 authentication.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // 设置到 Security 上下文，后续 Controller 可通过 @AuthenticationPrincipal 获取
+                // 设置到 Security 上下文
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception e) {
@@ -103,36 +104,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return bearerToken.substring(BEARER_PREFIX.length());
         }
         return null;
-    }
-
-    /**
-     * 验证 Token 有效性（签名 + 过期时间）
-     *
-     * @param token JWT Token
-     * @return true 有效，false 无效或已过期
-     */
-    private boolean validateToken(String token) {
-        try {
-            parseToken(token);
-            return true;
-        } catch (Exception e) {
-            log.debug("Token 验证失败：{}", e.getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * 解析 JWT Token 获取 Claims
-     *
-     * @param token JWT Token
-     * @return Claims 声明
-     */
-    private Claims parseToken(String token) {
-        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-        return Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
     }
 }
