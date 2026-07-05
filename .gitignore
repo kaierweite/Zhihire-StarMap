@@ -41,3 +41,7 @@ ai-service/__pycache__/
 deploy/*.tar.gz
 video/
 ppt/
+
+# Maven local repo (项目内缓存)
+.mvn-repo/
+

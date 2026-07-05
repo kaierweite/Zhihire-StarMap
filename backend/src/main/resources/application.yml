@@ -1,0 +1,73 @@
+# ==================== 服务端口 ====================
+server:
+  port: 8080
+
+# ==================== Spring 配置 ====================
+spring:
+  application:
+    name: zhihire-starmap
+  # 当前激活的配置文件：dev（本地 H2）/ prod（麒麟虚机 KingbaseES）
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+---
+# ==================== dev profile（本地 H2 内存数据库） ====================
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:starmap;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+# ==================== prod profile（麒麟虚机 KingbaseES） ====================
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: jdbc:kingbasees://localhost:54321/starmap
+    username: starmap
+    password: ${DB_PASSWORD:starmap123}
+    driver-class-name: com.kingbase8.Driver
+
+---
+# ==================== 通用配置（所有 profile 共享） ====================
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      logic-delete-field: deletedAt
+      logic-delete-value: "1"
+      logic-not-delete-value: "0"
+      id-type: auto
+
+# JWT 配置
+jwt:
+  secret: ${JWT_SECRET:zhihire-starmap-jwt-secret-key-2026-must-be-at-least-256-bits}
+  expiration: 86400000
+
+# AI 微服务地址
+ai:
+  service:
+    url: ${AI_SERVICE_URL:http://localhost:8000}
+
+# Knife4j API 文档
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
