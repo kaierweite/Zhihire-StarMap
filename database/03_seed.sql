@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- 智聘星图种子数据（03_seed.sql）
 -- 执行顺序：在 01_schema.sql + 02_index.sql 之后
 -- 数据规模：
@@ -13,7 +13,7 @@
 -- ==================== 1. Admin 账号 ====================
 -- 密码：admin123（BCrypt 加密）
 INSERT INTO "user" (username, password, email, phone, role, status)
-VALUES ('admin', '$2a$10$EqKpf1OFJiGQEhFBJp5XOeJibkKJdfKPUqMCPd./4A7/XYz3k3XHm', 'admin@zhihire.com', '13800000000', 'ADMIN', 'NORMAL');
+VALUES ('admin', '$2a$10$iTqJbcM.EgZQnklereeHTexX9qo8rXX4z6cFjZGfmtlr6kCqXdg2i', 'admin@zhihire.com', '13800000000', 'ADMIN', 'NORMAL');
 
 -- ==================== 2. 技能字典（100 条 ACTIVE） ====================
 
@@ -379,3 +379,4 @@ FROM skill s1, skill s2 WHERE s1.name='Python' AND s2.name='Pandas';
 INSERT INTO skill_relation (skill_id, related_skill_id, relation_type, weight)
 SELECT s1.id, s2.id, 'COMPLEMENTARY', 0.6
 FROM skill s1, skill s2 WHERE s1.name='数据分析' AND s2.name='数据可视化';
+
