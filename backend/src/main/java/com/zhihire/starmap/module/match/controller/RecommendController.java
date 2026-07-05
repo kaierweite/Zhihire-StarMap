@@ -5,6 +5,8 @@ import com.zhihire.starmap.module.common.result.Result;
 import com.zhihire.starmap.module.match.dto.RecommendDTO;
 import com.zhihire.starmap.module.match.entity.MatchResult;
 import com.zhihire.starmap.module.match.service.RecommendService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
  *
  * 职责：求职者岗位推荐 + 企业人才推荐 + 匹配详情
  */
+@Tag(name = "推荐接口", description = "岗位推荐/人才推荐")
 @RestController
 @RequestMapping("/api/recommend")
 public class RecommendController {

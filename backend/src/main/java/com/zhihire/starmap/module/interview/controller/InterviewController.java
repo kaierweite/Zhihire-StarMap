@@ -7,6 +7,8 @@ import com.zhihire.starmap.module.interview.dto.InterviewStartRequest;
 import com.zhihire.starmap.module.interview.dto.ResumeOptimizeRequest;
 import com.zhihire.starmap.module.interview.entity.*;
 import com.zhihire.starmap.module.interview.service.InterviewService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +21,7 @@ import java.util.Map;
  *
  * 职责：模拟面试全链路 + 简历优化
  */
+@Tag(name = "面试模块", description = "模拟面试全链路")
 @RestController
 @RequestMapping("/api/interview")
 public class InterviewController {

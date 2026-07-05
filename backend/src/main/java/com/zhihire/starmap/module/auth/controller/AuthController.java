@@ -5,6 +5,8 @@ import com.zhihire.starmap.module.auth.dto.LoginResponse;
 import com.zhihire.starmap.module.auth.dto.RegisterRequest;
 import com.zhihire.starmap.module.auth.service.AuthService;
 import com.zhihire.starmap.module.common.result.Result;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 路径前缀 /api/auth/，公开访问（SecurityConfig 已放行）
  */
 @Slf4j
+@Tag(name = "认证接口", description = "注册/登录")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -40,6 +43,7 @@ public class AuthController {
      * @param request 注册请求（username, password, role）
      * @return 统一结果
      */
+    @Operation(summary = "用户注册")
     @PostMapping("/register")
     public Result<Void> register(@Valid @RequestBody RegisterRequest request) {
         authService.register(request);
@@ -52,6 +56,7 @@ public class AuthController {
      * @param request 登录请求（username, password）
      * @return 包含 JWT Token 的登录响应
      */
+    @Operation(summary = "用户登录")
     @PostMapping("/login")
     public Result<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);

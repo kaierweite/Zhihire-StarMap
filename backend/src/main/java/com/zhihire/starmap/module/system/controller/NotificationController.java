@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zhihire.starmap.module.common.result.Result;
 import com.zhihire.starmap.module.system.entity.Notification;
 import com.zhihire.starmap.module.system.service.NotificationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
  *
  * 职责：通知列表、未读数、标记已读
  */
+@Tag(name = "通知接口", description = "通知列表/已读")
 @RestController
 @RequestMapping("/api/notification")
 public class NotificationController {

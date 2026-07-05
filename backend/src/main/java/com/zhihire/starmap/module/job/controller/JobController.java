@@ -7,6 +7,8 @@ import com.zhihire.starmap.module.job.dto.JobStatusRequest;
 import com.zhihire.starmap.module.job.entity.Job;
 import com.zhihire.starmap.module.job.entity.JobSkill;
 import com.zhihire.starmap.module.job.service.JobService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,7 @@ import java.util.List;
  * 职责：岗位 CRUD、手动/JD 双模式创建
  * 需认证，企业角色操作
  */
+@Tag(name = "岗位管理", description = "企业端岗位 CRUD")
 @RestController
 @RequestMapping("/api/job")
 public class JobController {
