@@ -1,0 +1,32 @@
+﻿# ===== Web 框架 =====
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+
+# ===== ORM + 数据库 =====
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0          # KingbaseES(PostgreSQL兼容) async 驱动
+alembic==1.14.0
+
+# ===== 认证 =====
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# ===== 配置 + 校验 =====
+pydantic==2.10.4
+pydantic-settings==2.7.0
+
+# ===== 缓存 =====
+aiocache==0.12.1
+
+# ===== AI 客户端 =====
+httpx==0.28.1            # 调 DeepSeek API
+
+# ===== 文档解析（纯 Python，适配龙芯）=====
+pdfplumber==0.11.4
+python-docx==1.1.2
+
+# ===== 知识图谱（常驻内存图）=====
+networkx==3.4.2
+
+# ===== 工具 =====
+python-multipart==0.0.20  # FastAPI 文件上传
