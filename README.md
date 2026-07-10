@@ -1,197 +1,167 @@
-﻿# Zhihire StarMap（智聘星图）
+# Zhihire StarMap（智聘星图）
 
-基于银河麒麟操作系统的 AI 智能匹配与能力图谱系统。
+基于银河麒麟操作系统的 AI 智能匹配与能力图谱平台。
 
-> 第十五届中国软件杯大赛 B2 赛题作品
+> **第十五届中国软件杯大赛 B2 赛题作品**
 > 出题企业：麒麟软件有限公司
 
 ---
 
 ## 项目简介
 
-智聘星图（Zhihire StarMap）是一个基于 AI、大模型和知识图谱技术的人才智能招聘平台，部署于银河麒麟操作系统（LoongArch 架构）上，使用人大金仓 KingbaseES 数据库。AI 算力全走云端大模型 API（DeepSeek），不在演示机本地加载大模型。
+智聘星图（Zhihire StarMap）是一个基于 AI 大模型与知识图谱技术的人才智能招聘平台，部署于 **银河麒麟 V11（LoongArch）** 操作系统，使用 **人大金仓 KingbaseES** 国产数据库，AI 算力全走云端 **DeepSeek API**。
 
-系统通过：
-- 简历智能解析（PDF/DOC/DOCX）
-- 岗位需求结构化分析
-- 能力图谱生成（类型化边知识图谱 + 缺口视图）
-- 人岗智能匹配与可解释评分
-- AI 职业规划（图算法主力 + LLM 润色）
-- 企业端反向荐人与面试邀请闭环
-
-帮助求职者和企业实现精准招聘与人才推荐。
+系统面向**三端用户**（求职者 / 企业 / 管理员），提供全链路招聘闭环服务：
+- **求职者端** — 简历解析 → 能力图谱 → 岗位匹配 → AI 模拟面试 → 职业规划
+- **企业端** — 岗位发布（JD 上传/手动）→ 候选人推荐 → 面试邀请
+- **管理端** — 用户管理 / 企业审核 / 技能字典 / 数据统计 / 操作审计
 
 ---
 
 ## 核心功能
 
 ### 求职者端
-- 用户注册登录
-- 简历上传与 AI 解析（技能归一 + 字典三态兜底）
-- 个人能力图谱（缺口视图 + PREREQUISITE 前置链）
-- 岗位智能推荐（可解释维度子分 + 依据）
-- AI 职业规划（图算法缺口分析 + 学习路线）
+- 注册登录 & 个人中心（完成度进度条 + 校友星图）
+- 简历上传与 AI 解析（PDF/DOCX/DOC，技能归一 + 字典三态兜底）
+- 个人能力图谱（类型化边知识图谱 + 技能缺口视图 + PREREQUISITE 前置链）
+- 岗位智能推荐（四维评分：技能/经验/位置/学历，可解释依据）
+- 岗位语义搜索 + 多维筛选
+- AI 模拟面试（LLM 实时问答 + 即时评分 + 面试报告）
+- AI 职业规划（图算法缺口分析 + 学习路线生成）
 
 ### 企业端
 - 企业注册与资质审核
-- 岗位发布（手动填写 / JD 上传双模式）
+- 岗位发布（手动填写 / JD 智能解析双模式）
 - 岗位能力图谱
-- 人才智能推荐（双向共用 match_result）
-- 候选人管理 + 面试邀请
+- 人才智能推荐（人岗双向 4 维匹配 + 图谱增值）
+- 候选人管理 + 面试邀请闭环
 
 ### 管理端
-- 用户管理 / 企业审核
+- 仪表板（数据统计聚合 + 服务状态卡片）
+- 企业审核 / 用户管理（封禁+数据维护）
 - 技能字典审核（候选词审核 + 同义合并）
-- 数据统计（实时聚合）
-- 系统监控（service 状态卡片）
-- 操作日志（AOP 切面落库）
-- 数据维护（岗位下架 / 用户封禁）
+- 操作日志审计（AOP 切面落库）
 
 ---
 
 ## 技术栈
 
-### 系统架构
-```
-Vue3 (前端)
-  ↓ HTTP
-FastAPI (全栈主服务，含 AI 能力)
-  ↓
-┌──────────────────┐
-│   KingbaseES     │
-│   (人大金仓)     │
-└──────────────────┘
-  ↓ HTTP
-云端 DeepSeek API
-```
+### 架构总览
+
+`
+Vue 3 + TypeScript (三端前端)
+    ↓ HTTP / JWT
+FastAPI (全栈主服务，内嵌 AI 能力)
+    ↓ SQLAlchemy 2.0 Async
+KingbaseES (人大金仓，PostgreSQL 兼容模式)
+    ↑
+云端 DeepSeek API (文档解析 / 面试 / 职业规划)
+`
 
 ### 前端
 - Vue 3 + TypeScript + Element Plus + ECharts
+- Lucide 图标 + 适配麒麟浏览器的 SCSS 样式
+- 三端独立构建：user / company / admin
 
-### 后端（全栈）
-- FastAPI + SQLAlchemy 2.0（异步）+ Alembic + JWT（python-jose）+ aiocache
-- AI 能力内置于主服务（文档解析 / 知识图谱 / 推荐算法）
-- 异步任务：BackgroundTasks / asyncio.create_task
+### 后端
+- **框架：** FastAPI + SQLAlchemy 2.0（异步）+ Alembic + JWT
+- **分层架构：** api/ → services/ → core/ + infrastructure/
+- **AI 能力：** LLM 模拟面试 + 即时评分 + 简历优化
+- **文档解析：** pdfplumber + python-docx（纯 Python，适配龙芯）
+- **知识图谱：** networkx（常驻内存图，skill.category 上色）
+- **缓存：** aiocache + 本地 match_result 表缓存
+- **密码加密：** BCrypt（passlib）
 
-### 数据库
-- 人大金仓 KingbaseES（国产数据库）
+### 数据库（共 27 张表）
+- KingbaseES（PostgreSQL 兼容模式）
+- 软删除标记 deleted_at（VARCHAR ''0''/''1''）
+- JSONB 存储弹性结构化数据
+- Alembic 管理迁移
 
 ### 部署环境
-- 银河麒麟 V11 + LoongArch（龙芯，四核 / 8GB / 256GB）
-- 裸部署优先（systemd），Docker 仅可选非推荐路径
+- 银河麒麟 V11 + LoongArch（龙芯，四核 / 8GB RAM / 256GB 存储）
+- 裸部署（systemd），无需 Docker
+- 人大金仓 KingbaseES V8（兼容 PostgreSQL 协议，端口 54321）
 
 ---
 
 ## 项目结构
 
-```text
+`
 Zhihire-StarMap/
-├── frontend/          # Vue3 前端
-├── backend/           # FastAPI 全栈主服务（含 AI 能力）
+├── frontend/                # Vue 3 三端前端
+│   └── src/
+│       ├── views/user/      # 求职者页面
+│       ├── views/company/   # 企业页面
+│       ├── views/admin/     # 管理员页面
+│       └── ...
+├── backend/                 # FastAPI 全栈后端
 │   └── app/
-│       ├── api/             # 路由层（参数校验 + 响应封装）
-│       │   └── v1/          # API 版本
-│       ├── services/        # 业务服务层（编排 core + infrastructure）
-│       ├── core/            # 核心算法层（解析/归一/图谱/匹配/职业规划）
-│       ├── infrastructure/  # 基础设施层（LLM / 缓存 / 文件存储）
-│       ├── models/          # Pydantic 模型 + SQLAlchemy ORM + 枚举
-│       ├── repositories/    # 仓储层（原子数据库操作）
+│       ├── api/v1/          # 路由层
+│       ├── services/        # 业务编排层
+│       ├── core/            # 核心算法（解析/匹配/图谱）
+│       ├── infrastructure/  # LLM / 缓存 / 文件
+│       ├── models/          # ORM / Pydantic / 枚举
+│       ├── repositories/    # 原子数据库操作
 │       ├── config/          # 配置管理
-│       ├── db/              # 数据库连接与迁移
-│       └── main.py          # FastAPI 入口
-├── database/          # 数据库(ER/建表SQL/种子数据)
-├── docs/              # 比赛文档
-│   ├── 01-需求分析/
-│   ├── 02-设计文档/
-│   ├── 03-产品说明书/
-│   ├── 04-测试报告/
-│   └── adr/          # 架构决策记录(0001-0011)
-├── prototype/         # 原型设计(HTML 富原型)
-├── assets/            # 资源文件
-├── deploy/            # 部署配置
-├── scripts/           # 工具脚本
-├── test/              # 测试数据
-├── ppt/               # 演示PPT
-├── video/             # 演示视频
-└── 开发记录文档/      # 开发记录（周报/赛题原文/计划）
-```
+│       ├── db/              # 连接与会话管理
+│       └── main.py          # 应用入口
+├── database/                # ER 图 / 建表 SQL / 种子数据
+├── docs/                    # 比赛文档 & 架构决策记录
+├── prototype/               # HTML 富原型（27 个页面）
+├── deploy/                  # 部署脚本与配置
+├── scripts/                 # 工具脚本
+├── test/                    # 测试数据与夹具
+└── start_all.bat            # 本地开发一键启动
+`
 
 ---
 
-## 原型设计
+## 本地开发
 
-> 原型不再使用 draw.io 矢量稿，统一用 HTML + Tailwind + 共享 `prototype/config.js` 设计令牌做成可点可看的富原型（rich prototype），一屏一文件，可直接演进到 Vue3 真页。
+### 前置依赖
+- Python 3.11+
+- Node.js 18+
+- KingbaseES（或 PostgreSQL 兼容数据库，端口 54321）
 
-原型共 27 个 HTML 文件（23 基础 + 4 面试模块，ADR-0011），分四端：18 项一级菜单 / 独立页 + 5 项二级页与特色页。本次 grilling 收口定型，明细见 `prototype/README.md`。
+### 启动步骤
 
-### common — 公共页（3 项）
+`ash
+# 1. 启动数据库
+#    确保 127.0.0.1:54321 可访问
 
-- 首页着陆页 — 系统首页，品牌与三大核心能力入口
-- 登录页 — 双角色登录（求职者 / 企业 / 管理员），右侧承担产品介绍
-- 注册页 — 求职者 + 企业双角色注册
+# 2. 初始化数据库
+cd backend
+pip install -r requirements.txt
+alembic upgrade head
 
-### user — 求职者端（一级菜单 7 项）
+# 3. 启动后端
+python run.py
+# 后端运行在 http://127.0.0.1:8000
 
-- 个人中心 — REQ-022 身份档案：城市选择器 + 完成度进度条 + 基本资料；内含「校友星图」卡片（由 user_profile 院校/行业字段派生）
-- 简历中心 — 简历上传 + AI 解析（仅管理 resume + upload_file，不再内嵌能力图谱/职业规划 tab）
-- 能力图谱 — 类型化边知识图谱 + 缺口视图 + PREREQUISITE 前置链
-- 岗位推荐 — 系统主动推荐，可解释维度子分 + 依据（原「职位推荐」）
-- 岗位搜索 — 求职者主动检索岗位，AI 语义搜索 + 多维筛选（原「职位搜索」）
-- 校园招聘 — *愿景展示页（非闭环依赖）*，面向未来的视野展示
-- 职业规划 — AI 智能职业规划，图算法缺口分析 + 学习路线
+# 4. 启动前端（三端）
+cd frontend
+npm install
+npm run dev         # 用户端 http://localhost:5173
+npx vite --port 5174  # 企业端 http://localhost:5174
+npx vite --port 5175  # 管理端 http://localhost:5175
+`
 
-### company — 企业端（一级菜单 4 项）
-
-术语统一为「岗位 / 人才」对称对仗（与企业端的「主动寻访」呼应）。
-
-- 企业首页 — 招聘中心 + 企业信息编辑 + 审核状态条
-- 主动寻访 — 不绑定具体岗位的开放式人才搜索 + 候选人对比（原「AI 淘金寻宝」）
-- 岗位发布 — 手动填写 / JD 上传双模式
-- 岗位管理 — 岗位列表 + 编辑 + 状态切换；编辑弹窗内「查看能力图谱」承载岗位能力图谱；某岗位点进「查看候选人」转候选人推荐二级页
-
-### admin — 管理端（一级菜单 4 项）
-
-- 管理员仪表板 — 数据统计聚合 + service 状态卡片
-- 审核管理 — 企业审核 Tab + 技能字典审核 Tab（候选词审核 + 同义合并）
-- 用户管理 — 用户列表 + 搜索 + 封禁；底部承载岗位下架（数据维护落点，对接 V4「岗位下架 / 用户封禁」）
-- 系统日志 — AOP 切面落库的查询入口（对接 V4 Q18）
-
-### 二级页与特色页（5 项，不在一级侧边栏）
-
-- 岗位详情（user）— 从岗位推荐 / 岗位搜索点进；含匹配详情面板
-- 通知中心（user）— 顶部铃铛浮标入口；`GET /api/notification/unread-count` 每 30s 红点轮询
-- 候选人推荐（company）— 从岗位管理某岗位进；反向共用同一份 match_result
-- 企业通知中心（company）— 顶部铃铛浮标入口
-- 洞察（user）— *派生功能页（非闭环依赖）*，可由能力图谱 + 技能字典派生：技能折旧预警 / 生涯健康度 / 未来路径推演器（「如果……就……」沙盘）/ 反焦虑提示
-
-### 关于愿景 / 派生页的口径
-
-- 校园招聘（愿景展示页）与 洞察（派生功能页）均属非闭环依赖，保留为面向求职者决策辅助 / 未来视野的展示页；已剔除无数据源的模块（薪资预测、热钱/冷灶指数、人脉迁徙热力图、压力面试数字人、反向背调、同温层去向、面试官心理画像、组织生命周期等），避免无源功能在演示中被追问。
-- 已删除整页：人脉（社交关系图谱无数据源）、职场资讯（外部宏观数据仪表盘无数据源）。
+### 快速启动（Windows）
+`ash
+start_all.bat
+`
 
 ---
 
-## 开发进度
+## 开发规范
 
-- [x] 项目初始化
-- [x] 赛题分析与需求拆解
-- [x] 技术选型与架构设计
-- [x] 功能模块图、业务流程图、用例图
-- [x] 数据库 ER 设计（22 表）
-- [x] V4 grilling 22 条决策收口
-- [x] ADR 0001-0011 落地
-- [x] 三份时序图 V4 对齐版
-- [x] 演示叙事 8 分镜
-- [x] deploy 骨架
-- [x] 原型富原型落地（27 个 HTML 文件，grill 收口定型；draw.io 路径已弃用）
-- [ ] 数据库建表脚本
-- [ ] 后端冒烟骨架（FastAPI `/api/ping` + KingbaseES `SELECT 1`）
-- [ ] 麒麟虚机冒烟关卡
-- [ ] 后端业务模块开发（含 AI 能力）
-- [ ] 前端开发
-- [ ] 设计文档 / 产品说明书 / 测试报告
-- [ ] 部署脚本 install.sh
-- [ ] 演示 PPT / 演示视频
+- 后端统一使用 Result[T] Pydantic 模型封装返回
+- 遵循 RESTful API 设计规范（前缀 /api/）
+- 状态字段使用 VARCHAR 语义化枚举（NORMAL/DISABLED/BANNED）
+- 密码使用 BCrypt 加密
+- 四层后端分层：api/ -> services/ -> core/ + infrastructure/
+- Git 提交格式：[type]: [description]
 
 ---
 
