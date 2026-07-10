@@ -221,44 +221,46 @@ async function handleApply(job: Job) {
 
               <div class="job-center">
                 <div class="match-dashboard">
-                  <div class="dashboard-header">
-                    <div class="match-badge" :class="matchClass(job.score)">
-                      <span class="match-num">{{ job.score }}%</span>
-                      <span class="match-label">总体匹配度</span>
-                    </div>
-                  </div>
                   <div class="circle-scores">
                     <div class="circle-score-item">
-                      <svg class="score-circle" viewBox="0 0 44 44">
-                        <circle cx="22" cy="22" r="18" class="circle-bg" />
-                        <circle cx="22" cy="22" r="18" class="circle-fill skill" :style="{ strokeDasharray: job.skillScore * 1.13 + ' 113' }" transform="rotate(-90, 22, 22)" />
-                        <text x="22" y="25" text-anchor="middle" class="circle-text">{{ job.skillScore }}%</text>
+                      <svg class="score-circle" viewBox="0 0 52 52">
+                        <circle cx="26" cy="26" r="22" class="circle-bg" />
+                        <circle cx="26" cy="26" r="22" class="circle-fill skill" :style="{ strokeDasharray: job.skillScore * 1.38 + ' 138' }" transform="rotate(-90, 26, 26)" />
+                        <text x="26" y="28" text-anchor="middle" class="circle-text">{{ job.skillScore }}%</text>
                       </svg>
                       <span class="circle-label">技能</span>
                     </div>
                     <div class="circle-score-item">
-                      <svg class="score-circle" viewBox="0 0 44 44">
-                        <circle cx="22" cy="22" r="18" class="circle-bg" />
-                        <circle cx="22" cy="22" r="18" class="circle-fill exp" :style="{ strokeDasharray: job.expScore * 1.13 + ' 113' }" transform="rotate(-90, 22, 22)" />
-                        <text x="22" y="25" text-anchor="middle" class="circle-text">{{ job.expScore }}%</text>
+                      <svg class="score-circle" viewBox="0 0 52 52">
+                        <circle cx="26" cy="26" r="22" class="circle-bg" />
+                        <circle cx="26" cy="26" r="22" class="circle-fill exp" :style="{ strokeDasharray: job.expScore * 1.38 + ' 138' }" transform="rotate(-90, 26, 26)" />
+                        <text x="26" y="28" text-anchor="middle" class="circle-text">{{ job.expScore }}%</text>
                       </svg>
                       <span class="circle-label">经验</span>
                     </div>
                     <div class="circle-score-item">
-                      <svg class="score-circle" viewBox="0 0 44 44">
-                        <circle cx="22" cy="22" r="18" class="circle-bg" />
-                        <circle cx="22" cy="22" r="18" class="circle-fill city" :style="{ strokeDasharray: job.cityScore * 1.13 + ' 113' }" transform="rotate(-90, 22, 22)" />
-                        <text x="22" y="25" text-anchor="middle" class="circle-text">{{ job.cityScore }}%</text>
+                      <svg class="score-circle" viewBox="0 0 52 52">
+                        <circle cx="26" cy="26" r="22" class="circle-bg" />
+                        <circle cx="26" cy="26" r="22" class="circle-fill city" :style="{ strokeDasharray: job.cityScore * 1.38 + ' 138' }" transform="rotate(-90, 26, 26)" />
+                        <text x="26" y="28" text-anchor="middle" class="circle-text">{{ job.cityScore }}%</text>
                       </svg>
                       <span class="circle-label">位置</span>
                     </div>
                     <div class="circle-score-item">
-                      <svg class="score-circle" viewBox="0 0 44 44">
-                        <circle cx="22" cy="22" r="18" class="circle-bg" />
-                        <circle cx="22" cy="22" r="18" class="circle-fill edu" :style="{ strokeDasharray: job.eduScore * 1.13 + ' 113' }" transform="rotate(-90, 22, 22)" />
-                        <text x="22" y="25" text-anchor="middle" class="circle-text">{{ job.eduScore }}%</text>
+                      <svg class="score-circle" viewBox="0 0 52 52">
+                        <circle cx="26" cy="26" r="22" class="circle-bg" />
+                        <circle cx="26" cy="26" r="22" class="circle-fill edu" :style="{ strokeDasharray: job.eduScore * 1.38 + ' 138' }" transform="rotate(-90, 26, 26)" />
+                        <text x="26" y="28" text-anchor="middle" class="circle-text">{{ job.eduScore }}%</text>
                       </svg>
                       <span class="circle-label">文化</span>
+                    </div>
+                    <div class="circle-score-item main-score">
+                      <svg class="score-circle" viewBox="0 0 52 52">
+                        <circle cx="26" cy="26" r="22" class="circle-bg" />
+                        <circle cx="26" cy="26" r="22" class="circle-fill main" :class="matchClass(job.score)" :style="{ strokeDasharray: job.score * 1.38 + ' 138' }" transform="rotate(-90, 26, 26)" />
+                        <text x="26" y="28" text-anchor="middle" class="circle-text">{{ job.score }}%</text>
+                      </svg>
+                      <span class="circle-label">总体匹配</span>
                     </div>
                   </div>
                 </div>
@@ -327,7 +329,7 @@ async function handleApply(job: Job) {
 .clear-btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; border: 1px solid #f56c6c; background: none; color: #f56c6c; font-size: 12px; cursor: pointer; transition: all 0.2s; &:hover { background: #f56c6c; color: #fff; } }
 .filter-count { font-size: 13px; color: #909399; margin-top: 10px; }
 
-.job-list { display: flex; flex-direction: column; gap: 16px; }
+.job-list { display: flex; flex-direction: column; gap: 20px; }
 .job-card { background: #fff; border-radius: 16px; border: 1px solid #e5e7eb; padding: 20px; transition: all 0.3s; &:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.08); } }
 .job-card-inner { display: flex; gap: 24px; align-items: stretch; }
 .job-left { flex: 1; min-width: 0; display: flex; flex-direction: column; }
@@ -342,20 +344,15 @@ async function handleApply(job: Job) {
 .company-name { font-weight: 500; color: #303133; }
 
 .job-center { flex: 1.2; min-width: 0; display: flex; flex-direction: column; }
-.match-dashboard { background: #fafbfc; border-radius: 12px; padding: 14px; flex: 1; display: flex; flex-direction: column; }
-.dashboard-header { display: flex; align-items: flex-start; justify-content: flex-end; margin-bottom: 12px; }
-.match-badge { border-radius: 8px; padding: 8px 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 700; line-height: 1; min-width: 80px; }
-.match-num { font-size: 20px; }
-.match-label { font-size: 9px; font-weight: 600; opacity: 0.8; margin-top: 1px; }
-.match-high { background: rgba(25,135,84,0.12); color: #198754; }
-.match-mid { background: rgba(255,193,7,0.15); color: #b8860b; }
-.match-low { background: rgba(220,53,69,0.12); color: #dc3545; }
-.circle-scores { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; flex: 1; }
+.match-dashboard { background: #ffffff; border-radius: 12px; padding: 14px; flex: 1; display: flex; flex-direction: column; }
+.circle-scores { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; flex: 1; }
 .circle-score-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.score-circle { width: 44px; height: 44px; }
+.score-circle { width: 52px; height: 52px; }
 .circle-bg { fill: none; stroke: #e5e7eb; stroke-width: 4; }
-.circle-fill { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dasharray 0.6s ease; &.skill { stroke: #1a3a5c; } &.exp { stroke: #0ea5e9; } &.city { stroke: #f59e0b; } &.edu { stroke: #8b5cf6; } }
-.circle-text { font-size: 9px; font-weight: 700; fill: #303133; }
+.circle-fill { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dasharray 0.6s ease; &.skill { stroke: #1a3a5c; } &.exp { stroke: #0ea5e9; } &.city { stroke: #f59e0b; } &.edu { stroke: #8b5cf6; } &.main.match-high { stroke: #198754; } &.main.match-mid { stroke: #b8860b; } &.main.match-low { stroke: #dc3545; } }
+.circle-text { font-size: 10px; font-weight: 700; fill: #303133; }
+.circle-text-num { font-size: 12px; font-weight: 700; fill: #303133; }
+.circle-text-label { font-size: 7px; font-weight: 600; fill: #909399; }
 .circle-label { font-size: 10px; color: #909399; }
 
 .job-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex-shrink: 0; width: 130px; }
