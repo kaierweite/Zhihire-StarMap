@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 智聘星图</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="config.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#003527",
+                        "primary-container": "#064e3b",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#80bea6",
+                        "surface": "#f8f9ff",
+                        "surface-container": "#edeeef",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#121c28",
+                        "on-surface-variant": "#404944",
+                        "outline": "#707974",
+                        "outline-variant": "#bfc9c3",
+                        "secondary": "#575e70"
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(191, 201, 195, 0.4);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s;
+            border-radius: 12px;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        .btn-primary {
+            position: relative;
+            overflow: hidden;
+            background: #064e3b;
+            color: #fff;
+            padding: 12px 32px;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 0.02em;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #003527;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(6, 78, 59, 0.25);
+        }
+
+        .btn-primary::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transform: skewX(-20deg);
+            animation: shimmer 4s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                left: -150%
+            }
+
+            30% {
+                left: 150%
+            }
+
+            100% {
+                left: 150%
+            }
+        }
+
+        .btn-ghost {
+            border: 1px solid #121c28;
+            color: #121c28;
+            padding: 12px 32px;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+            background: transparent;
+        }
+
+        .btn-ghost:hover {
+            background: #121c28;
+            color: #fff;
+        }
+
+        .ambient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.12;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        ::selection {
+            background: #b0f0d6;
+            color: #002117;
+        }
+
+        .role-card {
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .role-card.active {
+            border-color: #064e3b;
+            background: rgba(6, 78, 59, 0.08);
+        }
+
+        .role-card:hover {
+            border-color: #064e3b;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg)
+            }
+
+            50% {
+                transform: translateY(-12px) rotate(3deg)
+            }
+        }
+
+        .float-card {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .float-card-delay {
+            animation: float 6s ease-in-out 2s infinite;
+        }
+
+        .float-card-delay2 {
+            animation: float 6s ease-in-out 4s infinite;
+        }
+
+        @keyframes floatDecor {
+
+            0%,
+            100% {
+                transform: translateY(0)
+            }
+
+            50% {
+                transform: translateY(-8px)
+            }
+        }
+
+        .float-decor {
+            animation: floatDecor 5s ease-in-out infinite;
+        }
+
+        .float-decor2 {
+            animation: floatDecor 7s ease-in-out 1s infinite;
+        }
+    </style>
+</head>
+
+<body class="bg-surface min-h-screen">
+    <div class="flex min-h-screen">
+        <!-- Left Side: Form -->
+        <div class="w-full lg:w-[520px] flex flex-col justify-center px-12 lg:px-16 relative z-10">
+            <!-- Logo -->
+            <div class="mb-10">
+                <a href="首页着陆页.html" class="font-bold text-3xl tracking-tight text-primary">智聘星图</a>
+            </div>
+
+            <!-- Heading -->
+            <p class="text-on-surface-variant text-base mb-8">登录你的账户，探索无限机遇</p>
+
+            <!-- Form -->
+            <form class="flex flex-col gap-5" onsubmit="event.preventDefault(); login();" style="animation: fadeInUp 0.5s ease 0.2s forwards; opacity:0;">
+                <!-- 企业名称 (仅企业角色) -->
+                <div id="company-name-field" class="hidden">
+                    <label
+                        class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">企业名称</label>
+                    <div class="relative">
+                        <span
+                            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">business</span>
+                        <input id="company-name-input" type="text" placeholder="请输入企业名称"
+                            class="w-full pl-12 pr-4 py-3.5 rounded-xl border border-outline-variant/60 bg-white/80 backdrop-blur text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all text-sm">
+                    </div>
+                </div>
+
+                <!-- 手机号 / 管理账号 (动态切换) -->
+                <div>
+                    <label id="account-label"
+                        class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">手机号</label>
+                    <div class="relative">
+                        <span id="account-icon"
+                            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">phone</span>
+                        <input id="account-input" type="text" placeholder="请输入手机号"
+                            class="w-full pl-12 pr-4 py-3.5 rounded-xl border border-outline-variant/60 bg-white/80 backdrop-blur text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all text-sm">
+                    </div>
+                </div>
+
+                <!-- 密码 -->
+                <div>
+                    <label
+                        class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">密码</label>
+                    <div class="relative">
+                        <span
+                            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">lock</span>
+                        <input id="password-input" type="password" placeholder="请输入密码"
+                            class="w-full pl-12 pr-12 py-3.5 rounded-xl border border-outline-variant/60 bg-white/80 backdrop-blur text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all text-sm">
+                        <button type="button"
+                            class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-xl">visibility_off</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Remember me + Forgot -->
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox"
+                            class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary/20">
+                        <span class="text-sm text-on-surface-variant">记住我</span>
+                    </label>
+                    <a href="#"
+                        class="text-sm text-primary font-semibold hover:text-primary-dark transition-colors">忘记密码?</a>
+                </div>
+
+                <!-- Role Selector -->
+                <div>
+                    <label
+                        class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">选择角色</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="role-card active rounded-xl p-4 flex flex-col items-center gap-2 text-center bg-white/50"
+                            onclick="selectRole(this)">
+                            <span class="material-symbols-outlined text-2xl text-primary">person</span>
+                            <span class="text-xs font-semibold text-on-surface">求职者</span>
+                        </div>
+                        <div class="role-card rounded-xl p-4 flex flex-col items-center gap-2 text-center bg-white/50"
+                            onclick="selectRole(this)">
+                            <span class="material-symbols-outlined text-2xl text-on-surface-variant">business</span>
+                            <span class="text-xs font-semibold text-on-surface">企业</span>
+                        </div>
+                        <div class="role-card rounded-xl p-4 flex flex-col items-center gap-2 text-center bg-white/50"
+                            onclick="selectRole(this)">
+                            <span
+                                class="material-symbols-outlined text-2xl text-on-surface-variant">admin_panel_settings</span>
+                            <span class="text-xs font-semibold text-on-surface">管理员</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="btn-primary w-full py-3.5 text-center mt-2">登录</button>
+            </form>
+
+            <!-- Register link -->
+            <p class="text-center text-sm text-on-surface-variant mt-6"
+                style="animation: fadeInUp 0.5s ease 0.3s forwards; opacity:0;">
+                还没有账号？<a href="注册.html"
+                    class="text-primary font-semibold hover:text-primary-dark transition-colors">立即注册</a>
+            </p>
+        </div>
+
+        <!-- Right Side: Hero Visual -->
+        <div class="hidden lg:flex flex-1 relative overflow-hidden items-center justify-center"
+            style="background: linear-gradient(135deg, #064e3b 0%, #2b6954 50%, #003527 100%);">
+            <!-- Ambient Orbs -->
+            <div class="ambient-orb w-80 h-80 bg-white top-1/4 -left-20" style="opacity:0.08;"></div>
+            <div class="ambient-orb w-64 h-64 bg-white bottom-20 right-10" style="opacity:0.06;"></div>
+            <div class="ambient-orb w-48 h-48 bg-white top-10 right-1/3" style="opacity:0.05;"></div>
+
+            <!-- Geometric Decorations -->
+            <div class="absolute top-16 right-16 w-20 h-20 border border-white/10 rounded-lg float-decor rotate-12">
+            </div>
+            <div class="absolute bottom-32 left-16 w-14 h-14 border border-white/10 rounded-full float-decor2"></div>
+            <div class="absolute top-1/3 left-8 w-3 h-3 bg-white/20 rounded-full float-decor"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-5 h-5 border border-white/15 rounded-sm float-decor2 rotate-45">
+            </div>
+            <div class="absolute top-20 left-1/3 w-2 h-2 bg-white/25 rounded-full"></div>
+
+            <!-- Floating Glass Feature Cards -->
+            <div class="relative z-10 flex flex-col items-center gap-6 w-full max-w-md px-8">
+                <div class="float-card glass-card p-5 flex items-center gap-4 w-72"
+                    style="background:rgba(255,255,255,0.12); backdrop-filter:blur(24px); border:1px solid rgba(255,255,255,0.2); box-shadow:0 8px 32px rgba(0,0,0,0.1);">
+                    <div class="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-xl">account_tree</span>
+                    </div>
+                    <div>
+                        <div class="text-white font-semibold text-sm">能力图谱</div>
+                        <div class="text-white/60 text-xs">AI 语义驱动的技能知识网络</div>
+                    </div>
+                </div>
+                <div class="float-card-delay glass-card p-5 flex items-center gap-4 w-72 ml-8"
+                    style="background:rgba(255,255,255,0.12); backdrop-filter:blur(24px); border:1px solid rgba(255,255,255,0.2); box-shadow:0 8px 32px rgba(0,0,0,0.1);">
+                    <div class="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-xl">auto_awesome</span>
+                    </div>
+                    <div>
+                        <div class="text-white font-semibold text-sm">AI 智能匹配</div>
+                        <div class="text-white/60 text-xs">精准对接理想岗位与人才</div>
+                    </div>
+                </div>
+                <div class="float-card-delay2 glass-card p-5 flex items-center gap-4 w-72"
+                    style="background:rgba(255,255,255,0.12); backdrop-filter:blur(24px); border:1px solid rgba(255,255,255,0.2); box-shadow:0 8px 32px rgba(0,0,0,0.1);">
+                    <div class="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-xl">route</span>
+                    </div>
+                    <div>
+                        <div class="text-white font-semibold text-sm">AI 职业规划</div>
+                        <div class="text-white/60 text-xs">个性化职业发展路径推荐</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Tagline -->
+            <div class="absolute bottom-10 left-0 right-0 text-center">
+                <p class="text-white/40 text-xs tracking-widest uppercase font-semibold">Powered by 银河麒麟 · 人大金仓 ·
+                    DeepSeek</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 内置账号数据
+        const accounts = {
+            'qiuzhizhe123': { password: '123465', role: '求职者', nickname: '求职小能手', avatar: 'Q' },
+            'hr123': { password: '123456', role: '企业', nickname: 'HR张经理', avatar: 'H', company: '前途无忧' },
+            'admin': { password: '123456', role: '管理员', nickname: '系统管理员', avatar: 'A' }
+        };
+
+        function login() {
+            const activeCard = document.querySelector('.role-card.active');
+            const roleText = activeCard ? activeCard.querySelector('span:last-child').textContent.trim() : '';
+            const account = document.getElementById('account-input').value.trim();
+            const password = document.getElementById('password-input').value.trim();
+
+            if (roleText === '企业') {
+                if (!account || !password) {
+                    alert('请填写账号和密码'); return;
+                }
+            } else {
+                if (!account || !password) {
+                    alert('请填写账号和密码'); return;
+                }
+            }
+
+            // 验证内置账号
+            const user = accounts[account];
+            if (!user || user.password !== password) {
+                alert('账号或密码错误'); return;
+            }
+            if (user.role !== roleText) {
+                alert('账号角色与所选角色不匹配'); return;
+            }
+
+            // 保存登录状态
+            localStorage.setItem('loggedIn', 'true');
+            localStorage.setItem('userRole', roleText);
+            localStorage.setItem('userNickname', user.nickname);
+            localStorage.setItem('userAvatar', user.avatar);
+            if (user.company) localStorage.setItem('companyName', user.company);
+
+            if (roleText === '求职者') {
+                window.location.href = '首页着陆页.html';
+            } else if (roleText === '企业') {
+                window.location.href = '../company/企业首页.html';
+            } else if (roleText === '管理员') {
+                window.location.href = '../admin/管理员仪表板.html';
+            }
+        }
+
+        function selectRole(el) {
+            document.querySelectorAll('.role-card').forEach(card => {
+                card.classList.remove('active');
+                card.querySelector('span:first-child').classList.remove('text-primary');
+                card.querySelector('span:first-child').classList.add('text-on-surface-variant');
+            });
+            el.classList.add('active');
+            el.querySelector('span:first-child').classList.remove('text-on-surface-variant');
+            el.querySelector('span:first-child').classList.add('text-primary');
+
+            const roleText = el.querySelector('span:last-child').textContent.trim();
+            const companyNameField = document.getElementById('company-name-field');
+            const accountLabel = document.getElementById('account-label');
+            const accountIcon = document.getElementById('account-icon');
+            const accountInput = document.getElementById('account-input');
+
+            if (roleText === '企业') {
+                companyNameField.classList.remove('hidden');
+                accountLabel.textContent = '手机号';
+                accountIcon.textContent = 'phone';
+                accountInput.placeholder = '请输入手机号';
+            } else if (roleText === '管理员') {
+                companyNameField.classList.add('hidden');
+                accountLabel.textContent = '管理员账号';
+                accountIcon.textContent = 'admin_panel_settings';
+                accountInput.placeholder = '请输入管理账号';
+            } else {
+                companyNameField.classList.add('hidden');
+                accountLabel.textContent = '手机号';
+                accountIcon.textContent = 'phone';
+                accountInput.placeholder = '请输入手机号';
+            }
+        }
+    </script>
+</body>
+
+</html>

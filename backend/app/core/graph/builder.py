@@ -58,6 +58,28 @@ async def build_graph(db: AsyncSession) -> nx.Graph:
             G.add_edge(a_id, b_id, relation_type=rel.relation_type, weight=rel.weight)
     logger.info("Loaded %d relations into graph", len(all_relations))
 
+    # Auto-generate edges for skills in the same category (INCLUDES)
+    # This ensures the graph has connections even without manual skill_relation entries
+    from collections import defaultdict
+    cat_groups: dict[str, list[str]] = defaultdict(list)
+    for sk in all_skills:
+        cat = sk.category or "通用"
+        cat_groups[cat].append(str(sk.id))
+
+    auto_edges = 0
+    for cat, skill_ids in cat_groups.items():
+        if len(skill_ids) <= 1:
+            continue
+        # Connect skills within the same category with INCLUDES edges
+        # Use a hub approach: connect first skill to all others in same category
+        hub = skill_ids[0]
+        for sid in skill_ids[1:]:
+            if not G.has_edge(hub, sid):
+                G.add_edge(hub, sid, relation_type="INCLUDES", weight=0.6)
+                auto_edges += 1
+
+    logger.info("Auto-generated %d INCLUDES edges (same-category)", auto_edges)
+
     skill_graph.set(G)
     return G
 

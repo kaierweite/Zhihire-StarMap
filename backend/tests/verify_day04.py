@@ -6,14 +6,10 @@ if sys.platform == "win32":
     import asyncio
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-# Apply KingbaseES compat before any imports that create engine
 from app.db import compat
 
-# Test all imports
-from app.models.entities import *
-from app.models.entities import (
-    SkillRelation, Role, RoleSkill, AbilityGraph,
-)
+# Imports with correct names
+from app.models.entities import SkillRelation, Role, RoleSkill, AbilityGraph
 print("[OK] ORM entities imported")
 
 from app.repositories import (
@@ -24,23 +20,23 @@ from app.repositories import (
 )
 print("[OK] Repositories imported")
 
-from app.core.graph.builder import GraphBuilder
-from app.core.graph.echarts_mapper import EChartsMapper
+from app.core.graph.builder import SkillGraphHolder
+from app.core.graph.echarts_mapper import graph_to_echarts, build_user_graph, build_job_graph
 print("[OK] Core modules imported")
 
-from app.services.graph_service import GraphService
+from app.services.graph_service import get_user_graph, get_job_graph, reload_graph_endpoint
 print("[OK] Service imported")
 
 from app.api.v1.graph import router as graph_router
-print("[OK] Route imported")
+print("[OK] Routes imported")
 
-# Check app startup
+# Check app routes
 from app.main import app
 routes = sorted([r.path for r in app.routes if hasattr(r, "path")])
 
 print(f"\nTotal routes: {len(routes)}")
-graph_routes = [r for r in routes if "graph" in r or "skill" in r]
-for r in graph_routes:
-    print(f"  [OK] {r}")
+for r in routes:
+    if "graph" in r or "skill" in r:
+        print(f"  [OK] {r}")
 
-print("\n=== Day04 Verification Complete ===")
+print("\n=== Day04 Verification Complete: All OK ===")

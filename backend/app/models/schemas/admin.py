@@ -103,6 +103,49 @@ class AdminServiceStatus(BaseModel):
     status: str = Field(..., description="状态：UP / DOWN")
     latency_ms: int | None = Field(None, description="延迟毫秒数")
 
+class AiProviderItem(BaseModel):
+    """AI 提供商配置响应模型。"""
+    model_config = ConfigDict(from_attributes=True)
+    id: int = Field(..., description="主键")
+    provider_name: str = Field(..., description="提供商标识")
+    display_name: str = Field(..., description="显示名称")
+    api_key: str | None = Field(None, description="API Key（掩码后）")
+    base_url: str | None = Field(None, description="API 基础地址")
+    models: list[str] | None = Field(None, description="可用模型列表")
+    order_no: int = Field(0, description="排序序号")
+    status: str = Field(..., description="状态")
+    created_at: datetime | None = Field(None, description="创建时间")
+    updated_at: datetime | None = Field(None, description="更新时间")
+
+
+class AiProviderUpdateRequest(BaseModel):
+    """AI 提供商配置更新请求。"""
+    display_name: str | None = Field(None, max_length=100, description="显示名称")
+    api_key: str | None = Field(None, description="API Key")
+    base_url: str | None = Field(None, max_length=500, description="API 基础地址")
+    models: list[str] | None = Field(None, description="可用模型列表")
+    order_no: int | None = Field(None, ge=0, description="排序序号")
+    status: str | None = Field(None, pattern="^(NORMAL|DISABLED)$", description="启用状态")
+
+
+class AiProviderCreateRequest(BaseModel):
+    """AI 提供商配置创建请求。"""
+    provider_name: str = Field(..., min_length=1, max_length=50, description="提供商标识")
+    display_name: str = Field(..., min_length=1, max_length=100, description="显示名称")
+    api_key: str | None = Field(None, description="API Key")
+    base_url: str | None = Field(None, max_length=500, description="API 基础地址")
+    models: list[str] | None = Field(None, description="可用模型列表")
+    order_no: int = Field(0, ge=0, description="排序序号")
+
+
+class AiProviderTestResult(BaseModel):
+    """AI 提供商连接测试结果。"""
+    success: bool = Field(..., description="是否成功")
+    latency_ms: int | None = Field(None, description="延迟毫秒")
+    message: str = Field(..., description="提示信息")
+
+
+
 
 class JobAdminItem(BaseModel):
     """后台岗位管理列表项响应模型。"""

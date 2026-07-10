@@ -9,6 +9,9 @@ export interface RegisterForm {
   username: string
   password: string
   role: UserRole
+  company_name?: string
+  email?: string
+  phone?: string
 }
 
 export interface LoginResult {

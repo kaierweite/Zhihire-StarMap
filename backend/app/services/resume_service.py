@@ -3,6 +3,7 @@
 ???????CRUD ? AI ?????
 """
 import json
+import os
 from typing import Any
 
 from fastapi import UploadFile
@@ -65,7 +66,7 @@ async def upload_resume(
     content = await file.read()
     file_size = len(content)
     if file_size > MAX_FILE_SIZE:
-        raise BusinessError(400, "???????? 10MB")
+        raise BusinessError(400, "??????????? 10MB?")
 
     mime_type = file.content_type or ""
     if mime_type not in ALLOWED_MIME_TYPES:
@@ -131,10 +132,21 @@ async def list_resumes(
     rows, total = await resume_repository.list_by_user(db, user.id, page, size)
     items = [
         ResumeListItem(
-            id=r.id, title=r.title, status=r.status, created_at=r.created_at
+            id=r.id, title=r.title, status=r.status,
+            created_at=r.created_at, updated_at=r.updated_at,
         )
         for r in rows
     ]
+    # Batch-populate file_name from upload_file
+    file_ids = [r.file_id for r in rows if r.file_id is not None]
+    if file_ids:
+        from app.repositories.upload_file_repository import list_by_ids as _list_file_ids
+        name_map = await _list_file_ids(db, file_ids)
+        for item in items:
+            for row in rows:
+                if row.id == item.id and row.file_id is not None and row.file_id in name_map:
+                    item.file_name = name_map[row.file_id]
+                    break
     return items, total
 
 
@@ -176,6 +188,48 @@ async def get_resume_detail(db: AsyncSession, user: User, resume_id: int) -> Res
     )
 
 
+def _deep_merge(content_text: str | None, user_json_str: str | None) -> str:
+    """Deep-merge user-edited JSON into existing content_text, preserving system-derived fields.
+
+    When the user edits parsed resume content via PUT, only the editable fields
+    (name, education, skills names, etc.) are sent back. This function merges the
+    user's changes into the existing JSON while preserving system-derived fields
+    like skill_id and category in the skills array (matched by skill name).
+    """
+    if user_json_str is None:
+        return content_text if content_text is not None else "{}"
+
+    try:
+        old = json.loads(content_text) if content_text else {}
+        user_data = json.loads(user_json_str) if isinstance(user_json_str, str) else {}
+    except (json.JSONDecodeError, TypeError):
+        return user_json_str if isinstance(user_json_str, str) else "{}"
+
+    for k, v in user_data.items():
+        if isinstance(v, list) and k == "skills" and isinstance(old.get(k), list):
+            old_skills = {s.get("name"): s for s in old[k] if s.get("name")}
+            merged_skills = []
+            for usr_skill in v:
+                name = usr_skill.get("name")
+                old_skill = old_skills.get(name) if name else None
+                if old_skill:
+                    merged = dict(usr_skill)
+                    merged["skill_id"] = old_skill.get("skill_id")
+                    merged["category"] = old_skill.get("category")
+                    merged_skills.append(merged)
+                else:
+                    merged_skills.append(dict(usr_skill))
+            old[k] = merged_skills
+        elif isinstance(v, list) and isinstance(old.get(k), list):
+            old[k] = [dict(item) for item in v]
+        elif k.startswith("_"):
+            pass
+        else:
+            old[k] = v
+
+    return json.dumps(old, ensure_ascii=False)
+
+
 async def update_resume_content(
     db: AsyncSession,
     user: User,
@@ -202,12 +256,15 @@ async def update_resume_content(
     if title is not None:
         resume.title = title
     if content_text is not None:
-        resume.content_text = content_text
+        resume.content_text = _deep_merge(resume.content_text, content_text)
 
     await resume_repository.update(db, resume)
     await db.commit()
 
     return await get_resume_detail(db, user, resume_id)
+
+
+
 
 
 async def delete_resume(db: AsyncSession, user: User, resume_id: int) -> None:
@@ -283,9 +340,9 @@ async def optimize_resume(
     suggestions: list[OptimizeSuggestion] = []
     try:
         raw = response.strip()
-        if raw.startswith("`json"):
+        if raw.startswith("```json"):
             raw = raw[7:]
-        if raw.endswith("`"):
+        if raw.endswith("```"):
             raw = raw[:-3]
         raw = raw.strip()
         items = json.loads(raw)

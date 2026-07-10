@@ -3,6 +3,7 @@
 基于 Pydantic Settings 从环境变量与 .env 文件读取全局配置，
 集中管理数据库连接、JWT 密钥、DeepSeek API Key 与文件存储路径等参数。
 """
+import os  # 路径拼接与目录创建
 from functools import lru_cache  # 提供单例缓存，避免重复读取环境变量
 
 from pydantic_settings import BaseSettings, SettingsConfigDict  # 配置基类与配置字典
@@ -15,9 +16,9 @@ class Settings(BaseSettings):
     变量名大小写不敏感，未声明的环境变量将被忽略。
     """
 
-    # Pydantic Settings 配置：从 .env 读取、UTF-8 编码、忽略多余项
+    # Pydantic Settings 配置：从 backend/.env 读取、UTF-8 编码、忽略多余项
     model_config = SettingsConfigDict(
-        env_file=".env",  # 默认读取后端根目录下的 .env
+        env_file=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".env"),
         env_file_encoding="utf-8",  # 读取 .env 时使用 UTF-8 编码
         case_sensitive=False,  # 环境变量名不区分大小写
         extra="ignore",  # 忽略未声明的环境变量，避免启动报错
@@ -29,12 +30,10 @@ class Settings(BaseSettings):
     api_prefix: str = "/api"  # 统一 API 路径前缀
 
     # ===== 数据库连接 =====
-    # KingbaseES 兼容 PostgreSQL，使用 asyncpg 异步驱动
-    database_url: str = (
-        "postgresql+asyncpg://kingbase:kingbase@127.0.0.1:54321/starmap"
-    )
-    db_pool_size: int = 10  # 连接池常驻连接数
-    db_max_overflow: int = 20  # 连接池允许的额外溢出连接数
+    # KingbaseES 兼容 PostgreSQL，使用 psycopg v3 异步驱动
+    database_url: str = "postgresql+psycopg://system:123456@localhost:54321/zhihire"
+    db_pool_size: int = 5  # 连接池常驻连接数
+    db_max_overflow: int = 5  # 连接池允许的额外溢出连接数
     db_pool_recycle: int = 3600  # 连接回收周期（秒），避免数据库主动断开
 
     # ===== JWT 认证 =====

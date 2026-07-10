@@ -54,3 +54,27 @@ export function listSkillAudit(page = 1, size = 20) {
 export function auditSkill(skillId: number, action: 'approve' | 'reject', targetId?: number) {
   return request.put<ApiResponse<SkillAuditItem>>(`/admin/skill/${skillId}/audit`, { action, target_id: targetId })
 }
+
+
+// ---- AI Provider Config ----
+import type { AiProviderItem, AiProviderCreateRequest, AiProviderUpdateRequest, AiProviderTestResult } from '@/types/admin'
+
+export function listAiProviders() {
+  return request.get<ApiResponse<AiProviderItem[]>>('/admin/ai-config')
+}
+
+export function createAiProvider(data: AiProviderCreateRequest) {
+  return request.post<ApiResponse<AiProviderItem>>('/admin/ai-config', data)
+}
+
+export function updateAiProvider(id: number, data: AiProviderUpdateRequest) {
+  return request.put<ApiResponse<AiProviderItem>>('/admin/ai-config/' + id, data)
+}
+
+export function testAiProvider(id: number) {
+  return request.post<ApiResponse<AiProviderTestResult>>('/admin/ai-config/' + id + '/test')
+}
+
+export function deleteAiProvider(id: number) {
+  return request.delete<ApiResponse<null>>('/admin/ai-config/' + id)
+}

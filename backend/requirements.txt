@@ -3,13 +3,12 @@ fastapi==0.115.6
 uvicorn[standard]==0.34.0
 
 # ===== ORM + 数据库 =====
-sqlalchemy[asyncio]==2.0.36
-asyncpg==0.30.0          # KingbaseES(PostgreSQL兼容) async 驱动
+sqlalchemy[asyncio]==2.0.43
 alembic==1.14.0
 
 # ===== 认证 =====
 python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
+bcrypt==5.0.0
 
 # ===== 配置 + 校验 =====
 pydantic==2.10.4
@@ -30,3 +29,4 @@ networkx==3.4.2
 
 # ===== 工具 =====
 python-multipart==0.0.20  # FastAPI 文件上传
+psycopg[binary]==3.3.4          # KingbaseES(PostgreSQL兼容) async 驱动

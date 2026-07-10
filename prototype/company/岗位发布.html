@@ -1,0 +1,518 @@
+﻿<!DOCTYPE html>
+<html class="light" lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>岗位发布 - 智聘星图</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="config.js"></script>
+    <style>
+        .glass-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(196,197,217,0.4); box-shadow: 0 4px 20px rgba(0,0,0,0.04); transition: all 0.3s; border-radius: 12px; }
+        .glass-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+        .btn-primary { position: relative; overflow: hidden; background: #064e3b; color: #fff; padding: 12px 32px; border-radius: 9999px; font-weight: 600; font-size: 14px; letter-spacing: 0.02em; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; }
+        .btn-primary:hover { background: #003527; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(6,78,59,0.25); }
+        .btn-primary::after { content:""; position:absolute; top:0; left:-150%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent); transform:skewX(-20deg); animation:shimmer 4s infinite; }
+        @keyframes shimmer { 0%{left:-150%} 30%{left:150%} 100%{left:150%} }
+        .btn-ghost { border: 1px solid #191c1d; color: #191c1d; padding: 12px 32px; border-radius: 9999px; font-weight: 600; font-size: 14px; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; background: transparent; cursor: pointer; }
+        .btn-ghost:hover { background: #191c1d; color: #fff; }
+        .chip { display:inline-flex; align-items:center; gap:4px; padding:4px 12px; border-radius:4px; font-size:12px; font-weight:600; letter-spacing:0.05em; }
+        .chip-primary { background: #b0f0d6; color: #003527; }
+        .chip-success { background: #d4edda; color: #155724; }
+        .ambient-orb { position:absolute; border-radius:50%; filter:blur(100px); opacity:0.12; pointer-events:none; z-index:-1; }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .animate-fade-in-up { animation:fadeInUp 0.6s ease forwards; }
+        ::selection { background: #b0f0d6; color: #002117; }
+        .skill-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 6px; background: #b0f0d6; color: #003527; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+        .skill-chip button { background: none; border: none; color: #003527; cursor: pointer; padding: 0; line-height: 1; font-size: 16px; display: flex; align-items: center; }
+        .skill-chip button:hover { color: #93000a; }
+        .tab-active { color: #064e3b; border-bottom: 3px solid #064e3b; font-weight: 600; }
+        .tab-inactive { color: #434656; border-bottom: 3px solid transparent; }
+        .tab-inactive:hover { color: #064e3b; }
+        input, textarea, select { font-family: 'Inter', sans-serif; }
+        .upload-zone { border: 2px dashed rgba(196,197,217,0.6); border-radius: 12px; padding: 48px; text-align: center; transition: all 0.3s; cursor: pointer; }
+        .upload-zone:hover { border-color: #064e3b; background: rgba(6,78,59,0.03); }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #064e3b; box-shadow: 0 0 0 3px rgba(6,78,59,0.1); }
+        .mobile-nav-drawer { display:none; position:fixed; inset:0; z-index:100; }
+        .mobile-nav-drawer.open { display:flex; }
+        .mobile-nav-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.4); }
+        .mobile-nav-panel { position:absolute; right:0; top:0; bottom:0; width:280px; background:#fff; box-shadow:-4px 0 24px rgba(0,0,0,0.15); padding:24px; overflow-y:auto; }
+        .toast { position:fixed; bottom:24px; right:24px; background:#064e3b; color:#fff; padding:12px 24px; border-radius:12px; font-size:14px; font-weight:500; z-index:200; transform:translateY(80px); opacity:0; transition:all 0.3s ease; }
+        .toast.show { transform:translateY(0); opacity:1; }
+            .active-tab { color: #064e3b; border-bottom: 2px solid #064e3b; font-weight: 700; }
+    </style>
+</head>
+<body class="bg-surface font-sans text-on-surface min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm h-14">
+        <div class="flex justify-between items-center w-full px-4 md:px-16 max-w-[1440px] mx-auto h-full">
+            <a href="企业首页.html" class="font-bold text-xl tracking-tight text-primary">智聘星图</a>
+            <div class="hidden md:flex items-center gap-6 text-sm">
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="企业首页.html">企业首页</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="岗位管理.html">岗位管理</a>
+                <a class="text-primary border-b-2 border-primary pb-1 font-semibold" href="岗位发布.html">岗位发布</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="智能筛选.html">智能筛选</a>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="relative" id="notif-bell-wrap">
+                    <button onclick="toggleNotifDropdown(event)" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-all p-2 relative cursor-pointer">
+                        notifications
+                        <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#93000a] text-white text-[9px] font-bold rounded-full flex items-center justify-center">3</span>
+                    </button>
+                    <div id="notif-dropdown" class="hidden absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-2xl border border-outline-variant/30 z-50 overflow-hidden">
+                        <div class="flex items-center justify-between p-3 border-b border-outline-variant/30">
+                            <h3 class="text-sm font-semibold text-on-surface">通知</h3>
+                            <span class="text-xs text-on-surface-variant">3 条未读</span>
+                        </div>
+                        <div class="max-h-64 overflow-y-auto">
+                            <div class="px-3 py-2.5 hover:bg-surface-container cursor-pointer border-b border-outline-variant/10">
+                                <div class="flex items-start gap-2"><span class="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0"></span><div><p class="text-xs text-on-surface font-medium">张伟 投递了「高级前端工程师」</p><p class="text-[11px] text-on-surface-variant mt-0.5">5 分钟前</p></div></div>
+                            </div>
+                            <div class="px-3 py-2.5 hover:bg-surface-container cursor-pointer border-b border-outline-variant/10">
+                                <div class="flex items-start gap-2"><span class="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0"></span><div><p class="text-xs text-on-surface font-medium">岗位「AI算法工程师」已通过审核</p><p class="text-[11px] text-on-surface-variant mt-0.5">1 小时前</p></div></div>
+                            </div>
+                            <div class="px-3 py-2.5 hover:bg-surface-container cursor-pointer">
+                                <div class="flex items-start gap-2"><span class="w-2 h-2 rounded-full bg-transparent mt-1.5 flex-shrink-0"></span><div><p class="text-xs text-on-surface-variant">系统将于今晚 23:00 进行维护</p><p class="text-[11px] text-on-surface-variant mt-0.5">3 小时前</p></div></div>
+                            </div>
+                        </div>
+                        <div class="p-2 border-t border-outline-variant/30 text-center">
+                            <a href="企业通知中心.html" class="text-xs text-primary font-medium hover:underline px-3 py-1.5 inline-block">查看全部通知</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-bold cursor-pointer">企</div>
+                <button class="md:hidden p-1.5 hover:bg-surface-container rounded-lg transition-colors" onclick="openMobileNav()">
+                    <span class="material-symbols-outlined text-on-surface text-xl">menu</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 移动端导航抽屉 -->
+    <div id="mobileNavDrawer" class="mobile-nav-drawer">
+        <div class="mobile-nav-overlay" onclick="closeMobileNav()"></div>
+        <div class="mobile-nav-panel">
+            <div class="flex items-center justify-between mb-8">
+                <span class="font-bold text-lg text-primary">智聘星图</span>
+                <button onclick="closeMobileNav()" class="p-1 hover:bg-surface-container rounded-lg">
+                    <span class="material-symbols-outlined text-on-surface-variant">close</span>
+                </button>
+            </div>
+            <div class="flex flex-col gap-1">
+                <a href="企业首页.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">home</span>
+                    <span class="text-sm font-medium">企业首页</span>
+                </a>
+                <a href="岗位管理.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">work</span>
+                    <span class="text-sm font-medium">岗位管理</span>
+                </a>
+                <a href="岗位发布.html" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary font-semibold transition-colors">
+                    <span class="material-symbols-outlined text-xl">add_circle</span>
+                    <span class="text-sm font-medium">岗位发布</span>
+                </a>
+                <a href="智能筛选.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">auto_awesome</span>
+                    <span class="text-sm font-medium">智能筛选</span>
+                </a>
+                <div class="border-t border-outline-variant/30 my-2"></div>
+                <a href="企业通知中心.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">notifications</span>
+                    <span class="text-sm font-medium">通知中心</span>
+                </a>
+                <a href="候选人推荐.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">groups</span>
+                    <span class="text-sm font-medium">候选人推荐</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Background orbs -->
+    <div class="ambient-orb w-[500px] h-[500px] bg-primary top-20 -left-60" style="position:fixed;"></div>
+    <div class="ambient-orb w-[400px] h-[400px] bg-primary-container bottom-20 -right-40" style="position:fixed;"></div>
+
+    <!-- Page Content -->
+    <main class="pt-20 pb-16 px-4 md:px-16 max-w-[1440px] mx-auto">
+
+        <!-- Page Header -->
+        <div class="mb-10 animate-fade-in-up">
+            <h1 class="text-2xl md:text-[40px] leading-tight md:leading-[48px] font-bold tracking-tight text-on-surface mb-2" style="letter-spacing:-0.03em;">岗位发布</h1>
+            <p class="text-on-surface-variant text-sm md:text-lg">AI 辅助解析 JD，自动提取技能要求与权重</p>
+        </div>
+
+        <!-- Mode Tabs -->
+        <div class="flex gap-8 mb-8 border-b border-outline-variant/40">
+            <button id="tabManual" class="pb-3 text-[15px] font-semibold tab-active transition-all" onclick="switchTab('manual')">
+                <span class="material-symbols-outlined text-[18px] align-middle mr-1">edit_note</span>
+                手动填写
+            </button>
+            <button id="tabAI" class="pb-3 text-[15px] tab-inactive transition-all" onclick="switchTab('ai')">
+                <span class="material-symbols-outlined text-[18px] align-middle mr-1">auto_awesome</span>
+                AI 上传解析
+            </button>
+        </div>
+
+        <!-- Manual Mode Form -->
+        <div id="manualMode" class="animate-fade-in-up">
+            <form id="jobForm" onsubmit="return false;">
+                <div class="glass-card p-6 md:p-8 mb-8" style="border-radius:12px;">
+                    <h2 class="text-xl font-semibold text-on-surface mb-6 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">badge</span>
+                        基本信息
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">岗位名称 <span class="text-error">*</span></label>
+                            <input id="jobName" type="text" placeholder="例：高级前端工程师" class="w-full px-4 py-3 rounded-lg border border-outline-variant/60 bg-white/60 backdrop-blur-sm text-on-surface text-sm transition-all">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">岗位描述 <span class="text-error">*</span></label>
+                            <textarea id="jobDesc" rows="6" placeholder="请详细描述岗位职责与要求..." class="w-full px-4 py-3 rounded-lg border border-outline-variant/60 bg-white/60 backdrop-blur-sm text-on-surface text-sm transition-all resize-y"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">职业角色</label>
+                            <select id="jobRole" class="w-full px-4 py-3 rounded-lg border border-outline-variant/60 bg-white/60 backdrop-blur-sm text-on-surface text-sm transition-all">
+                                <option>高级前端工程师</option><option>产品经理</option><option>数据分析师</option><option>后端开发工程师</option><option>UI/UX设计师</option><option>DevOps工程师</option><option>算法工程师</option><option>技术总监</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">工作地点</label>
+                            <input id="jobCity" type="text" placeholder="例：北京市海淀区" class="w-full px-4 py-3 rounded-lg border border-outline-variant/60 bg-white/60 backdrop-blur-sm text-on-surface text-sm transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">薪资范围 (K/月)</label>
+                            <div class="flex items-center gap-3">
+                                <input id="salaryMin" type="number" placeholder="最低" class="w-full px-4 py-3 rounded-lg border border-outline-variant/60 bg-white/60 backdrop-blur-sm text-on-surface text-sm transition-all">
+                                <span class="text-on-surface-variant font-medium">—</span>
+                                <input id="salaryMax" type="number" placeholder="最高" class="w-full px-4 py-3 rounded-lg border border-outline-variant/60 bg-white/60 backdrop-blur-sm text-on-surface text-sm transition-all">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">经验要求</label>
+                            <select id="jobExp" class="w-full px-4 py-3 rounded-lg border border-outline-variant/60 bg-white/60 backdrop-blur-sm text-on-surface text-sm transition-all">
+                                <option>不限</option><option>1-3年</option><option selected>3-5年</option><option>5-10年</option><option>10年以上</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">学历要求</label>
+                            <select id="jobEdu" class="w-full px-4 py-3 rounded-lg border border-outline-variant/60 bg-white/60 backdrop-blur-sm text-on-surface text-sm transition-all">
+                                <option>不限</option><option>大专</option><option selected>本科</option><option>硕士</option><option>博士</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills Section -->
+                <div class="glass-card p-6 md:p-8 mb-8" style="border-radius:12px;">
+                    <h2 class="text-xl font-semibold text-on-surface mb-6 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">psychology</span>
+                        技能要求
+                    </h2>
+                    <div class="relative flex gap-3 mb-4">
+                        <div class="flex-1 relative">
+                            <input type="text" id="skillInput" placeholder="搜索或选择技能..." class="w-full px-4 py-3 rounded-lg border border-outline-variant/60 bg-white/60 backdrop-blur-sm text-on-surface text-sm transition-all" oninput="filterSkillDict()" onfocus="showSkillDropdown()" autocomplete="off">
+                            <div id="skillDropdown" class="hidden absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-xl border border-outline-variant/30 z-50 max-h-60 overflow-y-auto"></div>
+                        </div>
+                        <button type="button" onclick="addSkillFromDict()" class="btn-primary px-6 py-3">
+                            <span class="material-symbols-outlined text-[18px]">add</span>
+                            添加
+                        </button>
+                    </div>
+                    <div id="skillList" class="flex flex-wrap gap-3 mb-6"></div>
+                    <h3 class="text-sm font-semibold text-on-surface-variant mb-3 uppercase tracking-widest" style="font-size:12px; letter-spacing:0.1em;">技能重要性设置</h3>
+                    <div id="importanceArea" class="space-y-3"></div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap items-center gap-4">
+                    <button type="button" class="btn-primary px-8 py-3.5 text-[15px]" onclick="publishJob()">
+                        <span class="material-symbols-outlined text-[20px]">publish</span>
+                        发布岗位
+                    </button>
+                    <button type="button" class="btn-ghost px-8 py-3.5 text-[15px]" onclick="saveDraft()">
+                        <span class="material-symbols-outlined text-[20px]">save</span>
+                        保存草稿
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- AI Upload Mode -->
+        <div id="aiMode" class="hidden animate-fade-in-up">
+            <div class="glass-card p-6 md:p-8 mb-8" style="border-radius:12px;">
+                <h2 class="text-xl font-semibold text-on-surface mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">upload_file</span>
+                    上传职位描述文档
+                </h2>
+                <div id="uploadArea" class="upload-zone" onclick="simulateUpload()">
+                    <div class="flex flex-col items-center gap-4">
+                        <div class="w-16 h-16 rounded-full bg-primary-fixed flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary text-3xl">cloud_upload</span>
+                        </div>
+                        <div>
+                            <p class="text-on-surface font-semibold text-base">点击或拖拽文件到此处</p>
+                            <p class="text-on-surface-variant text-sm mt-1">支持 PDF、Word、TXT 格式，最大 10MB</p>
+                        </div>
+                        <button type="button" class="btn-ghost px-6 py-2.5 text-sm" onclick="event.stopPropagation();simulateUpload()">
+                            <span class="material-symbols-outlined text-[18px]">folder_open</span>
+                            浏览文件
+                        </button>
+                    </div>
+                </div>
+                <!-- 上传中状态 -->
+                <div id="uploadProgress" class="hidden mt-4">
+                    <div class="flex items-center gap-3 p-4 rounded-lg bg-primary/5 border border-primary/10">
+                        <span class="material-symbols-outlined text-primary animate-spin">progress_activity</span>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-on-surface">AI 正在解析文档...</p>
+                            <p class="text-xs text-on-surface-variant">正在提取岗位信息、技能要求和薪资范围</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parsed Results -->
+            <div id="parsedResults" class="hidden">
+                <div class="glass-card p-6 md:p-8 mb-8" style="border-radius:12px;">
+                    <h2 class="text-xl font-semibold text-on-surface mb-2 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">auto_awesome</span>
+                        AI 解析结果
+                    </h2>
+                    <p class="text-on-surface-variant text-sm mb-6">以下信息由 AI 从文档中自动提取，请确认后发布</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">岗位名称</label>
+                            <div class="px-4 py-3 rounded-lg bg-surface-container-low text-on-surface text-sm font-medium">高级前端工程师</div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">工作地点</label>
+                            <div class="px-4 py-3 rounded-lg bg-surface-container-low text-on-surface text-sm font-medium">北京市海淀区</div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">薪资范围</label>
+                            <div class="px-4 py-3 rounded-lg bg-surface-container-low text-on-surface text-sm font-medium">35K-55K</div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">经验要求</label>
+                            <div class="px-4 py-3 rounded-lg bg-surface-container-low text-on-surface text-sm font-medium">5-10年</div>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">岗位描述</label>
+                        <div class="px-4 py-3 rounded-lg bg-surface-container-low text-on-surface text-sm leading-relaxed">负责公司核心产品的前端架构设计与开发，带领团队完成技术方案落地。要求精通 Vue.js / React 生态，具备大型项目架构经验，对性能优化、工程化有深入理解。</div>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">AI 提取的技能要求</label>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between px-4 py-3 rounded-lg bg-surface-container-low/60"><div class="flex items-center gap-3"><span class="chip chip-primary">Vue.js</span></div><span class="chip chip-primary">必须 MUST</span></div>
+                            <div class="flex items-center justify-between px-4 py-3 rounded-lg bg-surface-container-low/60"><div class="flex items-center gap-3"><span class="chip chip-primary">TypeScript</span></div><span class="chip chip-primary">必须 MUST</span></div>
+                            <div class="flex items-center justify-between px-4 py-3 rounded-lg bg-surface-container-low/60"><div class="flex items-center gap-3"><span class="chip chip-primary">React</span></div><span class="chip chip-warning">需要 NEED</span></div>
+                            <div class="flex items-center justify-between px-4 py-3 rounded-lg bg-surface-container-low/60"><div class="flex items-center gap-3"><span class="chip chip-primary">Webpack</span></div><span class="chip chip-warning">需要 NEED</span></div>
+                            <div class="flex items-center justify-between px-4 py-3 rounded-lg bg-surface-container-low/60"><div class="flex items-center gap-3"><span class="chip chip-primary">Node.js</span></div><span class="chip chip-neutral">加分 BONUS</span></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-4">
+                        <button class="btn-primary px-8 py-3.5 text-[15px]" onclick="publishAIParsedJob()">
+                            <span class="material-symbols-outlined text-[20px]">check_circle</span>
+                            确认发布
+                        </button>
+                        <button class="btn-ghost px-8 py-3.5 text-[15px]" onclick="resetUpload()">
+                            <span class="material-symbols-outlined text-[20px]">restart_alt</span>
+                            重新上传
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-surface-container-lowest border-t border-outline-variant w-full py-12 mt-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 md:px-16 max-w-[1440px] mx-auto">
+            <div>
+                <div class="font-bold text-3xl text-on-surface mb-3">智聘星图</div>
+                <p class="text-on-surface-variant">AI 驱动的智能招聘平台<br>基于银河麒麟 · 人大金仓 · DeepSeek</p>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">企业端</h4>
+                <div class="flex flex-col gap-1 text-secondary text-sm">
+                    <a href="企业首页.html" class="hover:text-primary transition-colors">企业首页</a>
+                    <a href="岗位管理.html" class="hover:text-primary transition-colors">岗位管理</a>
+                    <a href="岗位发布.html" class="hover:text-primary transition-colors">岗位发布</a>
+                    <a href="智能筛选.html" class="hover:text-primary transition-colors">智能筛选</a>
+                    <a href="候选人推荐.html" class="hover:text-primary transition-colors">候选人推荐</a>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">支持</h4>
+                <div class="flex flex-col gap-1 text-secondary text-sm">
+                    <a href="企业通知中心.html" class="hover:text-primary transition-colors">通知中心</a>
+                    <a href="javascript:void(0)" class="hover:text-primary transition-colors">隐私政策</a>
+                    <a href="javascript:void(0)" class="hover:text-primary transition-colors">联系支持</a>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-6 text-sm text-on-surface-variant">&copy; 2024 智聘星图. 策就领导力的未来。</div>
+    </footer>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        function switchTab(mode) {
+            const tabManual = document.getElementById('tabManual');
+            const tabAI = document.getElementById('tabAI');
+            const manualMode = document.getElementById('manualMode');
+            const aiMode = document.getElementById('aiMode');
+            if (mode === 'manual') {
+                tabManual.className = 'pb-3 text-[15px] font-semibold tab-active transition-all';
+                tabAI.className = 'pb-3 text-[15px] tab-inactive transition-all';
+                manualMode.classList.remove('hidden');
+                aiMode.classList.add('hidden');
+            } else {
+                tabAI.className = 'pb-3 text-[15px] font-semibold tab-active transition-all';
+                tabManual.className = 'pb-3 text-[15px] tab-inactive transition-all';
+                aiMode.classList.remove('hidden');
+                manualMode.classList.add('hidden');
+            }
+        }
+
+        // === Toast ===
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // === 技能字典 ===
+        const SKILL_DICT = [
+            { name: 'React', category: '前端' }, { name: 'Vue.js', category: '前端' }, { name: 'Angular', category: '前端' },
+            { name: 'TypeScript', category: '前端' }, { name: 'JavaScript', category: '前端' }, { name: 'Next.js', category: '前端' },
+            { name: 'Tailwind CSS', category: '前端' }, { name: 'HTML/CSS', category: '前端' }, { name: 'Webpack', category: '前端' },
+            { name: 'Vite', category: '前端' }, { name: 'Flutter', category: '前端' }, { name: 'React Native', category: '前端' },
+            { name: 'Java', category: '后端' }, { name: 'Python', category: '后端' }, { name: 'Go', category: '后端' },
+            { name: 'Rust', category: '后端' }, { name: 'C++', category: '后端' }, { name: 'Node.js', category: '后端' },
+            { name: 'Spring Boot', category: '后端' }, { name: 'Django', category: '后端' }, { name: 'FastAPI', category: '后端' },
+            { name: 'MySQL', category: '数据' }, { name: 'PostgreSQL', category: '数据' }, { name: 'MongoDB', category: '数据' },
+            { name: 'Redis', category: '数据' }, { name: 'Elasticsearch', category: '数据' }, { name: 'Kafka', category: '数据' },
+            { name: 'Docker', category: '运维' }, { name: 'Kubernetes', category: '运维' }, { name: 'Jenkins', category: '运维' },
+            { name: 'Terraform', category: '运维' }, { name: 'AWS', category: '运维' }, { name: 'Linux', category: '运维' },
+            { name: 'PyTorch', category: 'AI' }, { name: 'TensorFlow', category: 'AI' }, { name: 'scikit-learn', category: 'AI' },
+            { name: 'LangChain', category: 'AI' }, { name: '大模型', category: 'AI' }, { name: '自然语言处理', category: 'AI' },
+            { name: '数据分析', category: '通用' }, { name: '项目管理', category: '通用' }, { name: '产品设计', category: '通用' },
+            { name: '团队管理', category: '通用' }
+        ];
+        const CATEGORY_COLORS = { '前端': '#064e3b', '后端': '#155724', '数据': '#e65100', '运维': '#6a1b9a', 'AI': '#1565c0', '通用': '#434656' };
+        let selectedSkill = null;
+        let addedSkills = [];
+
+        function showSkillDropdown() { filterSkillDict(); document.getElementById('skillDropdown').classList.remove('hidden'); }
+        function filterSkillDict() {
+            const query = document.getElementById('skillInput').value.toLowerCase();
+            const filtered = SKILL_DICT.filter(s => s.name.toLowerCase().includes(query) && !addedSkills.find(a => a.name === s.name));
+            const dd = document.getElementById('skillDropdown');
+            if (filtered.length === 0) { dd.innerHTML = '<div class="px-4 py-3 text-sm text-on-surface-variant">无匹配技能</div>'; return; }
+            dd.innerHTML = filtered.map(s => `<div class="px-4 py-2.5 text-sm hover:bg-surface-container cursor-pointer flex items-center justify-between" onmousedown="selectSkill('${s.name}')"><span class="font-medium text-on-surface">${s.name}</span><span class="text-[10px] px-2 py-0.5 rounded" style="background:${CATEGORY_COLORS[s.category]}20;color:${CATEGORY_COLORS[s.category]}">${s.category}</span></div>`).join('');
+        }
+        function selectSkill(name) { document.getElementById('skillInput').value = name; selectedSkill = name; document.getElementById('skillDropdown').classList.add('hidden'); }
+        function addSkillFromDict() {
+            const input = document.getElementById('skillInput');
+            const name = selectedSkill || input.value.trim();
+            if (!name) return;
+            if (addedSkills.find(a => a.name === name)) { showToast('该技能已添加'); return; }
+            const dictItem = SKILL_DICT.find(s => s.name === name);
+            if (!dictItem) { showToast('请从技能字典中选择技能'); return; }
+            addedSkills.push({ name, category: dictItem.category });
+            renderSkills();
+            input.value = '';
+            selectedSkill = null;
+        }
+        function renderSkills() {
+            const skillList = document.getElementById('skillList');
+            const impArea = document.getElementById('importanceArea');
+            skillList.innerHTML = addedSkills.map(s => `<div class="skill-chip" style="background:${CATEGORY_COLORS[s.category]}15;color:${CATEGORY_COLORS[s.category]}">${s.name} <button onclick="removeSkill('${s.name}')" title="移除">&times;</button></div>`).join('');
+            impArea.innerHTML = addedSkills.map(s => `<div class="flex items-center justify-between px-4 py-3 rounded-lg bg-surface-container-low/60"><div class="flex items-center gap-3"><span class="skill-chip" style="padding:4px 10px;background:${CATEGORY_COLORS[s.category]}15;color:${CATEGORY_COLORS[s.category]}">${s.name}</span></div><select class="px-4 py-2 rounded-lg border border-outline-variant/60 bg-white/60 text-sm text-on-surface transition-all w-48"><option value="5" selected>必须 MUST</option><option value="3">需要 NEED</option><option value="1">加分 BONUS</option></select></div>`).join('');
+        }
+        function removeSkill(name) { addedSkills = addedSkills.filter(s => s.name !== name); renderSkills(); }
+
+        // === 表单提交 ===
+        function collectFormData() {
+            return {
+                id: Date.now(),
+                title: document.getElementById('jobName').value.trim(),
+                desc: document.getElementById('jobDesc').value.trim(),
+                role: document.getElementById('jobRole').value,
+                city: document.getElementById('jobCity').value.trim(),
+                salary: (document.getElementById('salaryMin').value || '0') + 'K-' + (document.getElementById('salaryMax').value || '0') + 'K',
+                exp: document.getElementById('jobExp').value,
+                edu: document.getElementById('jobEdu').value,
+                skills: addedSkills.map(s => s.name),
+                status: 'OPEN',
+                source: 'MANUAL',
+                date: new Date().toISOString().slice(0, 10),
+                applicants: 0
+            };
+        }
+        function publishJob() {
+            const data = collectFormData();
+            if (!data.title) { showToast('请填写岗位名称'); return; }
+            if (!data.desc) { showToast('请填写岗位描述'); return; }
+            let jobs = JSON.parse(localStorage.getItem('company_jobs') || '[]');
+            jobs.unshift(data);
+            localStorage.setItem('company_jobs', JSON.stringify(jobs));
+            showToast('岗位发布成功！');
+            setTimeout(() => { window.location.href = '岗位管理.html'; }, 1500);
+        }
+        function saveDraft() {
+            const data = collectFormData();
+            if (!data.title) { showToast('请填写岗位名称'); return; }
+            data.status = 'DRAFT';
+            let jobs = JSON.parse(localStorage.getItem('company_jobs') || '[]');
+            jobs.unshift(data);
+            localStorage.setItem('company_jobs', JSON.stringify(jobs));
+            showToast('草稿已保存');
+        }
+
+        // === AI上传 ===
+        function simulateUpload() {
+            document.getElementById('uploadArea').classList.add('hidden');
+            document.getElementById('uploadProgress').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('uploadProgress').classList.add('hidden');
+                document.getElementById('parsedResults').classList.remove('hidden');
+            }, 2000);
+        }
+        function resetUpload() {
+            document.getElementById('uploadArea').classList.remove('hidden');
+            document.getElementById('parsedResults').classList.add('hidden');
+            document.getElementById('uploadProgress').classList.add('hidden');
+        }
+        function publishAIParsedJob() {
+            const data = {
+                id: Date.now(), title: '高级前端工程师', desc: '负责公司核心产品的前端架构设计与开发，带领团队完成技术方案落地。', role: '高级前端工程师', city: '北京市海淀区', salary: '35K-55K', exp: '5-10年', edu: '本科',
+                skills: ['Vue.js', 'TypeScript', 'React', 'Webpack', 'Node.js'], status: 'OPEN', source: 'UPLOAD', date: new Date().toISOString().slice(0, 10), applicants: 0
+            };
+            let jobs = JSON.parse(localStorage.getItem('company_jobs') || '[]');
+            jobs.unshift(data);
+            localStorage.setItem('company_jobs', JSON.stringify(jobs));
+            showToast('AI解析岗位已发布！');
+            setTimeout(() => { window.location.href = '岗位管理.html'; }, 1500);
+        }
+
+        // === 通知下拉 ===
+        function toggleNotifDropdown(e) { e.stopPropagation(); document.getElementById('notif-dropdown').classList.toggle('hidden'); }
+        document.addEventListener('click', function(e) { var wrap = document.getElementById('notif-bell-wrap'); if (wrap && !wrap.contains(e.target)) document.getElementById('notif-dropdown').classList.add('hidden'); });
+
+        // === 移动端导航 ===
+        function openMobileNav() { document.getElementById('mobileNavDrawer').classList.add('open'); document.body.style.overflow = 'hidden'; }
+        function closeMobileNav() { document.getElementById('mobileNavDrawer').classList.remove('open'); document.body.style.overflow = ''; }
+
+        // 初始化默认技能
+        addedSkills = [{ name: 'Vue.js', category: '前端' }, { name: 'TypeScript', category: '前端' }, { name: 'React', category: '前端' }];
+        renderSkills();
+    </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 """用户仓储模块。
 
-只做原子数据库操作，不包含业务编排与事务提交。
-事务提交由调用方（service 层）负责，仓储仅负责数据访问与刷新以取回主键。
+只做原子数据库操作。软删除使用库中约定的 VARCHAR `'0'/'1'` 标记，
+查询时过滤 `deleted_at == '0'` 以获得未删除记录。
 """
 from sqlalchemy import select  # 查询构造
 from sqlalchemy.ext.asyncio import AsyncSession  # 异步会话类型
@@ -14,14 +14,12 @@ async def create(db: AsyncSession, user: User) -> User:
 
     Args:
         db: 异步数据库会话。
-        user: 待新增的 User 实例（调用方负责填充 password_hash 等字段）。
+        user: 待新增的 User 实例。
 
     Returns:
         User: 已写入数据库、含主键的用户实例。
     """
-    # 加入会话
     db.add(user)
-    # 刷新以取回数据库生成的主键与 server_default 字段
     await db.flush()
     return user
 
@@ -36,12 +34,10 @@ async def get_by_username(db: AsyncSession, username: str) -> User | None:
     Returns:
         User | None: 命中返回实例，否则返回 None。
     """
-    # 构造查询：用户名匹配且未软删除
     stmt = select(User).where(
         User.username == username,
-        User.deleted_at.is_(None),
+        User.deleted_at == "0",  # 库约定：'0' 未删除
     )
-    # 执行并取第一条
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
 
@@ -56,11 +52,18 @@ async def get_by_id(db: AsyncSession, user_id: int) -> User | None:
     Returns:
         User | None: 命中返回实例，否则返回 None。
     """
-    # 构造查询：主键匹配且未软删除
     stmt = select(User).where(
         User.id == user_id,
-        User.deleted_at.is_(None),
+        User.deleted_at == "0",  # 库约定：'0' 未删除
     )
-    # 执行并取第一条
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
+
+async def list_by_role(db: AsyncSession, role: str) -> list[User]:
+    """按角色查询未删除的用户列表。"""
+    stmt = select(User).where(
+        User.role == role,
+        User.deleted_at == "0",
+    ).order_by(User.created_at.desc())
+    result = await db.execute(stmt)
+    return list(result.scalars().all())

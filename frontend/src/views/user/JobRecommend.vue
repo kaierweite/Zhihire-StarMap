@@ -48,7 +48,7 @@ async function fetchRecommendations() {
     const jobs = res.data.data.jobs
     const details = await Promise.all(
       jobs.map((job) =>
-        getJobDetail(job.job_id).then((r) => r.data.data).catch((): null => null),
+        getJobDetail(job.job_id, { _silentError: true }).then((r) => r.data.data).catch((): null => null),
       ),
     )
     allJobs.value = jobs.map((job, idx) => {
@@ -71,7 +71,7 @@ async function fetchRecommendations() {
         salaryNum: detail?.salary_min ?? 0,
         companyType: "", industry: "", companySize: "",
         tags: ["AI推荐"], tagTypes: ["ai"],
-        logo: job.company_name.charAt(0), logoColor: "#dbeafe",
+        logo: (job.company_name || "未").charAt(0), logoColor: "#dbeafe",
         applied: false,
       }
     })

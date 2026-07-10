@@ -1,0 +1,475 @@
+﻿<!DOCTYPE html>
+<html class="light" lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人才推荐 - 智聘星图</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="config.js"></script>
+    <style>
+        .glass-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(196,197,217,0.4); box-shadow: 0 4px 20px rgba(0,0,0,0.04); transition: all 0.3s; border-radius: 12px; }
+        .glass-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+        .btn-primary { position:relative;overflow:hidden;background:#064e3b;color:#fff;padding:10px 24px;border-radius:9999px;font-weight:600;font-size:13px;transition:all 0.3s;display:inline-flex;align-items:center;gap:6px;border:none;cursor:pointer; }
+        .btn-primary:hover { background:#003527;transform:translateY(-1px); }
+        .btn-ghost { border:1px solid #191c1d;color:#191c1d;padding:10px 24px;border-radius:9999px;font-weight:600;font-size:13px;transition:all 0.3s;display:inline-flex;align-items:center;gap:6px;background:transparent;cursor:pointer; }
+        .btn-ghost:hover { background:#191c1d;color:#fff; }
+        .chip { display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:4px;font-size:11px;font-weight:600; }
+        .chip-primary { background:#b0f0d6;color:#003527; }
+        .chip-success { background:#d4edda;color:#155724; }
+        .chip-warning { background:#fff3cd;color:#856404; }
+        .chip-neutral { background:#f3f4f5;color:#434656; }
+        .skill-chip { display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:#b0f0d6;color:#003527;font-size:12px;font-weight:600; }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .animate-fade-in-up { animation:fadeInUp 0.6s ease forwards; }
+        ::selection { background:#b0f0d6;color:#002117; }
+        input,select { font-family:'Inter',sans-serif; }
+        input:focus,select:focus { outline:none;border-color:#064e3b;box-shadow:0 0 0 3px rgba(6,78,59,0.1); }
+        .score-ring { width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative; }
+        .score-ring svg { position:absolute;inset:0;transform:rotate(-90deg); }
+        .dim-bar { height:6px;border-radius:3px;background:#e5e7eb;overflow:hidden; }
+        .dim-bar-fill { height:100%;border-radius:3px;transition:width 0.6s ease; }
+        .mobile-nav-drawer { display:none;position:fixed;inset:0;z-index:100; }
+        .mobile-nav-drawer.open { display:flex; }
+        .mobile-nav-overlay { position:absolute;inset:0;background:rgba(0,0,0,0.4); }
+        .mobile-nav-panel { position:absolute;right:0;top:0;bottom:0;width:280px;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,0.15);padding:24px;overflow-y:auto; }
+            .active-tab { color: #064e3b; border-bottom: 2px solid #064e3b; font-weight: 700; }
+    </style>
+</head>
+<body class="bg-surface font-sans text-on-surface min-h-screen">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm h-14">
+        <div class="flex justify-between items-center w-full px-4 md:px-16 max-w-[1440px] mx-auto h-full">
+            <a href="企业首页.html" class="font-bold text-xl tracking-tight text-primary">智聘星图</a>
+            <div class="hidden md:flex items-center gap-6 text-sm">
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="企业首页.html">企业首页</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="岗位管理.html">岗位管理</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="岗位发布.html">岗位发布</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="智能筛选.html">智能筛选</a>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="relative" id="notif-bell-wrap">
+                    <button onclick="toggleNotifDropdown(event)" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-all p-2 relative cursor-pointer">notifications<span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#93000a] text-white text-[9px] font-bold rounded-full flex items-center justify-center">3</span></button>
+                    <div id="notif-dropdown" class="hidden absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-2xl border border-outline-variant/30 z-50 overflow-hidden">
+                        <div class="flex items-center justify-between p-3 border-b border-outline-variant/30"><h3 class="text-sm font-semibold text-on-surface">通知</h3><span class="text-xs text-on-surface-variant">3 条未读</span></div>
+                        <div class="max-h-64 overflow-y-auto">
+                            <div class="px-3 py-2.5 hover:bg-surface-container cursor-pointer border-b border-outline-variant/10"><div class="flex items-start gap-2"><span class="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0"></span><div><p class="text-xs text-on-surface font-medium">张伟 投递了「高级前端工程师」</p><p class="text-[11px] text-on-surface-variant mt-0.5">5 分钟前</p></div></div></div>
+                        </div>
+                        <div class="p-2 border-t border-outline-variant/30 text-center"><a href="企业通知中心.html" class="text-xs text-primary font-medium hover:underline px-3 py-1.5 inline-block">查看全部通知</a></div>
+                    </div>
+                </div>
+                <div class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-bold cursor-pointer">企</div>
+                <button class="md:hidden p-1.5 hover:bg-surface-container rounded-lg transition-colors" onclick="openMobileNav()"><span class="material-symbols-outlined text-on-surface text-xl">menu</span></button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 移动端导航抽屉 -->
+    <div id="mobileNavDrawer" class="mobile-nav-drawer">
+        <div class="mobile-nav-overlay" onclick="closeMobileNav()"></div>
+        <div class="mobile-nav-panel">
+            <div class="flex items-center justify-between mb-8"><span class="font-bold text-lg text-primary">智聘星图</span><button onclick="closeMobileNav()" class="p-1 hover:bg-surface-container rounded-lg"><span class="material-symbols-outlined text-on-surface-variant">close</span></button></div>
+            <div class="flex flex-col gap-1">
+                <a href="企业首页.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">home</span><span class="text-sm font-medium">企业首页</span></a>
+                <a href="岗位管理.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">work</span><span class="text-sm font-medium">岗位管理</span></a>
+                <a href="岗位发布.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">add_circle</span><span class="text-sm font-medium">岗位发布</span></a>
+                <a href="智能筛选.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">auto_awesome</span><span class="text-sm font-medium">智能筛选</span></a>
+                <div class="border-t border-outline-variant/30 my-2"></div>
+                <a href="企业通知中心.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">notifications</span><span class="text-sm font-medium">通知中心</span></a>
+                <a href="候选人推荐.html" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary font-semibold transition-colors"><span class="material-symbols-outlined text-xl">groups</span><span class="text-sm font-medium">候选人推荐</span></a>
+            </div>
+        </div>
+    </div>
+
+    <main class="pt-20 pb-16 px-4 md:px-16 max-w-[1440px] mx-auto">
+        <!-- 面包屑导航 -->
+        <div class="mb-4">
+            <a href="岗位管理.html" class="inline-flex items-center gap-1.5 text-sm text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-base">arrow_back</span>返回岗位管理</a>
+        </div>
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-on-surface">人才推荐</h1>
+                <p class="text-sm text-on-surface-variant mt-1">基于岗位JD智能匹配，查看推荐候选人的维度分解与推荐依据</p>
+            </div>
+        </div>
+        <!-- 筛选栏 -->
+        <div class="glass-card p-4 mb-6 flex flex-wrap items-center gap-3">
+            <select id="job-filter" class="px-3 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30" onchange="filterCandidates()">
+                <option value="all">全部岗位</option><option value="高级前端工程师">高级前端工程师</option><option value="AI算法工程师">AI算法工程师</option><option value="Java后端工程师">Java后端工程师</option>
+            </select>
+            <select id="match-filter" class="px-3 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30" onchange="filterCandidates()">
+                <option value="0">最低匹配度</option><option value="60">60%以上</option><option value="75">75%以上</option><option value="85">85%以上</option>
+            </select>
+            <div class="flex items-center gap-2 ml-auto text-sm text-on-surface-variant"><span>共 <span id="total-count" class="font-semibold text-on-surface">8</span> 位推荐候选人</span></div>
+        </div>
+        <div id="candidate-list" class="space-y-4 mb-6"></div>
+        <div id="pagination" class="flex items-center justify-center gap-2"></div>
+    </main>
+
+    <!-- 推荐可解释面板 -->
+    <div id="detail-panel" class="fixed inset-y-0 right-0 w-full md:w-[520px] bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 overflow-y-auto">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6"><h2 class="text-lg font-bold text-on-surface">推荐详情</h2><button class="material-symbols-outlined text-on-surface-variant hover:text-on-surface" onclick="closeDetailPanel()">close</button></div>
+            <div id="detail-content"></div>
+        </div>
+    </div>
+    <div id="detail-overlay" class="fixed inset-0 bg-black/30 z-40 hidden" onclick="closeDetailPanel()"></div>
+
+    <!-- Footer -->
+    <footer class="bg-surface-container-lowest border-t border-outline-variant w-full py-12 mt-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 md:px-16 max-w-[1440px] mx-auto">
+            <div><div class="font-bold text-3xl text-on-surface mb-3">智聘星图</div><p class="text-on-surface-variant">AI 驱动的智能招聘平台<br>基于银河麒麟 · 人大金仓 · DeepSeek</p></div>
+            <div><h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">企业端</h4><div class="flex flex-col gap-1 text-secondary text-sm"><a href="企业首页.html" class="hover:text-primary transition-colors">企业首页</a><a href="岗位管理.html" class="hover:text-primary transition-colors">岗位管理</a><a href="岗位发布.html" class="hover:text-primary transition-colors">岗位发布</a><a href="智能筛选.html" class="hover:text-primary transition-colors">智能筛选</a><a href="候选人推荐.html" class="hover:text-primary transition-colors">候选人推荐</a></div></div>
+            <div><h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">支持</h4><div class="flex flex-col gap-1 text-secondary text-sm"><a href="企业通知中心.html" class="hover:text-primary transition-colors">通知中心</a><a href="javascript:void(0)" class="hover:text-primary transition-colors">隐私政策</a><a href="javascript:void(0)" class="hover:text-primary transition-colors">联系支持</a></div></div>
+        </div>
+        <div class="text-center mt-6 text-sm text-on-surface-variant">&copy; 2024 智聘星图. 策就领导力的未来。</div>
+    </footer>
+
+    <!-- 面试邀请弹窗 -->
+    <div id="inviteModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden" onclick="if(event.target===this)closeInviteModal()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden" onclick="event.stopPropagation()">
+            <!-- 弹窗头部 -->
+            <div class="p-6 border-b border-outline-variant/20 bg-gradient-to-r from-primary/5 to-primary-container/5">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-on-surface">发送面试邀请</h2>
+                    <button onclick="closeInviteModal()" class="p-1 hover:bg-surface-container rounded-lg transition-colors">
+                        <span class="material-symbols-outlined text-on-surface-variant">close</span>
+                    </button>
+                </div>
+                <div class="flex items-center gap-3 mt-4">
+                    <div id="inviteCandidateAvatar" class="w-12 h-12 rounded-full bg-primaryfrom-primary to-primary-container flex items-center justify-center text-on-primary font-bold text-lg">张</div>
+                    <div>
+                        <div id="inviteCandidateName" class="font-semibold text-on-surface">张伟</div>
+                        <div id="inviteCandidateRole" class="text-sm text-on-surface-variant">高级前端工程师</div>
+                    </div>
+                </div>
+                <input type="hidden" id="inviteCandidateId" value="">
+                <input type="hidden" id="selectedInterviewType" value="video">
+            </div>
+            
+            <!-- 弹窗内容 -->
+            <div class="p-6">
+                <!-- 面试方式选择 -->
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold text-on-surface mb-3">选择面试方式</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="interview-type-option border-2 border-primary bg-primary/5 rounded-xl p-4 cursor-pointer transition-all hover:shadow-md" data-type="video" onclick="selectInterviewType('video')">
+                            <div class="relative">
+                                <span class="type-check material-symbols-outlined text-primary text-xl absolute -top-1 -right-1">check_circle</span>
+                                <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-2">
+                                    <span class="material-symbols-outlined text-primary text-2xl">videocam</span>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-sm font-semibold text-on-surface">视频面试</div>
+                                <div class="text-xs text-on-surface-variant mt-1">线上实时视频</div>
+                            </div>
+                        </div>
+                        <div class="interview-type-option border-2 border-outline-variant/40 rounded-xl p-4 cursor-pointer transition-all hover:shadow-md hover:border-primary/30" data-type="phone" onclick="selectInterviewType('phone')">
+                            <div class="relative">
+                                <span class="type-check material-symbols-outlined text-primary text-xl absolute -top-1 -right-1 hidden">check_circle</span>
+                                <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center mx-auto mb-2">
+                                    <span class="material-symbols-outlined text-on-surface-variant text-2xl">phone</span>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-sm font-semibold text-on-surface">电话面试</div>
+                                <div class="text-xs text-on-surface-variant mt-1">语音通话面试</div>
+                            </div>
+                        </div>
+                        <div class="interview-type-option border-2 border-outline-variant/40 rounded-xl p-4 cursor-pointer transition-all hover:shadow-md hover:border-primary/30" data-type="onsite" onclick="selectInterviewType('onsite')">
+                            <div class="relative">
+                                <span class="type-check material-symbols-outlined text-primary text-xl absolute -top-1 -right-1 hidden">check_circle</span>
+                                <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center mx-auto mb-2">
+                                    <span class="material-symbols-outlined text-on-surface-variant text-2xl">business</span>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-sm font-semibold text-on-surface">现场面试</div>
+                                <div class="text-xs text-on-surface-variant mt-1">公司现场面试</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 面试时间 -->
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold text-on-surface mb-2">面试时间</label>
+                    <input type="datetime-local" id="inviteTime" class="w-full px-4 py-3 rounded-xl border border-outline-variant/40 bg-white text-on-surface text-sm transition-all hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/10">
+                </div>
+                
+                <!-- 备注信息 -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-on-surface mb-2">备注信息（选填）</label>
+                    <textarea id="inviteNote" rows="3" placeholder="例：请提前准备好简历和作品集..." class="w-full px-4 py-3 rounded-xl border border-outline-variant/40 bg-white text-on-surface text-sm transition-all hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/10 resize-none"></textarea>
+                </div>
+            </div>
+            
+            <!-- 弹窗底部 -->
+            <div class="p-4 bg-surface-container-lowest border-t border-outline-variant/20 flex items-center justify-end gap-3">
+                <button onclick="closeInviteModal()" class="px-5 py-2.5 rounded-xl border border-outline-variant/40 text-on-surface-variant text-sm font-medium hover:bg-surface-container transition-all">
+                    取消
+                </button>
+                <button onclick="confirmInvite()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-primary to-primary-container text-white text-sm font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">send</span>
+                    发送邀请
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            var params = new URLSearchParams(window.location.search);
+            var jobName = params.get('job');
+            if (jobName) {
+                var jobFilter = document.getElementById('job-filter');
+                for (var i = 0; i < jobFilter.options.length; i++) {
+                    if (jobFilter.options[i].value === jobName) { jobFilter.selectedIndex = i; filterCandidates(); break; }
+                }
+            }
+        })();
+
+                const JOB_SKILLS = {
+            '高级前端工程师': { required:['React','TypeScript','JavaScript','Next.js','Node.js','HTML/CSS','Webpack','Git'], preferred:['Docker','CI/CD'] },
+            'AI算法工程师': { required:['Python','PyTorch','TensorFlow','scikit-learn','SQL','CUDA'], preferred:['大模型','强化学习','MLOps'] },
+            'Java后端工程师': { required:['Java','Spring Boot','MySQL','Redis','Docker','Kubernetes'], preferred:['Kafka','微服务','链路追踪'] }
+        };
+        const candidates = [
+            { id:1, name:'张伟', avatar:'张', edu:'硕士研究生', exp:'6年', city:'北京', targetJob:'高级前端工程师', match:92, skills:['React','TypeScript','Vue.js','Node.js','Next.js'], skillScore:95, eduScore:90, expScore:88, cityScore:100, status:'在职-考虑机会', source:'主动投递', rationale:'候选人拥有6年前端开发经验，精通React和TypeScript，与岗位技能需求高度匹配。', graphHints:'张伟与贵司技术栈重合度92%，曾在同类型B端产品项目中担任技术负责人。' },
+            { id:2, name:'李娜', avatar:'李', edu:'本科', exp:'5年', city:'上海', targetJob:'高级前端工程师', match:78, skills:['Vue.js','React','JavaScript','CSS'], skillScore:80, eduScore:75, expScore:82, cityScore:65, status:'在职-不考虑', source:'系统推荐', rationale:'候选人Vue.js经验丰富，但缺少TypeScript和Node.js经验。城市不匹配。', graphHints:'李娜在Vue生态有深度贡献，GitHub上有3个开源项目获1000+ star。' },
+            { id:3, name:'王强', avatar:'王', edu:'硕士研究生', exp:'4年', city:'北京', targetJob:'AI算法工程师', match:88, skills:['Python','PyTorch','CUDA','大模型','强化学习'], skillScore:92, eduScore:90, expScore:80, cityScore:100, status:'在职-考虑机会', source:'猎头推荐', rationale:'候选人具备大模型训练与推理优化经验，CUDA编程能力突出。', graphHints:'王强曾在顶级AI实验室实习，发表过NeurIPS workshop论文。' },
+            { id:4, name:'刘洋', avatar:'刘', edu:'博士', exp:'8年', city:'深圳', targetJob:'AI算法工程师', match:82, skills:['Python','TensorFlow','scikit-learn','NLP'], skillScore:85, eduScore:95, expScore:90, cityScore:45, status:'在职-考虑机会', source:'系统推荐', rationale:'候选人博士学历，8年AI经验。但城市不匹配，且缺少PyTorch和大模型实战经验。', graphHints:'刘洋在NLP领域有3篇ACL论文，但工业界大模型经验较少。' },
+            { id:5, name:'赵敏', avatar:'赵', edu:'本科', exp:'6年', city:'杭州', targetJob:'Java后端工程师', match:85, skills:['Java','Spring Boot','MySQL','Redis','Kafka'], skillScore:88, eduScore:70, expScore:90, cityScore:75, status:'离职-随时到岗', source:'主动投递', rationale:'候选人6年Java后端经验，技术栈与岗位高度匹配。', graphHints:'赵敏在高并发系统设计方面有丰富经验，曾负责日均千万级QPS系统。' },
+            { id:6, name:'陈浩', avatar:'陈', edu:'硕士研究生', exp:'7年', city:'北京', targetJob:'Java后端工程师', match:90, skills:['Java','Spring Boot','MySQL','Redis','Docker','Kubernetes'], skillScore:93, eduScore:90, expScore:92, cityScore:100, status:'在职-考虑机会', source:'猎头推荐', rationale:'候选人7年Java后端经验，精通微服务架构和容器化部署。综合评分最高。', graphHints:'陈浩有从0到1搭建微服务架构的完整经验。' },
+            { id:7, name:'孙丽', avatar:'孙', edu:'硕士研究生', exp:'3年', city:'北京', targetJob:'高级前端工程师', match:70, skills:['React','TypeScript','JavaScript'], skillScore:72, eduScore:90, expScore:60, cityScore:100, status:'在职-不考虑', source:'系统推荐', rationale:'候选人学历优秀，但3年经验略不足，缺少Node.js和工程化经验。', graphHints:'孙丽在前端性能优化方面有独到见解。' },
+            { id:8, name:'周磊', avatar:'周', edu:'本科', exp:'5年', city:'成都', targetJob:'Java后端工程师', match:75, skills:['Java','Spring Boot','MySQL','MongoDB'], skillScore:78, eduScore:70, expScore:80, cityScore:50, status:'在职-考虑机会', source:'主动投递', rationale:'候选人Java基础扎实，但城市不匹配，且缺少Redis和微服务经验。', graphHints:'周磊在分布式系统方面有实践经验，但技术栈偏传统。' }
+        ];
+
+        let currentPage = 1;
+        const pageSize = 4;
+        let filtered = [...candidates];
+
+        function renderSkillComparison(c) {
+            var jobDef = JOB_SKILLS[c.targetJob];
+            if (!jobDef) return '<p class="text-sm text-on-surface-variant p-4">暂无该岗位的技能图谱数据</p>';
+            var jobSkills = jobDef.required.concat(jobDef.preferred || []);
+            var candidateSkills = c.skills;
+            var matched = candidateSkills.filter(s => jobSkills.some(js => js.toLowerCase() === s.toLowerCase()));
+            var missing = jobSkills.filter(js => !candidateSkills.some(s => s.toLowerCase() === js.toLowerCase()));
+            var extra = candidateSkills.filter(s => !jobSkills.some(js => js.toLowerCase() === s.toLowerCase()));
+            var coverage = jobSkills.length > 0 ? Math.round((matched.length / jobDef.required.length) * 100) : 0;
+            var nodeR = 22, gapX = 70, svgW = 480, svgH = 120;
+            var leftX = 60, rightX = svgW - 60, centerY = svgH / 2;
+            var maxRows = Math.max(matched.length, missing.length);
+            var rowH = Math.min(36, (svgH - 20) / Math.max(maxRows, 1));
+            var matchedNodes = matched.map((s, i) => { var y = 10 + i * rowH + nodeR; return {skill:s, x:leftX, y:y, color:'#155724', opacity:0.9}; });
+            var missingNodes = missing.map((s, i) => { var y = 10 + i * rowH + nodeR; return {skill:s, x:rightX, y:y, color:'#dc3545', opacity:0.8}; });
+            var svg = '<svg viewBox="0 0 '+svgW+' '+svgH+'" class="w-full" style="min-height:100px;">';
+            svg += '<defs><marker id="arrowG" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto"><polygon points="0 0,6 2,0 4" fill="#155724" opacity="0.4"/></marker>';
+            svg += '<marker id="arrowR" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto"><polygon points="0 0,6 2,0 4" fill="#dc3545" opacity="0.4"/></marker></defs>';
+            var midX = svgW / 2;
+            matchedNodes.forEach(n => {
+                svg += '<line x1="'+(n.x+nodeR)+'" y1="'+n.y+'" x2="'+(midX-20)+'" y2="'+n.y+'" stroke="#155724" stroke-width="1.5" opacity="0.3" class="skill-comp-edge"/>';
+                svg += '<line x1="'+(midX+20)+'" y1="'+n.y+'" x2="'+(n.x+nodeR+20)+'" y2="'+n.y+'" stroke="#155724" stroke-width="1.5" opacity="0.3" class="skill-comp-edge"/>';
+            });
+            missingNodes.forEach(n => {
+                svg += '<line x1="'+(midX+20)+'" y1="'+n.y+'" x2="'+(n.x-nodeR-10)+'" y2="'+n.y+'" stroke="#dc3545" stroke-width="1.5" opacity="0.3" class="skill-comp-edge missing"/>';
+                svg += '<line x1="'+(n.x-nodeR-10)+'" y1="'+n.y+'" x2="'+(n.x-nodeR)+'" y2="'+n.y+'" stroke="#dc3545" stroke-width="1.5" opacity="0.3" marker-end="url(#arrowR)"/>';
+            });
+            matchedNodes.forEach(n => {
+                svg += '<circle cx="'+n.x+'" cy="'+n.y+'" r="'+nodeR+'" fill="'+n.color+'" opacity="'+n.opacity+'" class="skill-comp-node"/>';
+                var fontSize = n.skill.length > 8 ? '7' : '8';
+                svg += '<text x="'+n.x+'" y="'+(n.y+3)+'" text-anchor="middle" fill="#fff" font-size="'+fontSize+'" font-weight="600">'+n.skill+'</text>';
+            });
+            missingNodes.forEach(n => {
+                svg += '<circle cx="'+n.x+'" cy="'+n.y+'" r="'+nodeR+'" fill="'+n.color+'" opacity="'+n.opacity+'" stroke="#dc3545" stroke-width="2" stroke-dasharray="4,3" class="skill-comp-node"/>';
+                var fontSize = n.skill.length > 8 ? '7' : '8';
+                svg += '<text x="'+n.x+'" y="'+(n.y+3)+'" text-anchor="middle" fill="#fff" font-size="'+fontSize+'" font-weight="600">'+n.skill+'</text>';
+            });
+            svg += '</svg>';
+            var legend = '<div class="flex flex-wrap items-center gap-4 px-4 py-2 bg-surface-container-low"><span class="skill-comp-legend"><span class="dot" style="background:#155724"></span>已覆盖('+matched.length+')</span><span class="skill-comp-legend"><span class="dot" style="background:#dc3545;border:2px dashed #dc3545;background:transparent"></span>缺失('+missing.length+')</span><span class="skill-comp-legend"><span class="dot" style="background:#6b7280"></span>候选额外('+extra.length+')</span></div>';
+            var summary = '<div class="p-4">';
+            summary += '<div class="flex items-center gap-3 mb-3"><div class="flex-1"><div class="text-xs text-on-surface-variant mb-1">岗位必备技能覆盖率</div><div class="flex items-center gap-2"><div class="flex-1 dim-bar"><div class="dim-bar-fill" style="width:'+coverage+'%;background:'+(coverage>=80?'#155724':coverage>=60?'#856404':'#dc3545')+'"></div></div><span class="text-sm font-bold" style="color:'+(coverage>=80?'#155724':coverage>=60?'#856404':'#dc3545')+'">'+coverage+'%</span></div></div></div>';
+            if (matched.length > 0) summary += '<div class="mb-2"><span class="text-[11px] font-semibold text-[#155724]">已覆盖：</span><span class="text-[11px] text-on-surface-variant">'+matched.join('、')+'</span></div>';
+            if (missing.length > 0) summary += '<div class="mb-2"><span class="text-[11px] font-semibold text-[#dc3545]">需补强：</span><span class="text-[11px] text-on-surface-variant">'+missing.join('、')+'</span></div>';
+            if (extra.length > 0) summary += '<div class="mb-2"><span class="text-[11px] font-semibold text-on-surface-variant">候选额外技能：</span><span class="text-[11px] text-on-surface-variant">'+extra.join('、')+'</span></div>';
+            if (missing.length > 0) summary += '<div class="mt-3 p-3 rounded-lg bg-[#dc3545]/5 border border-[#dc3545]/10"><p class="text-[11px] text-on-surface leading-relaxed"><span class="font-semibold text-[#dc3545]">AI 建议：</span>候选人缺少 <strong>'+missing.slice(0,3).join('</strong>、<strong>')+'</strong> 等'+missing.length+'项岗位必备技能。'+(missing.length<=2?'差距较小，可通过短期培训补齐。':'建议优先考察已覆盖的核心技能深度，缺口项作为入职后培养方向。')+'</p></div>';
+            summary += '</div>';
+            return '<div class="border border-outline-variant/30 rounded-xl overflow-hidden">' + legend + svg + summary + '</div>';
+        }
+
+        function renderCandidates() {
+            const list = document.getElementById('candidate-list');
+            const start = (currentPage - 1) * pageSize;
+            const page = filtered.slice(start, start + pageSize);
+            document.getElementById('total-count').textContent = filtered.length;
+            if (page.length === 0) {
+                list.innerHTML = '<div class="glass-card p-12 text-center"><span class="material-symbols-outlined text-4xl text-on-surface-variant mb-3 block">person_off</span><p class="text-on-surface-variant">暂无匹配的候选人</p></div>';
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+            list.innerHTML = page.map((c, i) => {
+                const matchColor = c.match >= 85 ? '#155724' : c.match >= 70 ? '#856404' : '#721c24';
+                const statusColor = c.status.includes('离职') ? 'chip-success' : c.status.includes('考虑') ? 'chip-primary' : 'chip-neutral';
+                const ringPct = (c.match / 100) * 251.2;
+                return `<div class="glass-card p-5 animate-fade-in-up" style="animation-delay:${i*0.05}s"><div class="flex flex-col md:flex-row items-stretch gap-5">
+                    <div class="flex-shrink-0 flex md:flex-col items-center gap-3 md:gap-0"><div class="score-ring mb-0 md:mb-2"><svg viewBox="0 0 88 88"><circle cx="44" cy="44" r="40" fill="none" stroke="#e5e7eb" stroke-width="4"/><circle cx="44" cy="44" r="40" fill="none" stroke="${matchColor}" stroke-width="4" stroke-dasharray="${ringPct} 251.2" stroke-linecap="round"/></svg><span class="text-lg font-bold" style="color:${matchColor}">${c.match}</span></div><span class="text-[10px] text-on-surface-variant">匹配度</span></div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1 flex-wrap"><div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">${c.avatar}</div><span class="font-semibold text-on-surface">${c.name}</span><span class="chip ${statusColor}">${c.status}</span><span class="chip chip-neutral">${c.source}</span></div>
+                        <div class="flex flex-wrap items-center gap-3 text-xs text-on-surface-variant mb-2"><span>${c.edu}</span><span>|</span><span>${c.exp}经验</span><span>|</span><span>${c.city}</span><span>|</span><span>目标：${c.targetJob}</span></div>
+                        <div class="flex flex-wrap gap-1.5 mb-3">${c.skills.map(s => `<span class="skill-chip">${s}</span>`).join('')}</div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">${renderDimBar('技能',c.skillScore,'#064e3b')}${renderDimBar('学历',c.eduScore,'#155724')}${renderDimBar('经验',c.expScore,'#e65100')}${renderDimBar('城市',c.cityScore,'#6a1b9a')}</div>
+                    </div>
+                    <div class="flex md:flex-col gap-2 flex-shrink-0">
+                        <button class="btn-primary text-xs py-2 px-4" onclick="openDetailPanel(${c.id})"><span class="material-symbols-outlined text-sm">info</span>详情</button>
+                        <button class="btn-ghost text-xs py-2 px-4" onclick="inviteInterview(${c.id})"><span class="material-symbols-outlined text-sm">mail</span>邀请面试</button>
+                    </div>
+                </div></div>`;
+            }).join('');
+            renderPagination();
+        }
+
+        function renderDimBar(label, score, color) {
+            return `<div class="text-center"><div class="text-[10px] text-on-surface-variant mb-1">${label} ${score}</div><div class="dim-bar"><div class="dim-bar-fill" style="width:${score}%;background:${color}"></div></div></div>`;
+        }
+
+        function renderPagination() {
+            const total = Math.ceil(filtered.length / pageSize);
+            const pg = document.getElementById('pagination');
+            if (total <= 1) { pg.innerHTML = ''; return; }
+            let html = `<button class="px-3 py-1.5 text-sm rounded-lg border border-outline-variant/30 ${currentPage===1?'opacity-40 pointer-events-none':''}" onclick="goPage(${currentPage-1})">上一页</button>`;
+            for (let i = 1; i <= total; i++) {
+                html += `<button class="px-3 py-1.5 text-sm rounded-lg border ${i===currentPage?'bg-primary text-white border-primary':'border-outline-variant/30 hover:bg-surface-container'}" onclick="goPage(${i})">${i}</button>`;
+            }
+            html += `<button class="px-3 py-1.5 text-sm rounded-lg border border-outline-variant/30 ${currentPage===total?'opacity-40 pointer-events-none':''}" onclick="goPage(${currentPage+1})">下一页</button>`;
+            html += `<span class="text-xs text-on-surface-variant ml-2">共${filtered.length}条</span>`;
+            pg.innerHTML = html;
+        }
+
+        function goPage(p) { currentPage = p; renderCandidates(); }
+
+        function filterCandidates() {
+            const job = document.getElementById('job-filter').value;
+            const minMatch = parseInt(document.getElementById('match-filter').value);
+            filtered = candidates.filter(c => {
+                if (job !== 'all' && c.targetJob !== job) return false;
+                if (c.match < minMatch) return false;
+                return true;
+            });
+            currentPage = 1;
+            renderCandidates();
+        }
+
+        function openDetailPanel(id) {
+            const c = candidates.find(x => x.id === id);
+            if (!c) return;
+            const matchColor = c.match >= 85 ? '#155724' : c.match >= 70 ? '#856404' : '#721c24';
+            document.getElementById('detail-content').innerHTML = `
+                <div class="flex items-center gap-3 mb-6"><div class="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center text-xl font-bold">${c.avatar}</div><div><h3 class="text-lg font-bold text-on-surface">${c.name}</h3><p class="text-sm text-on-surface-variant">${c.edu} · ${c.exp}经验 · ${c.city}</p></div><div class="ml-auto text-right"><div class="text-2xl font-bold" style="color:${matchColor}">${c.match}%</div><div class="text-[10px] text-on-surface-variant">综合匹配度</div></div></div>
+                <div class="mb-6"><h4 class="text-sm font-semibold text-on-surface mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-primary text-lg">analytics</span>维度分解</h4><div class="space-y-3">${['技能:'+c.skillScore+':#064e3b','学历:'+c.eduScore+':#155724','经验:'+c.expScore+':#e65100','城市:'+c.cityScore+':#6a1b9a'].map(d => {const[l,s,c2]=d.split(':');return `<div class="flex items-center gap-3"><span class="text-xs text-on-surface-variant w-12">${l}</span><div class="flex-1 dim-bar"><div class="dim-bar-fill" style="width:${s}%;background:${c2}"></div></div><span class="text-xs font-semibold w-10 text-right">${s}/100</span></div>`;}).join('')}</div></div>
+                <div class="mb-6"><h4 class="text-sm font-semibold text-on-surface mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-primary text-lg">psychology</span>推荐依据</h4><div class="p-4 rounded-lg bg-primary/5 border border-primary/10"><p class="text-sm text-on-surface leading-relaxed">${c.rationale}</p></div></div>
+                <div class="mb-6"><h4 class="text-sm font-semibold text-on-surface mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-primary text-lg">schema</span>图谱理由</h4><div class="p-4 rounded-lg bg-surface-container"><p class="text-sm text-on-surface leading-relaxed">${c.graphHints}</p></div></div>
+                <div class="mb-6"><h4 class="text-sm font-semibold text-on-surface mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-primary text-lg">code</span>技能匹配</h4><div class="flex flex-wrap gap-2">${c.skills.map(s => `<span class="skill-chip">${s}</span>`).join('')}</div></div>
+                                <div class="mb-6"><h4 class="text-sm font-semibold text-on-surface mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-primary text-lg">account_tree</span>能力图谱对比</h4><div id="skill-comparison-graph" class="rounded-xl border border-outline-variant/30 overflow-hidden bg-white"></div></div>
+                <button class="btn-primary flex-1 w-full justify-center" onclick="inviteInterview(${c.id});closeDetailPanel()"><span class="material-symbols-outlined text-sm">mail</span>发起面试邀请</button>`;
+            document.getElementById('detail-panel').classList.remove('translate-x-full');
+            document.getElementById('detail-overlay').classList.remove('hidden');
+            document.getElementById('skill-comparison-graph').innerHTML = renderSkillComparison(c);
+        }
+
+        function closeDetailPanel() {
+            document.getElementById('detail-panel').classList.add('translate-x-full');
+            document.getElementById('detail-overlay').classList.add('hidden');
+        }
+
+        function inviteInterview(id) {
+            const c = candidates.find(x => x.id === id);
+            if (!c) return;
+            
+            const modal = document.getElementById('inviteModal');
+            document.getElementById('inviteCandidateName').textContent = c.name;
+            document.getElementById('inviteCandidateRole').textContent = c.targetJob;
+            document.getElementById('inviteCandidateAvatar').textContent = c.avatar;
+            document.getElementById('inviteCandidateAvatar').className = `w-12 h-12 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold text-lg`;
+            document.getElementById('inviteCandidateId').value = id;
+            modal.classList.remove('hidden');
+        }
+
+        function closeInviteModal() {
+            document.getElementById('inviteModal').classList.add('hidden');
+        }
+
+        function selectInterviewType(type) {
+            // 清除所有选中状态
+            document.querySelectorAll('.interview-type-option').forEach(el => {
+                el.classList.remove('border-primary', 'bg-primary/5');
+                el.classList.add('border-outline-variant/40');
+                el.querySelector('.type-check').classList.add('hidden');
+            });
+            
+            // 设置选中状态
+            const selected = document.querySelector(`[data-type="${type}"]`);
+            selected.classList.remove('border-outline-variant/40');
+            selected.classList.add('border-primary', 'bg-primary/5');
+            selected.querySelector('.type-check').classList.remove('hidden');
+            document.getElementById('selectedInterviewType').value = type;
+        }
+
+        function confirmInvite() {
+            const id = document.getElementById('inviteCandidateId').value;
+            const type = document.getElementById('selectedInterviewType').value;
+            const time = document.getElementById('inviteTime').value;
+            const note = document.getElementById('inviteNote').value;
+            
+            if (!time) {
+                alert('请选择面试时间');
+                return;
+            }
+            
+            const c = candidates.find(x => x.id == id);
+            const typeNames = {'video': '视频面试', 'phone': '电话面试', 'onsite': '现场面试'};
+            
+            // 存储面试邀请
+            let interviews = JSON.parse(localStorage.getItem('company_interviews') || '[]');
+            interviews.unshift({
+                id: Date.now(),
+                candidateId: id,
+                candidateName: c.name,
+                candidateRole: c.targetJob,
+                type: type,
+                typeName: typeNames[type],
+                time: time,
+                note: note,
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            });
+            localStorage.setItem('company_interviews', JSON.stringify(interviews));
+            
+            // 存储通知
+            let notifs = JSON.parse(localStorage.getItem('company_notifications') || '[]');
+            notifs.unshift({
+                id: Date.now(),
+                type: 'interview',
+                title: `面试邀请已发送`,
+                desc: `已向 ${c.name}（${c.targetJob}）发送${typeNames[type]}邀请`,
+                time: '刚刚',
+                read: false,
+                avatar: c.avatar,
+                name: c.name
+            });
+            localStorage.setItem('company_notifications', JSON.stringify(notifs));
+            
+            alert(`已向 ${c.name} 发送${typeNames[type]}邀请！\n面试时间：${time}`);
+            closeInviteModal();
+        }
+
+        renderCandidates();
+
+        function toggleNotifDropdown(e) { e.stopPropagation(); document.getElementById('notif-dropdown').classList.toggle('hidden'); }
+        document.addEventListener('click', function(e) { var wrap = document.getElementById('notif-bell-wrap'); if (wrap && !wrap.contains(e.target)) document.getElementById('notif-dropdown').classList.add('hidden'); });
+        function openMobileNav() { document.getElementById('mobileNavDrawer').classList.add('open'); document.body.style.overflow = 'hidden'; }
+        function closeMobileNav() { document.getElementById('mobileNavDrawer').classList.remove('open'); document.body.style.overflow = ''; }
+    </script>
+</body>
+</html>

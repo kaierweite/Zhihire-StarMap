@@ -1,0 +1,807 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能岗位推荐 - 智聘星图</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="config.js"></script>
+    <style>
+        .glass-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(196,197,217,0.4); box-shadow: 0 4px 20px rgba(0,0,0,0.04); transition: all 0.3s; border-radius: 12px; }
+        .glass-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+        .btn-primary { position: relative; overflow: hidden; background: #064e3b; color: #fff; padding: 12px 32px; border-radius: 9999px; font-weight: 600; font-size: 14px; letter-spacing: 0.02em; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary:hover { background: #003527; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(6,78,59,0.25); }
+        .btn-primary::after { content:""; position:absolute; top:0; left:-150%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent); transform:skewX(-20deg); animation:shimmer 4s infinite; }
+        @keyframes shimmer { 0%{left:-150%} 30%{left:150%} 100%{left:150%} }
+        .btn-ghost { border: 1px solid #191c1d; color: #191c1d; padding: 12px 32px; border-radius: 9999px; font-weight: 600; font-size: 14px; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-ghost:hover { background: #191c1d; color: #fff; }
+        .chip { display:inline-flex; align-items:center; gap:4px; padding:4px 12px; border-radius:4px; font-size:12px; font-weight:600; letter-spacing:0.05em; }
+        .chip-primary { background: #b0f0d6; color: #003527; }
+        .chip-success { background: #d4edda; color: #155724; }
+        .chip-warning { background: #fff3cd; color: #856404; }
+        .chip-neutral { background: #f3f4f5; color: #434656; }
+        .ambient-orb { position:absolute; border-radius:50%; filter:blur(100px); opacity:0.12; pointer-events:none; z-index:-1; }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .animate-fade-in-up { animation:fadeInUp 0.6s ease forwards; }
+        ::selection { background: #b0f0d6; color: #002117; }
+        .progress-bar { height: 6px; border-radius: 3px; background: #e1e3e4; overflow: hidden; }
+        .progress-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #064e3b, #2b6954); transition: width 0.5s ease; }
+        .match-circle { width: 56px; height: 56px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; line-height: 1; }
+        .match-circle .label { font-size: 9px; font-weight: 600; opacity: 0.8; margin-top: 2px; letter-spacing: 0.05em; }
+        .match-high { background: rgba(25,135,84,0.12); color: #198754; }
+        .match-mid { background: rgba(255,193,7,0.15); color: #b8860b; }
+        .match-low { background: rgba(220,53,69,0.12); color: #dc3545; }
+        .filter-select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23747688' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 4px center;
+            padding-right: 24px;
+        }
+        .filter-select::-ms-expand {
+            display: none;
+        }
+            .active-tab { color: #064e3b; border-bottom: 2px solid #064e3b; font-weight: 700; }
+    </style>
+</head>
+<body class="bg-surface font-inter text-on-surface min-h-screen">
+
+    <!-- Navigation -->
+    
+    
+    <nav class="fixed top-0 w-full z-50 bg-white h-14 border-b border-outline-variant/50 transition-all duration-300">
+        <div class="flex justify-between items-center w-full px-4 lg:px-10 max-w-[1440px] mx-auto h-full">
+            <a href="../common/首页着陆页.html" class="font-bold text-[22px] tracking-tight text-primary-container shrink-0">智聘星图</a>
+            <div class="hidden lg:flex items-center gap-6 xl:gap-8">
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="../common/首页着陆页.html">探索</a>
+                <a class="active-tab font-medium text-[13px] hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="职位推荐.html">职位推荐</a>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="职位搜索.html">职位搜索</a>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="简历中心.html">简历中心</a>
+                <div class="relative" id="interviewDD-wrap-desk">
+                    <button onclick="toggleInterviewDD(event, 'desk')" class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap cursor-pointer flex items-center gap-0.5">
+                        面试功能
+                        <span class="material-symbols-outlined text-sm transition-transform" id="interview-arrow-desk">expand_more</span>
+                    </button>
+                    <div id="interviewDD-desk" class="hidden absolute left-0 top-full mt-1 w-36 bg-white rounded-xl shadow-2xl border border-outline-variant/30 z-50 overflow-hidden">
+                        <a href="模拟面试.html" class="block px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors">智能面试</a>
+                        <a href="面试记录.html" class="block px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors">面试记录</a>
+                    </div>
+                </div>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="社交.html">社交</a>
+            </div>
+            <div class="flex items-center gap-2 lg:gap-3">
+                <a href="通知中心.html" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer hidden xl:block" title="通知中心">notifications</a>
+                <div class="hidden xl:flex items-center bg-surface-container rounded-full px-3 py-1.5 border border-outline-variant/60">
+                    <span class="material-symbols-outlined text-outline text-base">search</span>
+                    <input class="bg-transparent border-none focus:ring-0 text-sm w-32 ml-1 text-on-surface placeholder-on-surface-variant/60" placeholder="搜索职位..." type="text"/>
+                </div>
+                <div id="nav-guest" class="flex items-center gap-2">
+                    <a href="../common/登录.html" class="text-primary-container font-medium text-[13px] px-3 py-1.5 hover:bg-surface-container rounded-full transition-all hidden sm:inline-block">登录</a>
+                    <a href="../common/注册.html" class="bg-primary-container text-on-primary font-medium text-[13px] px-4 py-1.5 rounded-full hover:opacity-90 transition-all hidden sm:inline-block">注册</a>
+                </div>
+                <div id="nav-user" class="hidden items-center gap-3">
+                    <div class="relative">
+                        <div id="user-dropdown-trigger" class="flex items-center gap-2 cursor-pointer hover:bg-surface-container rounded-full px-3 py-1.5 transition-all">
+                            <div id="user-avatar" class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-xs font-bold">Q</div>
+                            <span id="user-nickname" class="text-sm font-medium text-on-surface hidden xl:inline-block">求职小能手</span>
+                            <span class="material-symbols-outlined text-sm text-on-surface-variant">expand_more</span>
+                        </div>
+                        <div id="user-dropdown" class="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-outline-variant/30 py-2 z-50 hidden">
+                            <a href="个人中心.html" class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-primary-container/10 hover:text-primary transition-colors"><span class="material-symbols-outlined text-base">person</span><span>个人中心</span></a>
+                            <a href="面试记录.html" class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-primary-container/10 hover:text-primary transition-colors"><span class="material-symbols-outlined text-base">calendar_today</span><span>我的面试</span></a>
+                            <div class="border-t border-outline-variant/20 my-1"></div>
+                            <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"><span class="material-symbols-outlined text-base">logout</span><span>退出登录</span></button>
+                        </div>
+                    </div>
+                </div>
+                <button id="mobile-menu-btn" class="lg:hidden p-1.5 hover:bg-surface-container rounded-lg transition-colors" onclick="toggleMobileMenu()"><span class="material-symbols-outlined text-on-surface text-xl">menu</span></button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-outline-variant/50 shadow-lg">
+            <div class="flex flex-col px-4 py-3 gap-1">
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="../common/首页着陆页.html">探索</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="职位推荐.html">职位推荐</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="职位搜索.html">职位搜索</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="简历中心.html">简历中心</a>
+                <div class="relative" id="interviewDD-wrap-mob">
+                    <button onclick="toggleInterviewDD(event, 'mob')" class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all cursor-pointer flex items-center justify-between w-full">
+                        面试功能
+                        <span class="material-symbols-outlined text-base transition-transform" id="interview-arrow-mob">expand_more</span>
+                    </button>
+                    <div id="interviewDD-mob" class="hidden ml-4 space-y-0.5 mt-0.5">
+                        <a href="模拟面试.html" class="block py-2 px-3 text-sm text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">智能面试</a>
+                        <a href="面试记录.html" class="block py-2 px-3 text-sm text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">面试记录</a>
+                    </div>
+                </div>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="社交.html">社交</a>
+                <div class="border-t border-outline-variant/30 my-2"></div>
+                <div id="mobile-guest" class="flex gap-2">
+                    <a href="../common/登录.html" class="flex-1 text-center text-primary-container font-medium text-sm py-2.5 border border-outline-variant/40 rounded-lg hover:bg-surface-container transition-all">登录</a>
+                    <a href="../common/注册.html" class="flex-1 text-center bg-primary-container text-on-primary font-medium text-sm py-2.5 rounded-lg hover:opacity-90 transition-all">注册</a>
+                </div>
+                <div id="mobile-user" class="hidden items-center gap-3 px-3 py-2">
+                    <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-sm font-bold" id="mobile-avatar">Q</div>
+                    <span class="text-sm font-medium text-on-surface flex-1" id="mobile-nickname">求职小能手</span>
+                    <button onclick="logout()" class="text-on-surface-variant hover:text-red-500 transition-all"><span class="material-symbols-outlined text-lg">logout</span></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+
+    <!-- Page Header -->
+    <section class="pt-20 pb-8 px-4 lg:px-10 max-w-[1440px] mx-auto relative">
+        <div class="ambient-orb w-96 h-96 bg-primary top-0 right-0 -z-10" style="position:absolute;"></div>
+        <h1 class="text-5xl font-bold tracking-tight text-on-surface animate-fade-in-up" style="font-size:64px;line-height:-0.04em;letter-spacing:-0.04em;">智能岗位推荐</h1>
+        <p class="text-on-surface-variant mt-3 text-lg animate-fade-in-up" style="animation-delay:0.1s;">基于 AI 语义匹配的精准推荐，四维评分一目了然</p>
+    </section>
+
+    <!-- Resume Complete CTA -->
+    <div class="px-4 lg:px-10 max-w-[1440px] mx-auto">
+        <div class="bg-primary-container/5 border border-primary/10 rounded-2xl p-5 mb-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-primary-container/15 flex items-center justify-center flex-shrink-0">
+                    <span class="material-symbols-outlined text-primary text-2xl">description</span>
+                </div>
+                <div>
+                    <h3 class="text-base font-semibold text-on-surface">完善简历，获得更精准的推荐</h3>
+                    <p class="text-sm text-on-surface-variant mt-0.5">上传简历并让 AI 解析，系统将根据你的技能和经验智能匹配岗位</p>
+                </div>
+            </div>
+            <a href="简历中心.html" class="btn-primary text-sm px-6 py-2.5 flex-shrink-0">
+                <span class="material-symbols-outlined text-lg">upload</span>
+                前往简历中心
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <section class="px-4 lg:px-10 max-w-[1440px] mx-auto mb-8 animate-fade-in-up" style="animation-delay:0.2s;">
+        <div class="glass-card p-4">
+            <!-- 行业 + 筛选条件 一行 -->
+            <div class="flex items-center gap-2 flex-wrap">
+
+                <!-- 工作城市按钮 -->
+                <button onclick="openCityModal()" id="cityBtn" class="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg border border-outline-variant hover:border-primary hover:text-primary transition-colors cursor-pointer bg-white">
+                    <span class="material-symbols-outlined text-sm">location_on</span>
+                    <span id="cityBtnText">工作城市</span>
+                    <span class="material-symbols-outlined text-xs">expand_more</span>
+                </button>
+                <!-- 其他下拉筛选 -->
+                <div class="relative">
+                    <select id="filterEdu" class="filter-select text-xs border border-outline-variant rounded-lg pl-2 pr-6 py-1.5 bg-white focus:outline-none focus:border-primary transition-colors cursor-pointer" onchange="applyFilters()">
+                        <option value="">学历</option>
+                        <option value="大专">大专</option>
+                        <option value="本科">本科</option>
+                        <option value="硕士">硕士</option>
+                        <option value="博士">博士</option>
+                        <option value="不限">不限</option>
+                    </select>
+                </div>
+                <div class="relative">
+                    <select id="filterType" class="filter-select text-xs border border-outline-variant rounded-lg pl-2 pr-6 py-1.5 bg-white focus:outline-none focus:border-primary transition-colors cursor-pointer" onchange="applyFilters()">
+                        <option value="">工作性质</option>
+                        <option value="全职">全职</option>
+                        <option value="兼职">兼职</option>
+                        <option value="实习">实习</option>
+                        <option value="远程">远程</option>
+                    </select>
+                </div>
+                <div class="relative">
+                    <select id="filterCompany" class="filter-select text-xs border border-outline-variant rounded-lg pl-2 pr-6 py-1.5 bg-white focus:outline-none focus:border-primary transition-colors cursor-pointer" onchange="applyFilters()">
+                        <option value="">公司性质</option>
+                        <option value="互联网大厂">互联网大厂</option>
+                        <option value="国企央企">国企央企</option>
+                        <option value="外企">外企</option>
+                        <option value="创业公司">创业公司</option>
+                        <option value="上市公司">上市公司</option>
+                        <option value="不限">不限</option>
+                    </select>
+                </div>
+                <!-- 薪资自定义输入 -->
+                <div class="relative">
+                    <select id="filterSalary" class="filter-select text-xs border border-outline-variant rounded-lg pl-2 pr-6 py-1.5 bg-white focus:outline-none focus:border-primary transition-colors cursor-pointer" onchange="toggleSalaryCustom(this)">
+                        <option value="">薪资</option>
+                        <option value="10">10K以下</option>
+                        <option value="10-20">10K-20K</option>
+                        <option value="20-30">20K-30K</option>
+                        <option value="30-50">30K-50K</option>
+                        <option value="50">50K以上</option>
+                        <option value="custom">自定义</option>
+                    </select>
+                </div>
+                <!-- 薪资自定义输入框 -->
+                <div id="salaryCustom" class="hidden flex items-center gap-1">
+                    <input type="number" id="salaryMin" placeholder="最低" class="text-xs w-14 px-2 py-1.5 border border-outline-variant rounded-lg bg-white focus:outline-none focus:border-primary">
+                    <span class="text-xs text-on-surface-variant">-</span>
+                    <input type="number" id="salaryMax" placeholder="最高" class="text-xs w-14 px-2 py-1.5 border border-outline-variant rounded-lg bg-white focus:outline-none focus:border-primary">
+                    <span class="text-xs text-on-surface-variant">K</span>
+                    <button onclick="applyFilters()" class="text-xs px-2 py-1.5 bg-primary text-on-primary rounded-lg hover:opacity-90">确定</button>
+                </div>
+                <div class="ml-auto flex items-center gap-2">
+                    <div class="relative">
+                        <select id="sortBy" class="filter-select text-xs border border-outline-variant rounded-lg pl-2 pr-6 py-1.5 bg-white focus:outline-none focus:border-primary transition-colors cursor-pointer" onchange="applyFilters()">
+                            <option value="match">匹配度</option>
+                            <option value="salary">薪资</option>
+                            <option value="time">发布时间</option>
+                        </select>
+                    </div>
+                    <button onclick="resetFilters()" class="text-xs text-on-surface-variant hover:text-primary transition-colors px-2 py-1 flex items-center gap-0.5">
+                        <span class="material-symbols-outlined text-sm align-middle">restart_alt</span> 重置
+                    </button>
+                </div>
+            </div>
+            <!-- 已选标签 -->
+            <div id="activeFilters" class="flex flex-wrap gap-1.5 mt-3 hidden">
+            </div>
+        </div>
+    </section>
+
+    <!-- Job Cards Grid -->
+    <section class="px-4 lg:px-10 max-w-[1440px] mx-auto mb-12">
+        <div class="flex flex-col gap-4" id="jobList">
+        </div>
+    </section>
+
+    <!-- Pagination -->
+    <section class="px-4 lg:px-10 max-w-[1440px] mx-auto mb-16">
+        <div class="flex items-center justify-center gap-2">
+            <button class="w-10 h-10 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-xl">chevron_left</span>
+            </button>
+            <button class="w-10 h-10 rounded-lg flex items-center justify-center bg-primary text-white font-semibold text-sm cursor-pointer">1</button>
+            <button class="w-10 h-10 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container transition-all font-medium text-sm cursor-pointer">2</button>
+            <button class="w-10 h-10 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container transition-all font-medium text-sm cursor-pointer">3</button>
+            <span class="text-on-surface-variant px-1">...</span>
+            <button class="w-10 h-10 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container transition-all font-medium text-sm cursor-pointer">12</button>
+            <button class="w-10 h-10 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-xl">chevron_right</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- 城市选择弹窗 -->
+    <div id="cityModal" class="fixed inset-0 z-[200] hidden flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeCityModal()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-[760px] max-h-[540px] flex flex-col animate-fade-in-up">
+            <!-- 弹窗头部 -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-outline-variant/30">
+                <h3 class="text-lg font-bold text-on-surface">工作城市</h3>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center bg-surface-container rounded-lg px-3 py-1.5 border border-outline-variant/60">
+                        <span class="material-symbols-outlined text-outline text-base">search</span>
+                        <input id="citySearch" class="bg-transparent border-none focus:ring-0 text-sm w-40 ml-1 text-on-surface placeholder-on-surface-variant/60" placeholder="搜索城市名/区县" type="text" oninput="searchCity()"/>
+                    </div>
+                    <button onclick="closeCityModal()" class="text-on-surface-variant hover:text-on-surface transition-colors p-1 rounded-lg hover:bg-surface-container">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+            </div>
+            <!-- 弹窗内容 -->
+            <div class="flex flex-1 overflow-hidden">
+                <!-- 左侧省份 -->
+                <div class="w-[140px] border-r border-outline-variant/30 overflow-y-auto py-2 flex-shrink-0" id="provinceList">
+                </div>
+                <!-- 右侧城市 -->
+                <div class="flex-1 overflow-y-auto p-5" id="cityGrid">
+                </div>
+            </div>
+            <!-- 弹窗底部 -->
+            <div class="flex items-center justify-between px-6 py-3 border-t border-outline-variant/30 bg-surface-container-lowest rounded-b-2xl">
+                <span class="text-sm text-on-surface-variant">已选: <span id="selectedCount" class="font-semibold text-primary">0</span> / 5</span>
+                <div class="flex items-center gap-2">
+                    <button onclick="closeCityModal()" class="px-5 py-2 text-sm font-medium text-on-surface-variant border border-outline-variant rounded-lg hover:bg-surface-container transition-all">取消</button>
+                    <button onclick="confirmCity()" class="px-5 py-2 text-sm font-medium text-on-primary bg-primary rounded-lg hover:opacity-90 transition-all">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-surface-container-lowest border-t border-outline-variant w-full py-12 mt-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 lg:px-10 max-w-[1440px] mx-auto">
+            <div>
+                <div class="font-bold text-3xl text-on-surface mb-3">智聘星图</div>
+                <p class="text-on-surface-variant">AI 驱动的智能招聘平台<br>基于银河麒麟 · 人大金仓 · DeepSeek</p>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">平台</h4>
+                <div class="flex flex-col gap-1 text-secondary text-sm">
+                    <a href="#" class="hover:text-primary transition-colors">品牌宣言</a>
+                    <a href="#" class="hover:text-primary transition-colors">精选职位</a>
+                    <a href="#" class="hover:text-primary transition-colors">能力图谱</a>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">支持</h4>
+                <div class="flex flex-col gap-1 text-secondary text-sm">
+                    <a href="#" class="hover:text-primary transition-colors">隐私政策</a>
+                    <a href="#" class="hover:text-primary transition-colors">联系支持</a>
+                    <a href="#" class="hover:text-primary transition-colors">常见问题</a>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-6 text-sm text-on-surface-variant">&copy; 2024 智聘星图. 策就领导力的未来。</div>
+    </footer>
+
+    <script>
+        function filterJobs(category) {
+            document.querySelectorAll('.chip-neutral, .chip-primary').forEach(chip => {
+                chip.classList.remove('chip-primary');
+                chip.classList.add('chip-neutral');
+            });
+            event.target.classList.remove('chip-neutral');
+            event.target.classList.add('chip-primary');
+        }
+
+        // 移动端菜单切换
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // === 登录状态管理 ===
+        const isLoggedIn = localStorage.getItem('loggedIn') === 'true';
+        const userNickname = localStorage.getItem('userNickname') || '用户';
+        const userAvatar = localStorage.getItem('userAvatar') || 'U';
+
+        // 更新导航栏显示
+        if (isLoggedIn) {
+            document.getElementById('nav-guest').classList.add('hidden');
+            document.getElementById('nav-user').classList.remove('hidden');
+            document.getElementById('nav-user').classList.add('flex');
+            document.getElementById('user-avatar').textContent = userAvatar;
+            document.getElementById('user-nickname').textContent = userNickname;
+            // 移动端菜单
+            const mg = document.getElementById('mobile-guest');
+            const mu = document.getElementById('mobile-user');
+            if (mg) mg.classList.add('hidden');
+            if (mu) { mu.classList.remove('hidden'); mu.classList.add('flex'); }
+            const ma = document.getElementById('mobile-avatar');
+            const mn = document.getElementById('mobile-nickname');
+            if (ma) ma.textContent = userAvatar;
+            if (mn) mn.textContent = userNickname;
+        }
+
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('loggedIn');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('userNickname');
+            localStorage.removeItem('userAvatar');
+            window.location.href = '首页着陆页.html';
+        }
+
+        // 搜索框焦点交互
+        const searchInputs = document.querySelectorAll('input[type="text"]');
+        searchInputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('ring-2', 'ring-primary-container/40');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('ring-2', 'ring-primary-container/40');
+            });
+        });
+
+        // === 城市弹窗 ===
+        const cityData = {
+            '热门': ['北京', '上海', '广州', '深圳', '杭州', '成都', '武汉', '西安', '南京', '重庆', '天津', '苏州', '长沙', '郑州', '东莞'],
+            '广东': ['广州', '深圳', '东莞', '佛山', '珠海', '惠州', '中山', '汕头', '江门', '湛江'],
+            '北京': ['北京'],
+            '上海': ['上海'],
+            '江苏': ['南京', '苏州', '无锡', '常州', '南通', '徐州', '扬州', '镇江'],
+            '浙江': ['杭州', '宁波', '温州', '嘉兴', '湖州', '绍兴', '金华', '台州'],
+            '四川': ['成都', '绵阳', '德阳', '宜宾', '泸州', '南充', '达州'],
+            '湖北': ['武汉', '宜昌', '襄阳', '荆州', '黄冈', '十堰'],
+            '山东': ['济南', '青岛', '烟台', '潍坊', '临沂', '淄博', '济宁'],
+            '福建': ['福州', '厦门', '泉州', '漳州', '莆田', '龙岩'],
+            '陕西': ['西安', '咸阳', '宝鸡', '渭南', '汉中'],
+            '河南': ['郑州', '洛阳', '新乡', '南阳', '许昌', '周口'],
+            '湖南': ['长沙', '株洲', '湘潭', '衡阳', '岳阳', '常德'],
+            '辽宁': ['大连', '沈阳', '鞍山', '抚顺', '本溪'],
+            '吉林': ['长春', '吉林市', '四平', '通化'],
+            '黑龙江': ['哈尔滨', '大庆', '齐齐哈尔', '牡丹江']
+        };
+        let selectedCities = [];
+        let tempSelectedCities = [];
+        let currentProvince = '热门';
+
+        function initCityModal() {
+            const plist = document.getElementById('provinceList');
+            const provinces = Object.keys(cityData);
+            plist.innerHTML = provinces.map(p => `
+                <div class="px-4 py-2.5 text-sm cursor-pointer rounded-lg mx-2 transition-all ${p === currentProvince ? 'bg-primary/10 text-primary font-semibold' : 'text-on-surface-variant hover:bg-surface-container'}" onclick="selectProvince('${p}')" data-province="${p}">${p}</div>
+            `).join('');
+            renderCityGrid(currentProvince);
+        }
+
+        function selectProvince(province) {
+            currentProvince = province;
+            document.querySelectorAll('#provinceList > div').forEach(el => {
+                el.className = `px-4 py-2.5 text-sm cursor-pointer rounded-lg mx-2 transition-all ${el.dataset.province === province ? 'bg-primary/10 text-primary font-semibold' : 'text-on-surface-variant hover:bg-surface-container'}`;
+            });
+            renderCityGrid(province);
+        }
+
+        function renderCityGrid(province) {
+            const grid = document.getElementById('cityGrid');
+            const cities = cityData[province] || [];
+            grid.innerHTML = '<div class="flex flex-wrap gap-2">' + cities.map(c => {
+                const selected = tempSelectedCities.includes(c);
+                return `<button class="px-4 py-2 text-sm rounded-lg border transition-all ${selected ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-low border-outline-variant/40 text-on-surface hover:border-primary hover:text-primary'}" onclick="toggleCity('${c}')">${c}</button>`;
+            }).join('') + '</div>';
+        }
+
+        function toggleCity(city) {
+            const idx = tempSelectedCities.indexOf(city);
+            if (idx > -1) {
+                tempSelectedCities.splice(idx, 1);
+            } else {
+                if (tempSelectedCities.length >= 5) { alert('最多选择5个城市'); return; }
+                tempSelectedCities.push(city);
+            }
+            document.getElementById('selectedCount').textContent = tempSelectedCities.length;
+            renderCityGrid(currentProvince);
+        }
+
+        function searchCity() {
+            const keyword = document.getElementById('citySearch').value.trim().toLowerCase();
+            if (!keyword) { renderCityGrid(currentProvince); return; }
+            const allCities = [];
+            Object.values(cityData).forEach(cities => cities.forEach(c => { if (!allCities.includes(c)) allCities.push(c); }));
+            const matched = allCities.filter(c => c.toLowerCase().includes(keyword));
+            const grid = document.getElementById('cityGrid');
+            if (matched.length === 0) {
+                grid.innerHTML = '<div class="text-center py-8 text-on-surface-variant/60 text-sm">未找到匹配城市</div>';
+                return;
+            }
+            grid.innerHTML = '<div class="flex flex-wrap gap-2">' + matched.map(c => {
+                const selected = tempSelectedCities.includes(c);
+                return `<button class="px-4 py-2 text-sm rounded-lg border transition-all ${selected ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-low border-outline-variant/40 text-on-surface hover:border-primary hover:text-primary'}" onclick="toggleCity('${c}')">${c}</button>`;
+            }).join('') + '</div>';
+        }
+
+        function openCityModal() {
+            tempSelectedCities = [...selectedCities];
+            document.getElementById('cityModal').classList.remove('hidden');
+            document.getElementById('selectedCount').textContent = tempSelectedCities.length;
+            document.getElementById('citySearch').value = '';
+            initCityModal();
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCityModal() {
+            document.getElementById('cityModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function confirmCity() {
+            selectedCities = [...tempSelectedCities];
+            const btn = document.getElementById('cityBtnText');
+            if (selectedCities.length === 0) {
+                btn.textContent = '工作城市';
+            } else if (selectedCities.length === 1) {
+                btn.textContent = selectedCities[0];
+            } else {
+                btn.textContent = selectedCities[0] + ' 等' + selectedCities.length + '个';
+            }
+            closeCityModal();
+            applyFilters();
+        }
+
+        // 薪资自定义切换
+        function toggleSalaryCustom(select) {
+            document.getElementById('salaryCustom').classList.toggle('hidden', select.value !== 'custom');
+        }
+
+        // === 职位数据 ===
+        const jobData = [
+            { id: 1, title: '高级前端工程师', company: '字节跳动', logo: '字', logoClass: 'bg-blue-100 text-blue-600', city: '北京', exp: '3-5年', edu: '本科', salary: '25K-40K', salaryMin: 25, type: '全职', companyType: '互联网大厂', industry: '互联网', companySize: '10000人以上', category: 'tech', match: 92, tags: ['React', 'Vue', 'TypeScript'] },
+            { id: 2, title: '产品经理', company: '腾讯', logo: '腾', logoClass: 'bg-green-100 text-green-600', city: '深圳', exp: '3-5年', edu: '本科', salary: '30K-50K', salaryMin: 30, type: '全职', companyType: '互联网大厂', industry: '互联网', companySize: '10000人以上', category: 'tech', match: 87, tags: ['B端产品', '数据分析'], skillScore: 82, eduScore: 90, expScore: 85, cityScore: 80, rationale: '具备B端产品和数据分析技能，学历达标，经验基本匹配，城市为深圳有意向加分。', graphHint: '建议学习竞品分析方法论以提升产品规划深度。' },
+            { id: 3, title: '数据分析师', company: '阿里巴巴', logo: '阿', logoClass: 'bg-orange-100 text-orange-600', city: '杭州', exp: '2-4年', edu: '硕士', salary: '25K-45K', salaryMin: 25, type: '全职', companyType: '互联网大厂', industry: '互联网', companySize: '10000人以上', category: 'tech', match: 85, tags: ['Python', 'SQL', 'Tableau'], skillScore: 88, eduScore: 95, expScore: 80, cityScore: 75, rationale: 'Python和SQL技能匹配度高，硕士学历超标，2-4年经验基本满足，杭州工作意向匹配。', graphHint: '建议补充大数据工具以增强数据工程能力。' },
+            { id: 4, title: 'UI/UX设计师', company: '网易', logo: '网', logoClass: 'bg-red-100 text-red-600', city: '广州', exp: '2-4年', edu: '本科', salary: '18K-30K', salaryMin: 18, type: '全职', companyType: '互联网大厂', industry: '互联网', companySize: '10000人以上', category: 'design', match: 81, tags: ['Figma', 'Sketch', '用户研究'], skillScore: 78, eduScore: 90, expScore: 82, cityScore: 70, rationale: 'Figma和Sketch工具熟练，学历达标，经验匹配，广州城市意向需确认。', graphHint: '建议学习动效设计以拓展设计深度。' },
+            { id: 5, title: '投资分析师', company: '中信证券', logo: '中', logoClass: 'bg-yellow-100 text-yellow-600', city: '上海', exp: '1-3年', edu: '硕士', salary: '20K-35K', salaryMin: 20, type: '全职', companyType: '国企央企', industry: '金融', companySize: '500-999人', category: 'finance', match: 78, tags: ['财务建模', '行业研究'], skillScore: 75, eduScore: 95, expScore: 70, cityScore: 80, rationale: '具备财务建模基础，硕士学历超标，1-3年经验部分匹配，上海城市意向良好。', graphHint: '建议深入行业研究方法论并补充基础金融课程。' },
+            { id: 6, title: 'Java高级工程师', company: '美团', logo: '美', logoClass: 'bg-purple-100 text-purple-600', city: '北京', exp: '3-5年', edu: '本科', salary: '30K-50K', salaryMin: 30, type: '全职', companyType: '互联网大厂', industry: '互联网', companySize: '10000人以上', category: 'tech', match: 74, tags: ['Java', '微服务', '分布式'], skillScore: 72, eduScore: 90, expScore: 75, cityScore: 65, rationale: 'Java和微服务有基础，学历达标，分布式经验需加强，北京城市有意向。', graphHint: '建议学习Spring Cloud全家桶以补齐微服务治理短板。' },
+            { id: 7, title: '市场运营经理', company: '小米', logo: '米', logoClass: 'bg-orange-100 text-orange-600', city: '北京', exp: '3-5年', edu: '本科', salary: '20K-35K', salaryMin: 20, type: '全职', companyType: '上市公司', industry: '互联网', companySize: '10000人以上', category: 'sales', match: 72, tags: ['品牌营销', '数据分析'], skillScore: 68, eduScore: 90, expScore: 75, cityScore: 70, rationale: '品牌营销技能有基础，学历达标，3-5年经验部分匹配，北京城市意向良好。', graphHint: '建议补充数字营销和增长黑客相关知识体系。' },
+            { id: 8, title: 'AI算法工程师', company: '百度', logo: '百', logoClass: 'bg-blue-100 text-blue-600', city: '北京', exp: '3-5年', edu: '硕士', salary: '35K-60K', salaryMin: 35, type: '全职', companyType: '互联网大厂', industry: '互联网', companySize: '10000人以上', category: 'tech', match: 70, tags: ['深度学习', 'NLP', 'PyTorch'], skillScore: 65, eduScore: 95, expScore: 68, cityScore: 65, rationale: '深度学习有基础但NLP实战经验不足，硕士学历超标，3-5年经验需加强算法项目经历。', graphHint: '建议系统学习Transformer架构与大模型微调技术。' },
+            { id: 9, title: '人力资源专员', company: '华为', logo: '华', logoClass: 'bg-red-100 text-red-600', city: '深圳', exp: '1-3年', edu: '本科', salary: '15K-25K', salaryMin: 15, type: '全职', companyType: '国企央企', industry: '互联网', companySize: '10000人以上', category: 'sales', match: 68, tags: ['招聘', '员工关系'], skillScore: 62, eduScore: 90, expScore: 65, cityScore: 70, rationale: '招聘和员工关系有基础知识，学历达标，1-3年经验部分匹配，深圳城市意向良好。', graphHint: '建议学习HR数字化工具和人才评估方法论。' }
+        ];
+
+        // 当前筛选状态
+        // 综合筛选
+        function applyFilters() {
+            const edu = document.getElementById('filterEdu').value;
+            const type = document.getElementById('filterType').value;
+            const companyType = document.getElementById('filterCompany').value;
+            const salary = document.getElementById('filterSalary').value;
+            const salaryMin = parseInt(document.getElementById('salaryMin').value) || 0;
+            const salaryMax = parseInt(document.getElementById('salaryMax').value) || 999;
+            const sortBy = document.getElementById('sortBy').value;
+
+            let filtered = jobData.filter(job => {
+                if (selectedCities.length > 0 && !selectedCities.includes(job.city)) return false;
+                if (edu && job.edu !== edu) return false;
+                if (type && job.type !== type) return false;
+                if (companyType && job.companyType !== companyType) return false;
+                if (salary) {
+                    if (salary === '10' && job.salaryMin >= 10) return false;
+                    if (salary === '50' && job.salaryMin < 50) return false;
+                    if (salary === '10-20' && (job.salaryMin < 10 || job.salaryMin >= 20)) return false;
+                    if (salary === '20-30' && (job.salaryMin < 20 || job.salaryMin >= 30)) return false;
+                    if (salary === '30-50' && (job.salaryMin < 30 || job.salaryMin >= 50)) return false;
+                    if (salary === 'custom') {
+                        if (job.salaryMin < salaryMin || job.salaryMin > salaryMax) return false;
+                    }
+                }
+                return true;
+            });
+
+            // 排序
+            if (sortBy === 'match') filtered.sort((a, b) => b.match - a.match);
+            else if (sortBy === 'salary') filtered.sort((a, b) => b.salaryMin - a.salaryMin);
+
+            renderJobs(filtered);
+            updateActiveFilters();
+        }
+
+        // 投递岗位（轻量闭环：标记投递 + 提示，不跳详情）
+        function applyJob(jobId) {
+            const job = jobData.find(j => j.id === jobId);
+            if (!job) return;
+            const ok = confirm('确认投递「' + job.title + ' · ' + job.company + '」？');
+            if (!ok) return;
+            // recommend_record.is_applied = true（原型用 localStorage 模拟）
+            const applied = JSON.parse(localStorage.getItem('appliedJobs') || '[]');
+            if (!applied.includes(jobId)) applied.push(jobId);
+            localStorage.setItem('appliedJobs', JSON.stringify(applied));
+            // 给企业端发通知（原型模拟）
+            const notifs = JSON.parse(localStorage.getItem('notifications') || '[]');
+            notifs.unshift({ type: 'APPLICATION', title: job.title, company: job.company, time: '刚刚' });
+            localStorage.setItem('notifications', JSON.stringify(notifs));
+            alert('已投递「' + job.title + '」，企业端已收到你的简历。');
+        }
+        function renderJobs(jobs) {
+            const container = document.getElementById('jobList');
+            if (!container) return;
+            container.innerHTML = jobs.map((job, i) => `
+                <div class="glass-card p-5 animate-fade-in-up cursor-pointer hover:shadow-md transition-all" style="animation-delay:${0.1 + i * 0.05}s;">
+                    <div class="flex items-center justify-between gap-6">
+                        <!-- Left: Job Title + Tags -->
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-2">
+                                <h3 class="font-bold text-on-surface text-base truncate">${job.title}</h3>
+                                ${job.match >= 80 ? '<span class="px-2 py-0.5 bg-primary/10 text-primary text-[11px] font-semibold rounded-full whitespace-nowrap">AI推荐</span>' : ''}
+                                ${job.companyType === '国企央企' ? '<span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[11px] font-semibold rounded-full whitespace-nowrap">国企</span>' : ''}
+                            </div>
+                            <div class="flex flex-wrap gap-1.5 mb-3">
+                                <span class="px-2.5 py-1 bg-surface-container-high text-on-surface-variant text-[11px] rounded-full">校园</span>
+                                <span class="px-2.5 py-1 bg-surface-container-high text-on-surface-variant text-[11px] rounded-full">${job.edu}</span>
+                                <span class="px-2.5 py-1 bg-surface-container-high text-on-surface-variant text-[11px] rounded-full">在校/应届</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-on-surface-variant text-[13px]">
+                                <div class="w-6 h-6 rounded bg-surface-container-high flex items-center justify-center flex-shrink-0">
+                                    <span class="text-[10px] font-bold ${job.logoClass}">${job.logo}</span>
+                                </div>
+                                <span class="truncate">${job.company}</span>
+                                <span class="text-outline-variant">|</span>
+                                <span>${job.industry}</span>
+                                <span class="text-outline-variant">|</span>
+                                <span>${job.companySize}</span>
+                                <span class="text-outline-variant">|</span>
+                                <span>${job.companyType}</span>
+                            </div>
+                            <!-- Sub-scores: four-dimensional breakdown -->
+                            <div class="mt-3 pt-3 border-t border-outline-variant/30">
+                                <div class="grid grid-cols-4 gap-3 mb-2">
+                                    <div class="flex items-center gap-1.5"><span class="text-[11px] text-on-surface-variant w-7 shrink-0">技能</span><div class="sub-score-bar"><div class="sub-score-fill skill" style="width:${job.skillScore}%"></div></div><span class="text-[11px] font-semibold text-on-surface w-6 text-right">${job.skillScore}</span></div>
+                                    <div class="flex items-center gap-1.5"><span class="text-[11px] text-on-surface-variant w-7 shrink-0">学历</span><div class="sub-score-bar"><div class="sub-score-fill edu" style="width:${job.eduScore}%"></div></div><span class="text-[11px] font-semibold text-on-surface w-6 text-right">${job.eduScore}</span></div>
+                                    <div class="flex items-center gap-1.5"><span class="text-[11px] text-on-surface-variant w-7 shrink-0">经验</span><div class="sub-score-bar"><div class="sub-score-fill exp" style="width:${job.expScore}%"></div></div><span class="text-[11px] font-semibold text-on-surface w-6 text-right">${job.expScore}</span></div>
+                                    <div class="flex items-center gap-1.5"><span class="text-[11px] text-on-surface-variant w-7 shrink-0">城市</span><div class="sub-score-bar"><div class="sub-score-fill city" style="width:${job.cityScore}%"></div></div><span class="text-[11px] font-semibold text-on-surface w-6 text-right">${job.cityScore}</span></div>
+                                </div>
+                                <p class="rationale-text mb-1.5"><span class="font-semibold text-on-surface">匹配依据：</span>${job.rationale}</p>
+                                ${job.graphHint ? '<div class="graph-hint"><span class="material-symbols-outlined text-xs mr-1 align-middle">auto_graph</span>' + job.graphHint + '</div>' : ''}
+                            </div>
+                        </div>
+
+                        <!-- Right: Salary + Actions -->
+                        <div class="flex flex-col items-end gap-2 flex-shrink-0">
+                            <span class="text-primary font-bold text-lg whitespace-nowrap mb-1">${job.salary}</span>
+                            <div class="flex items-center gap-2">
+                                <a href="模拟面试.html?jobId=${job.id}" class="px-3.5 py-2 bg-primary-container text-on-primary text-[13px] font-semibold rounded-full hover:opacity-90 transition-all whitespace-nowrap flex items-center gap-1" onclick="event.stopPropagation()" title="针对该岗位发起 AI 模拟面试">
+                                    <span class="material-symbols-outlined text-sm">psychology</span>模拟面试
+                                </a>
+                                <a href="岗位详情.html?id=${job.id}" class="px-3.5 py-2 border border-outline-variant text-on-surface text-[13px] font-semibold rounded-full hover:border-primary hover:text-primary transition-all whitespace-nowrap flex items-center gap-1" onclick="event.stopPropagation()" title="查看岗位详情与匹配度">
+                                    <span class="material-symbols-outlined text-sm">description</span>详情
+                                </a>
+                                <button onclick="event.stopPropagation(); applyJob(${job.id})" class="px-3.5 py-2 bg-primary text-on-primary text-[13px] font-semibold rounded-full hover:bg-primary/90 transition-colors whitespace-nowrap flex items-center gap-1" title="立即投递该岗位">
+                                    <span class="material-symbols-outlined text-sm">send</span>投递
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            if (jobs.length === 0) {
+                container.innerHTML = '<div class="text-center py-16"><span class="material-symbols-outlined text-6xl text-on-surface-variant/30 mb-4 block">search_off</span><p class="text-on-surface-variant text-lg">暂无匹配职位</p><p class="text-on-surface-variant/60 text-sm mt-2">试试调整筛选条件</p></div>';
+            }
+        }
+
+        // 更新已选标签
+        function updateActiveFilters() {
+            const tags = [];
+            const edu = document.getElementById('filterEdu').value;
+            const type = document.getElementById('filterType').value;
+            const companyType = document.getElementById('filterCompany').value;
+            const salary = document.getElementById('filterSalary').value;
+
+            if (selectedCities.length > 0) {
+                tags.push({ key: 'city', label: selectedCities.length === 1 ? selectedCities[0] : selectedCities[0] + '等' + selectedCities.length + '个' });
+            }
+            if (edu) tags.push({ key: 'edu', label: edu });
+            if (type) tags.push({ key: 'type', label: type });
+            if (companyType) tags.push({ key: 'company', label: companyType });
+            if (salary) {
+                const salaryNames = { '10': '10K以下', '10-20': '10K-20K', '20-30': '20K-30K', '30-50': '30K-50K', '50': '50K以上' };
+                if (salary === 'custom') {
+                    const sm = parseInt(document.getElementById('salaryMin').value) || 0;
+                    const sx = parseInt(document.getElementById('salaryMax').value) || 999;
+                    tags.push({ key: 'salary', label: sm + 'K-' + sx + 'K' });
+                } else {
+                    tags.push({ key: 'salary', label: salaryNames[salary] });
+                }
+            }
+
+            const container = document.getElementById('activeFilters');
+            if (tags.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+            container.classList.remove('hidden');
+            container.innerHTML = tags.map(t => `
+                <span class="chip chip-primary text-[11px] flex items-center gap-1 cursor-pointer hover:bg-primary/20" onclick="clearFilter('${t.key}')">
+                    ${t.label}
+                    <span class="material-symbols-outlined text-xs">close</span>
+                </span>
+            `).join('') + `<span class="text-[11px] text-on-surface-variant cursor-pointer hover:text-primary" onclick="resetFilters()">清除全部</span>`;
+        }
+
+        // 清除单个筛选
+        function clearFilter(key) {
+            if (key === 'category') {
+                currentCategory = 'all';
+                document.querySelectorAll('.chip-neutral, .chip-primary').forEach(chip => {
+                    chip.classList.remove('chip-primary');
+                    chip.classList.add('chip-neutral');
+                });
+                const chips = document.querySelectorAll('.chip');
+                if (chips[0]) { chips[0].classList.remove('chip-neutral'); chips[0].classList.add('chip-primary'); }
+            } else if (key === 'city') {
+                selectedCities = [];
+                document.getElementById('cityBtnText').textContent = '工作城市';
+            }
+            else if (key === 'edu') document.getElementById('filterEdu').value = '';
+            else if (key === 'type') document.getElementById('filterType').value = '';
+            else if (key === 'company') document.getElementById('filterCompany').value = '';
+            else if (key === 'salary') {
+                document.getElementById('filterSalary').value = '';
+                document.getElementById('salaryMin').value = '';
+                document.getElementById('salaryMax').value = '';
+                document.getElementById('salaryCustom').classList.add('hidden');
+            }
+            applyFilters();
+        }
+
+        // 重置所有筛选
+        function resetFilters() {
+            currentCategory = 'all';
+            selectedCities = [];
+            document.getElementById('cityBtnText').textContent = '工作城市';
+            document.getElementById('filterEdu').value = '';
+            document.getElementById('filterType').value = '';
+            document.getElementById('filterCompany').value = '';
+            document.getElementById('filterSalary').value = '';
+            document.getElementById('salaryMin').value = '';
+            document.getElementById('salaryMax').value = '';
+            document.getElementById('salaryCustom').classList.add('hidden');
+            document.getElementById('sortBy').value = 'match';
+            document.querySelectorAll('.chip-neutral, .chip-primary').forEach(chip => {
+                chip.classList.remove('chip-primary');
+                chip.classList.add('chip-neutral');
+            });
+            const chips = document.querySelectorAll('.chip');
+            if (chips[0]) { chips[0].classList.remove('chip-neutral'); chips[0].classList.add('chip-primary'); }
+            applyFilters();
+        }
+        function toggleNotifDropdown(e) {
+            e.stopPropagation();
+            var dd = document.getElementById('notif-dropdown');
+            dd.classList.toggle('hidden');
+        }
+        function closeNotifDropdown() {
+            var dd = document.getElementById('notif-dropdown');
+            if (dd) dd.classList.add('hidden');
+        }
+        document.addEventListener('click', function(e) {
+            var wrap = document.getElementById('notif-bell-wrap');
+            if (wrap && !wrap.contains(e.target)) closeNotifDropdown();
+        });
+        function _OLD_REMOVED(e) {
+            e.stopPropagation();
+            ['interviewDD', 'interviewDD-mob'].forEach(function(id) {
+                var dd = document.getElementById(id);
+                if (dd) dd.classList.toggle('hidden');
+            });
+            ['interview-arrow', 'interview-arrow-mob'].forEach(function(id) {
+                var arrow = document.getElementById(id);
+                if (arrow) {
+                    var parent = arrow.closest('.relative');
+                    var dd = parent ? parent.querySelector('[id^="interviewDD"]') : null;
+                    if (dd) arrow.style.transform = dd.classList.contains('hidden') ? '' : 'rotate(180deg)';
+                }
+            });
+        }
+        function closeInterviewDD() {
+            ['interviewDD', 'interviewDD-mob'].forEach(function(id) {
+                var dd = document.getElementById(id);
+                if (dd) dd.classList.add('hidden');
+            });
+            ['interview-arrow', 'interview-arrow-mob'].forEach(function(id) {
+                var arrow = document.getElementById(id);
+                if (arrow) arrow.style.transform = '';
+            });
+        }
+        document.addEventListener('click', function(e) {
+            ['interviewDD-wrap', 'interviewDD-wrap-mob'].forEach(function(id) {
+                var wrap = document.getElementById(id);
+                if (wrap && !wrap.contains(e.target)) closeInterviewDD();
+            });
+        }););
+        });
+        // 页面加载时初始渲染职位卡片
+        document.addEventListener('DOMContentLoaded', function() { applyFilters(); });
+    </script>
+    <script>
+        function toggleInterviewDD(e, suffix) {
+            e.stopPropagation();
+            var dd = document.getElementById('interviewDD-' + suffix);
+            var arrow = document.getElementById('interview-arrow-' + suffix);
+            if (dd) dd.classList.toggle('hidden');
+            if (arrow) arrow.style.transform = dd && dd.classList.contains('hidden') ? '' : 'rotate(180deg)';
+        }
+        function closeInterviewDD(suffix) {
+            var dd = document.getElementById('interviewDD-' + suffix);
+            var arrow = document.getElementById('interview-arrow-' + suffix);
+            if (dd) dd.classList.add('hidden');
+            if (arrow) arrow.style.transform = '';
+        }
+        document.addEventListener('click', function(e) {
+            ['desk', 'mob'].forEach(function(s) {
+                var wrap = document.getElementById('interviewDD-wrap-' + s);
+                if (wrap && !wrap.contains(e.target)) closeInterviewDD(s);
+            });
+        });
+        function toggleMobileMenu() {
+            var menu = document.getElementById('mobile-menu');
+            if (menu) menu.classList.toggle('hidden');
+        }
+        function logout() {
+            localStorage.removeItem('loggedIn');
+            window.location.href = '../common/登录.html';
+        }
+    </script>
+
+</body>
+</html>
+        .sub-score-bar { height: 4px; border-radius: 2px; background: #e1e3e4; overflow: hidden; flex: 1; }
+        .sub-score-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+        .sub-score-fill.skill { background: #064e3b; }
+        .sub-score-fill.edu { background: #0ea5e9; }
+        .sub-score-fill.exp { background: #8b5cf6; }
+        .sub-score-fill.city { background: #f59e0b; }
+        .rationale-text { font-size: 12px; line-height: 1.5; color: #404944; }
+        .graph-hint { font-size: 11px; line-height: 1.5; color: #064e3b; background: rgba(6,78,59,0.06); padding: 6px 10px; border-radius: 6px; border-left: 3px solid #064e3b; }

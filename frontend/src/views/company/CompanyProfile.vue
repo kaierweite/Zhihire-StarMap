@@ -1,7 +1,7 @@
 ﻿<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Building2, Save, Globe, MapPin, Phone, Mail, User, FileText, AlertTriangle, CheckCircle, Clock } from 'lucide-vue-next'
+import { Building2, Save, Globe, MapPin, Phone, Mail, User, AlertTriangle, CheckCircle, Clock } from 'lucide-vue-next'
 import { getCompanyProfile, updateCompanyProfile, type CompanyProfile, type CompanyUpdateData } from '@/api/company'
 
 const loading = ref(true)
@@ -11,6 +11,7 @@ const profile = ref<CompanyProfile | null>(null)
 const form = reactive<CompanyUpdateData>({
   company_name: '',
   industry: '',
+  company_type: '',
   scale: '',
   website: '',
   logo_url: '',
@@ -36,6 +37,7 @@ const auditStatusType: Record<string, string> = {
 
 const scaleOptions = ['1-50人', '50-150人', '150-500人', '500-1000人', '1000人以上']
 const industryOptions = ['互联网/IT', '金融', '教育', '医疗', '制造业', '房地产', '零售', '文化传媒', '其他']
+const companyTypeOptions = ['国企', '事业单位', '上市公司', '其他']
 
 async function loadProfile() {
   loading.value = true
@@ -46,6 +48,7 @@ async function loadProfile() {
       const p = res.data.data
       form.company_name = p.company_name || ''
       form.industry = p.industry || ''
+      form.company_type = p.company_type || ''
       form.scale = p.scale || ''
       form.website = p.website || ''
       form.logo_url = p.logo_url || ''
@@ -137,11 +140,22 @@ onMounted(loadProfile)
               </el-col>
             </el-row>
 
-            <el-form-item label="企业官网">
-              <el-input v-model="form.website" placeholder="https://www.example.com">
-                <template #prefix><Globe :size="16" /></template>
-              </el-input>
-            </el-form-item>
+            <el-row :gutter="16">
+              <el-col :span="12">
+                <el-form-item label="企业类型">
+                  <el-select v-model="form.company_type" placeholder="请选择" clearable style="width:100%">
+                    <el-option v-for="o in companyTypeOptions" :key="o" :label="o" :value="o" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="企业官网">
+                  <el-input v-model="form.website" placeholder="https://www.example.com">
+                    <template #prefix><Globe :size="16" /></template>
+                  </el-input>
+                </el-form-item>
+              </el-col>
+            </el-row>
 
             <el-form-item label="公司地址">
               <el-input v-model="form.address" placeholder="如：北京市海淀区">
@@ -182,7 +196,6 @@ onMounted(loadProfile)
 
         <!-- Right: Audit status + Info -->
         <div class="side-card">
-          <!-- Audit status -->
           <div class="audit-card">
             <h3>审核状态</h3>
             <div class="audit-status">
@@ -205,7 +218,6 @@ onMounted(loadProfile)
             <p class="audit-hint">修改企业信息后，审核状态将重置为「审核中」，需管理员重新审核。</p>
           </div>
 
-          <!-- Quick info -->
           <div class="info-card">
             <h3>信息概览</h3>
             <el-descriptions :column="1" size="small" border>
@@ -225,7 +237,10 @@ onMounted(loadProfile)
 <style scoped lang="scss">
 .page { max-width: 1100px; margin: 0 auto; }
 
-@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 .fade-up { opacity: 0; animation: fadeUp 0.4s cubic-bezier(0.22,1,0.36,1) forwards; }
 .d1 { animation-delay: 0.08s; }
 

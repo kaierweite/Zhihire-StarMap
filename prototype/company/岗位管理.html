@@ -1,0 +1,612 @@
+﻿<!DOCTYPE html>
+<html class="light" lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>岗位管理 - 智聘星图</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="config.js"></script>
+    <style>
+        .glass-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(196,197,217,0.4); box-shadow: 0 4px 20px rgba(0,0,0,0.04); transition: all 0.3s; border-radius: 12px; }
+        .glass-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+        .btn-primary { position: relative; overflow: hidden; background: #064e3b; color: #fff; padding: 10px 24px; border-radius: 9999px; font-weight: 600; font-size: 13px; letter-spacing: 0.02em; transition: all 0.3s; display: inline-flex; align-items: center; gap: 6px; border: none; cursor: pointer; }
+        .btn-primary:hover { background: #003527; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(6,78,59,0.25); }
+        .btn-ghost { border: 1px solid #191c1d; color: #191c1d; padding: 10px 24px; border-radius: 9999px; font-weight: 600; font-size: 13px; transition: all 0.3s; display: inline-flex; align-items: center; gap: 6px; background: transparent; cursor: pointer; }
+        .btn-ghost:hover { background: #191c1d; color: #fff; }
+        .chip { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:600; letter-spacing:0.05em; }
+        .chip-primary { background: #b0f0d6; color: #003527; }
+        .chip-success { background: #d4edda; color: #155724; }
+        .chip-warning { background: #fff3cd; color: #856404; }
+        .chip-neutral { background: #f3f4f5; color: #434656; }
+        .chip-danger { background: #f8d7da; color: #721c24; }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .animate-fade-in-up { animation:fadeInUp 0.6s ease forwards; }
+        ::selection { background: #b0f0d6; color: #002117; }
+        .stat-card { position: relative; overflow: hidden; }
+        .stat-card::before { content: ''; position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; border-radius: 50%; background: currentColor; opacity: 0.06; }
+        .toggle-track { width: 44px; height: 24px; border-radius: 12px; background: #c4c5d9; transition: all 0.3s; cursor: pointer; position: relative; flex-shrink: 0; }
+        .toggle-track.active { background: #064e3b; }
+        .toggle-track::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: all 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+        .toggle-track.active::after { left: 22px; }
+        input, select, textarea { font-family: 'Inter', sans-serif; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #064e3b; box-shadow: 0 0 0 3px rgba(6,78,59,0.1); }
+        .skill-chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 6px; background: #b0f0d6; color: #003527; font-size: 12px; font-weight: 600; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .mobile-nav-drawer { display:none; position:fixed; inset:0; z-index:100; }
+        .mobile-nav-drawer.open { display:flex; }
+        .mobile-nav-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.4); }
+        .mobile-nav-panel { position:absolute; right:0; top:0; bottom:0; width:280px; background:#fff; box-shadow:-4px 0 24px rgba(0,0,0,0.15); padding:24px; overflow-y:auto; }
+        .pg-btn { min-width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; font-size:13px; font-weight:600; transition: all 0.2s; cursor:pointer; border: 1px solid rgba(196,197,217,0.4); background:#fff; color:#434656; }
+        .pg-btn:hover { background:#f3f4f5; }
+        .pg-btn.active { background:#064e3b; color:#fff; border-color:#064e3b; }
+        .pg-btn.disabled { opacity:0.35; pointer-events:none; }
+            .active-tab { color: #064e3b; border-bottom: 2px solid #064e3b; font-weight: 700; }
+    </style>
+</head>
+<body class="bg-surface font-sans text-on-surface min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm h-14">
+        <div class="flex justify-between items-center w-full px-4 md:px-16 max-w-[1440px] mx-auto h-full">
+            <a href="企业首页.html" class="font-bold text-xl tracking-tight text-primary">智聘星图</a>
+            <div class="hidden md:flex items-center gap-6 text-sm">
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="企业首页.html">企业首页</a>
+                <a class="text-primary border-b-2 border-primary pb-1 font-semibold" href="岗位管理.html">岗位管理</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="岗位发布.html">岗位发布</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="智能筛选.html">智能筛选</a>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="relative" id="notif-bell-wrap">
+                    <button onclick="toggleNotifDropdown(event)" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-all p-2 relative cursor-pointer">
+                        notifications
+                        <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#93000a] text-white text-[9px] font-bold rounded-full flex items-center justify-center">3</span>
+                    </button>
+                    <div id="notif-dropdown" class="hidden absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-2xl border border-outline-variant/30 z-50 overflow-hidden">
+                        <div class="flex items-center justify-between p-3 border-b border-outline-variant/30">
+                            <h3 class="text-sm font-semibold text-on-surface">通知</h3>
+                            <span class="text-xs text-on-surface-variant">3 条未读</span>
+                        </div>
+                        <div class="max-h-64 overflow-y-auto">
+                            <div class="px-3 py-2.5 hover:bg-surface-container cursor-pointer border-b border-outline-variant/10">
+                                <div class="flex items-start gap-2"><span class="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0"></span><div><p class="text-xs text-on-surface font-medium">张伟 投递了「高级前端工程师」</p><p class="text-[11px] text-on-surface-variant mt-0.5">5 分钟前</p></div></div>
+                            </div>
+                            <div class="px-3 py-2.5 hover:bg-surface-container cursor-pointer border-b border-outline-variant/10">
+                                <div class="flex items-start gap-2"><span class="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0"></span><div><p class="text-xs text-on-surface font-medium">岗位「AI算法工程师」已通过审核</p><p class="text-[11px] text-on-surface-variant mt-0.5">1 小时前</p></div></div>
+                            </div>
+                            <div class="px-3 py-2.5 hover:bg-surface-container cursor-pointer">
+                                <div class="flex items-start gap-2"><span class="w-2 h-2 rounded-full bg-transparent mt-1.5 flex-shrink-0"></span><div><p class="text-xs text-on-surface-variant">系统将于今晚 23:00 进行维护</p><p class="text-[11px] text-on-surface-variant mt-0.5">3 小时前</p></div></div>
+                            </div>
+                        </div>
+                        <div class="p-2 border-t border-outline-variant/30 text-center">
+                            <a href="企业通知中心.html" class="text-xs text-primary font-medium hover:underline px-3 py-1.5 inline-block">查看全部通知</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-bold cursor-pointer">企</div>
+                <button class="md:hidden p-1.5 hover:bg-surface-container rounded-lg transition-colors" onclick="openMobileNav()">
+                    <span class="material-symbols-outlined text-on-surface text-xl">menu</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 移动端导航抽屉 -->
+    <div id="mobileNavDrawer" class="mobile-nav-drawer">
+        <div class="mobile-nav-overlay" onclick="closeMobileNav()"></div>
+        <div class="mobile-nav-panel">
+            <div class="flex items-center justify-between mb-8">
+                <span class="font-bold text-lg text-primary">智聘星图</span>
+                <button onclick="closeMobileNav()" class="p-1 hover:bg-surface-container rounded-lg">
+                    <span class="material-symbols-outlined text-on-surface-variant">close</span>
+                </button>
+            </div>
+            <div class="flex flex-col gap-1">
+                <a href="企业首页.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">home</span>
+                    <span class="text-sm font-medium">企业首页</span>
+                </a>
+                <a href="岗位管理.html" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary font-semibold transition-colors">
+                    <span class="material-symbols-outlined text-xl">work</span>
+                    <span class="text-sm font-medium">岗位管理</span>
+                </a>
+                <a href="岗位发布.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">add_circle</span>
+                    <span class="text-sm font-medium">岗位发布</span>
+                </a>
+                <a href="智能筛选.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">auto_awesome</span>
+                    <span class="text-sm font-medium">智能筛选</span>
+                </a>
+                <div class="border-t border-outline-variant/30 my-2"></div>
+                <a href="企业通知中心.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">notifications</span>
+                    <span class="text-sm font-medium">通知中心</span>
+                </a>
+                <a href="候选人推荐.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">groups</span>
+                    <span class="text-sm font-medium">候选人推荐</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-12 md:pb-16 px-4 md:px-16 max-w-[1440px] mx-auto">
+        <!-- 页面标题 -->
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-6 md:mb-8">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-on-surface">岗位管理</h1>
+                <p class="text-xs md:text-sm text-on-surface-variant mt-1">管理已发布的岗位，控制上下架状态</p>
+            </div>
+            <a href="岗位发布.html" class="btn-primary">
+                <span class="material-symbols-outlined text-base">add</span>
+                发布新岗位
+            </a>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+            <div class="glass-card p-4 md:p-5 stat-card animate-fade-in-up" style="color:#064e3b">
+                <div class="text-2xl md:text-3xl font-bold text-primary">6</div>
+                <div class="text-xs md:text-sm text-on-surface-variant mt-1">总岗位数</div>
+            </div>
+            <div class="glass-card p-4 md:p-5 stat-card animate-fade-in-up" style="color:#155724">
+                <div class="text-2xl md:text-3xl font-bold text-[#155724]">3</div>
+                <div class="text-xs md:text-sm text-on-surface-variant mt-1">招聘中</div>
+            </div>
+            <div class="glass-card p-4 md:p-5 stat-card animate-fade-in-up" style="color:#856404">
+                <div class="text-2xl md:text-3xl font-bold text-[#856404]">2</div>
+                <div class="text-xs md:text-sm text-on-surface-variant mt-1">草稿</div>
+            </div>
+            <div class="glass-card p-4 md:p-5 stat-card animate-fade-in-up" style="color:#721c24">
+                <div class="text-2xl md:text-3xl font-bold text-[#721c24]">1</div>
+                <div class="text-xs md:text-sm text-on-surface-variant mt-1">已关闭</div>
+            </div>
+        </div>
+
+        <!-- 筛选栏 -->
+        <div class="glass-card p-3 md:p-4 mb-4 md:mb-6 flex flex-col md:flex-row flex-wrap items-stretch md:items-center gap-2 md:gap-3">
+            <div class="relative flex-1 min-w-[180px]">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">search</span>
+                <input id="search-input" type="text" placeholder="搜索岗位名称或技能..." class="w-full pl-10 pr-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30" oninput="filterJobs()">
+            </div>
+            <div class="flex gap-2">
+                <select id="status-filter" class="flex-1 md:flex-none px-3 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30" onchange="filterJobs()">
+                    <option value="all">全部状态</option>
+                    <option value="OPEN">招聘中</option>
+                    <option value="DRAFT">草稿</option>
+                    <option value="CLOSED">已关闭</option>
+                </select>
+                <select id="source-filter" class="flex-1 md:flex-none px-3 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30" onchange="filterJobs()">
+                    <option value="all">全部来源</option>
+                    <option value="MANUAL">手动填写</option>
+                    <option value="UPLOAD">AI解析</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 岗位列表 -->
+        <div id="job-list" class="space-y-3 mb-6"></div>
+
+        <!-- 分页 -->
+        <div id="pagination" class="flex items-center justify-center gap-1.5 md:gap-2 mt-4"></div>
+    </main>
+
+    <!-- 编辑岗位弹窗 -->
+    <div id="edit-modal" class="modal-overlay hidden" onclick="closeEditModal(event)">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto p-5 md:p-6 mx-4" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-lg font-bold text-on-surface">编辑岗位</h2>
+                <button class="material-symbols-outlined text-on-surface-variant hover:text-on-surface" onclick="closeEditModal()">close</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-on-surface-variant mb-1">岗位名称</label>
+                    <input id="edit-title" type="text" class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-on-surface-variant mb-1">岗位描述</label>
+                    <textarea id="edit-desc" rows="3" class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30"></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-on-surface-variant mb-1">工作城市</label>
+                        <input id="edit-city" type="text" class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-on-surface-variant mb-1">薪资范围</label>
+                        <input id="edit-salary" type="text" class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-on-surface-variant mb-1">经验要求</label>
+                        <select id="edit-exp" class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30">
+                            <option>不限</option><option>1-3年</option><option>3-5年</option><option>5-10年</option><option>10年以上</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-on-surface-variant mb-1">学历要求</label>
+                        <select id="edit-edu" class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30">
+                            <option>不限</option><option>大专</option><option>本科</option><option>硕士</option><option>博士</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 mt-4">
+                    <button class="btn-primary" onclick="saveEdit()">保存修改</button>
+                    <button class="btn-ghost" onclick="closeEditModal()">取消</button>
+                </div>
+                <div class="border-t border-outline-variant/30 pt-4 mt-2">
+                    <button class="btn-ghost text-xs" onclick="openSkillGraph()">
+                        <span class="material-symbols-outlined text-base">account_tree</span>
+                        查看能力图谱
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 能力图谱弹窗 -->
+    <div id="skill-graph-modal" class="modal-overlay hidden" onclick="closeSkillGraph(event)">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-y-auto p-5 md:p-6 mx-4" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-lg font-bold text-on-surface">岗位技能图谱</h2>
+                <button class="material-symbols-outlined text-on-surface-variant hover:text-on-surface" onclick="closeSkillGraph()">close</button>
+            </div>
+            <div class="flex items-center gap-2 mb-4">
+                <span class="text-sm text-on-surface-variant">岗位：</span>
+                <span id="sg-job-title" class="chip chip-primary"></span>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+                <div class="lg:col-span-2">
+                    <div class="p-4 rounded-xl bg-surface-container border border-outline-variant/30">
+                        <h3 class="text-sm font-semibold text-on-surface mb-3">技能依赖图谱</h3>
+                        <svg id="sg-graph-svg" class="w-full" viewBox="0 0 600 400"></svg>
+                        <div class="flex flex-wrap items-center gap-4 mt-3">
+                            <div class="flex items-center gap-2"><span class="w-6 h-0.5 bg-[#064e3b]"></span><span class="text-[11px] text-on-surface-variant">PREREQUISITE</span></div>
+                            <div class="flex items-center gap-2"><span class="w-6 h-0.5 bg-[#e65100]" style="border-top:2px dashed #e65100"></span><span class="text-[11px] text-on-surface-variant">INCLUDES</span></div>
+                            <div class="flex items-center gap-2"><span class="w-6 h-0.5 bg-[#6a1b9a]" style="border-top:2px dotted #6a1b9a"></span><span class="text-[11px] text-on-surface-variant">SIMILAR</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-1 space-y-4">
+                    <div class="p-4 rounded-xl bg-surface-container border border-outline-variant/30">
+                        <h3 class="text-sm font-semibold text-on-surface mb-3">岗位要求覆盖</h3>
+                        <div id="sg-coverage"></div>
+                    </div>
+                    <div class="p-4 rounded-xl bg-surface-container border border-outline-variant/30">
+                        <h3 class="text-sm font-semibold text-on-surface mb-3">技能缺口</h3>
+                        <div id="sg-gaps"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-surface-container-lowest border-t border-outline-variant w-full py-10 md:py-12 mt-12 md:mt-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 md:px-16 max-w-[1440px] mx-auto">
+            <div>
+                <div class="font-bold text-3xl text-on-surface mb-3">智聘星图</div>
+                <p class="text-on-surface-variant text-sm">AI 驱动的智能招聘平台<br>基于银河麒麟 · 人大金仓 · DeepSeek</p>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">企业端</h4>
+                <div class="flex flex-col gap-1 text-secondary text-sm">
+                    <a href="企业首页.html" class="hover:text-primary transition-colors">企业首页</a>
+                    <a href="岗位管理.html" class="hover:text-primary transition-colors">岗位管理</a>
+                    <a href="岗位发布.html" class="hover:text-primary transition-colors">岗位发布</a>
+                    <a href="智能筛选.html" class="hover:text-primary transition-colors">智能筛选</a>
+                    <a href="候选人推荐.html" class="hover:text-primary transition-colors">候选人推荐</a>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">支持</h4>
+                <div class="flex flex-col gap-1 text-secondary text-sm">
+                    <a href="企业通知中心.html" class="hover:text-primary transition-colors">通知中心</a>
+                    <a href="javascript:void(0)" class="hover:text-primary transition-colors">隐私政策</a>
+                    <a href="javascript:void(0)" class="hover:text-primary transition-colors">联系支持</a>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-6 text-sm text-on-surface-variant">&copy; 2024 智聘星图. 策就领导力的未来。</div>
+    </footer>
+
+    <script>
+        // 模拟岗位数据
+        const jobs = [
+            { id: 1, title: '高级前端工程师', desc: '负责公司核心产品的前端架构设计与开发', city: '北京', salary: '35K-55K', exp: '5-10年', edu: '本科', skills: ['React','TypeScript','Node.js'], status: 'OPEN', source: 'MANUAL', date: '2024-06-10', applicants: 12 },
+            { id: 2, title: 'AI算法工程师', desc: '负责大模型训练与推理优化', city: '上海', salary: '40K-70K', exp: '3-5年', edu: '硕士', skills: ['Python','PyTorch','CUDA','大模型'], status: 'OPEN', source: 'UPLOAD', date: '2024-06-08', applicants: 8 },
+            { id: 3, title: 'Java后端工程师', desc: '负责微服务架构设计与核心模块开发', city: '杭州', salary: '30K-50K', exp: '3-5年', edu: '本科', skills: ['Java','Spring Boot','MySQL','Redis'], status: 'OPEN', source: 'MANUAL', date: '2024-06-05', applicants: 15 },
+            { id: 4, title: '产品经理', desc: '负责AI招聘产品的需求分析与产品设计', city: '北京', salary: '25K-40K', exp: '3-5年', edu: '本科', skills: ['产品设计','B端','数据分析'], status: 'DRAFT', source: 'MANUAL', date: '2024-06-12', applicants: 0 },
+            { id: 5, title: '数据工程师', desc: '负责数据仓库建设与数据质量治理', city: '深圳', salary: '30K-45K', exp: '3-5年', edu: '本科', skills: ['Spark','Flink','Hive','Python'], status: 'DRAFT', source: 'UPLOAD', date: '2024-06-11', applicants: 0 },
+            { id: 6, title: 'DevOps工程师', desc: '负责CI/CD流水线与K8s集群运维', city: '成都', salary: '25K-40K', exp: '3-5年', edu: '本科', skills: ['Kubernetes','Docker','Jenkins','Terraform'], status: 'CLOSED', source: 'MANUAL', date: '2024-05-20', applicants: 6 }
+        ];
+
+        let currentPage = 1;
+        const pageSize = 4;
+        let filteredJobs = [...jobs];
+
+        function renderJobs() {
+            const list = document.getElementById('job-list');
+            const start = (currentPage - 1) * pageSize;
+            const pageJobs = filteredJobs.slice(start, start + pageSize);
+
+            if (pageJobs.length === 0) {
+                list.innerHTML = '<div class="glass-card p-8 md:p-12 text-center"><span class="material-symbols-outlined text-4xl text-on-surface-variant mb-3 block">work_off</span><p class="text-on-surface-variant text-sm">暂无匹配的岗位</p></div>';
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+
+            list.innerHTML = pageJobs.map((job, i) => {
+                const statusMap = {
+                    'OPEN': { label: '招聘中', cls: 'chip-success' },
+                    'DRAFT': { label: '草稿', cls: 'chip-warning' },
+                    'CLOSED': { label: '已关闭', cls: 'chip-danger' }
+                };
+                const s = statusMap[job.status];
+                return `
+                <div class="glass-card p-4 md:p-5 animate-fade-in-up" style="animation-delay:${i*0.05}s">
+                    <div class="flex flex-col md:flex-row items-start gap-3 md:gap-5">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-primary text-lg md:text-xl">work</span>
+                        </div>
+                        <div class="flex-1 min-w-0 w-full">
+                            <div class="flex flex-wrap items-center gap-2 mb-1">
+                                <h3 class="text-sm md:text-base font-semibold text-on-surface">${job.title}</h3>
+                                <span class="chip ${s.cls}">${s.label}</span>
+                                <span class="chip chip-neutral">${job.source === 'UPLOAD' ? 'AI解析' : '手动填写'}</span>
+                            </div>
+                            <p class="text-xs md:text-sm text-on-surface-variant mb-2 line-clamp-1">${job.desc}</p>
+                            <div class="flex flex-wrap items-center gap-2 md:gap-3 text-[11px] md:text-xs text-on-surface-variant">
+                                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs md:text-sm">location_on</span>${job.city}</span>
+                                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs md:text-sm">payments</span>${job.salary}</span>
+                                <span class="flex items-center gap-1 hidden sm:flex"><span class="material-symbols-outlined text-xs md:text-sm">school</span>${job.edu}</span>
+                                <span class="flex items-center gap-1 hidden sm:flex"><span class="material-symbols-outlined text-xs md:text-sm">work_history</span>${job.exp}</span>
+                                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs md:text-sm">people</span>${job.applicants}人投递</span>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5 mt-2">
+                                ${job.skills.map(sk => `<span class="skill-chip text-[10px] md:text-xs">${sk}</span>`).join('')}
+                            </div>
+                        </div>
+                        <div class="flex flex-row md:flex-col items-center md:items-end gap-3 md:gap-3 flex-shrink-0 w-full md:w-auto justify-between md:justify-start pt-1 md:pt-0">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] md:text-xs text-on-surface-variant">${job.status === 'OPEN' ? '下架' : '上架'}</span>
+                                <div class="toggle-track ${job.status === 'OPEN' ? 'active' : ''}" onclick="toggleJob(${job.id})"></div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="text-xs text-primary hover:underline" onclick="openEditModal(${job.id})">编辑</button>
+                                <button class="text-xs text-on-surface-variant hover:text-[#93000a]" onclick="deleteJob(${job.id})">删除</button>
+                            </div>
+                            <a href="候选人推荐.html?job=${encodeURIComponent(job.title)}" class="btn-ghost text-[10px] md:text-[11px] px-2.5 md:px-3 py-1 md:py-1.5">
+                                <span class="material-symbols-outlined text-xs md:text-sm">people</span>
+                                查看候选人
+                            </a>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const total = Math.ceil(filteredJobs.length / pageSize);
+            const pg = document.getElementById('pagination');
+            if (total <= 1) { pg.innerHTML = ''; return; }
+
+            var html = '';
+            // 上一页
+            html += '<button class="pg-btn' + (currentPage===1?' disabled':'') + '" onclick="goPage('+(currentPage-1)+')"><span class="material-symbols-outlined text-base">chevron_left</span></button>';
+            // 页码
+            for (let i = 1; i <= total; i++) {
+                html += '<button class="pg-btn'+(i===currentPage?' active':'')+'" onclick="goPage('+i+')">'+i+'</button>';
+            }
+            // 下一页
+            html += '<button class="pg-btn'+(currentPage===total?' disabled':'')+'" onclick="goPage('+(currentPage+1)+')"><span class="material-symbols-outlined text-base">chevron_right</span></button>';
+            // 总数
+            html += '<span class="text-xs text-on-surface-variant ml-2 hidden sm:inline">共'+filteredJobs.length+'条</span>';
+            pg.innerHTML = html;
+        }
+
+        function goPage(p) { currentPage = p; renderJobs(); window.scrollTo({top:0, behavior:'smooth'}); }
+
+        function filterJobs() {
+            const keyword = document.getElementById('search-input').value.toLowerCase();
+            const status = document.getElementById('status-filter').value;
+            const source = document.getElementById('source-filter').value;
+            filteredJobs = jobs.filter(j => {
+                if (keyword && !j.title.toLowerCase().includes(keyword) && !j.skills.some(s => s.toLowerCase().includes(keyword))) return false;
+                if (status !== 'all' && j.status !== status) return false;
+                if (source !== 'all' && j.source !== source) return false;
+                return true;
+            });
+            currentPage = 1;
+            renderJobs();
+        }
+
+        function toggleJob(id) {
+            const job = jobs.find(j => j.id === id);
+            if (!job) return;
+            job.status = job.status === 'OPEN' ? 'CLOSED' : 'OPEN';
+            filterJobs();
+        }
+
+        let editingId = null;
+        function openEditModal(id) {
+            const job = jobs.find(j => j.id === id);
+            if (!job) return;
+            editingId = id;
+            document.getElementById('edit-title').value = job.title;
+            document.getElementById('edit-desc').value = job.desc;
+            document.getElementById('edit-city').value = job.city;
+            document.getElementById('edit-salary').value = job.salary;
+            document.getElementById('edit-exp').value = job.exp;
+            document.getElementById('edit-edu').value = job.edu;
+            document.getElementById('edit-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEditModal(e) {
+            if (e && e.target !== e.currentTarget) return;
+            document.getElementById('edit-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+            editingId = null;
+        }
+
+        function saveEdit() {
+            const job = jobs.find(j => j.id === editingId);
+            if (!job) return;
+            job.title = document.getElementById('edit-title').value;
+            job.desc = document.getElementById('edit-desc').value;
+            job.city = document.getElementById('edit-city').value;
+            job.salary = document.getElementById('edit-salary').value;
+            job.exp = document.getElementById('edit-exp').value;
+            job.edu = document.getElementById('edit-edu').value;
+            closeEditModal();
+            filterJobs();
+            showToast('岗位信息已更新');
+        }
+
+        function deleteJob(id) {
+            if (!confirm('确定要删除该岗位吗？')) return;
+            const idx = jobs.findIndex(j => j.id === id);
+            if (idx > -1) jobs.splice(idx, 1);
+            filterJobs();
+            showToast('岗位已删除');
+        }
+
+        // === Toast ===
+        function showToast(msg) {
+            var t = document.createElement('div');
+            t.textContent = msg;
+            t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#064e3b;color:#fff;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:600;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,0.2);';
+            document.body.appendChild(t);
+            setTimeout(function(){ t.remove(); }, 2500);
+        }
+
+        // === 能力图谱 ===
+        const JOB_SKILL_GRAPHS = {
+            1: { title:'高级前端工程师', nodes:['React','TypeScript','JavaScript','Next.js','Node.js','HTML','CSS','Webpack','Docker'], edges:[
+                {from:'HTML',to:'CSS',type:'PREREQUISITE'},{from:'CSS',to:'JavaScript',type:'PREREQUISITE'},
+                {from:'JavaScript',to:'TypeScript',type:'PREREQUISITE'},{from:'JavaScript',to:'React',type:'PREREQUISITE'},
+                {from:'React',to:'Next.js',type:'PREREQUISITE'},{from:'JavaScript',to:'Node.js',type:'PREREQUISITE'},
+                {from:'JavaScript',to:'Webpack',type:'SIMILAR'},{from:'Docker',to:'Node.js',type:'INCLUDES'}
+            ], coverage:78, gaps:['微前端架构','性能优化','WebGL/Canvas','GraphQL'] },
+            2: { title:'AI算法工程师', nodes:['Python','PyTorch','CUDA','大模型','TensorFlow','scikit-learn','SQL'], edges:[
+                {from:'Python',to:'PyTorch',type:'PREREQUISITE'},{from:'Python',to:'TensorFlow',type:'PREREQUISITE'},
+                {from:'Python',to:'scikit-learn',type:'PREREQUISITE'},{from:'PyTorch',to:'CUDA',type:'PREREQUISITE'},
+                {from:'CUDA',to:'大模型',type:'PREREQUISITE'},{from:'SQL',to:'Python',type:'INCLUDES'}
+            ], coverage:65, gaps:['分布式训练','模型压缩','强化学习','MLOps'] },
+            3: { title:'Java后端工程师', nodes:['Java','Spring Boot','MySQL','Redis','Kafka','Docker','Kubernetes'], edges:[
+                {from:'Java',to:'Spring Boot',type:'PREREQUISITE'},{from:'MySQL',to:'Redis',type:'SIMILAR'},
+                {from:'Redis',to:'Kafka',type:'INCLUDES'},{from:'Docker',to:'Kubernetes',type:'PREREQUISITE'},
+                {from:'Java',to:'Docker',type:'INCLUDES'}
+            ], coverage:82, gaps:['微服务治理','分布式事务','链路追踪'] },
+            4: { title:'产品经理', nodes:['产品设计','B端','数据分析','Axure','用户研究','SQL'], edges:[
+                {from:'用户研究',to:'产品设计',type:'PREREQUISITE'},{from:'产品设计',to:'Axure',type:'PREREQUISITE'},
+                {from:'数据分析',to:'SQL',type:'PREREQUISITE'},{from:'B端',to:'产品设计',type:'INCLUDES'}
+            ], coverage:55, gaps:['AI产品设计','增长策略','商业化思维'] },
+            5: { title:'数据工程师', nodes:['Spark','Flink','Hive','Python','SQL','Kafka','Airflow'], edges:[
+                {from:'SQL',to:'Hive',type:'PREREQUISITE'},{from:'Python',to:'Spark',type:'PREREQUISITE'},
+                {from:'Spark',to:'Flink',type:'SIMILAR'},{from:'Kafka',to:'Flink',type:'INCLUDES'},
+                {from:'Python',to:'Airflow',type:'PREREQUISITE'}
+            ], coverage:70, gaps:['数据湖架构','实时数仓','数据治理'] },
+            6: { title:'DevOps工程师', nodes:['Kubernetes','Docker','Jenkins','Terraform','Linux','AWS','Git'], edges:[
+                {from:'Linux',to:'Docker',type:'PREREQUISITE'},{from:'Docker',to:'Kubernetes',type:'PREREQUISITE'},
+                {from:'Jenkins',to:'Git',type:'INCLUDES'},{from:'Terraform',to:'AWS',type:'PREREQUISITE'},
+                {from:'Linux',to:'AWS',type:'PREREQUISITE'}
+            ], coverage:75, gaps:['ServiceMesh','可观测性','混沌工程'] }
+        };
+
+        function openSkillGraph() {
+            if (!editingId) return;
+            var job = jobs.find(j => j.id === editingId);
+            if (!job) return;
+            var g = JOB_SKILL_GRAPHS[editingId];
+            if (!g) return;
+            document.getElementById('sg-job-title').textContent = job.title;
+            renderSkillGraphSVG(g);
+            renderCoverage(g);
+            renderGaps(g);
+            document.getElementById('skill-graph-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSkillGraph(e) {
+            if (e && e.target !== e.currentTarget) return;
+            document.getElementById('skill-graph-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function renderSkillGraphSVG(g) {
+            var svg = '';
+            var nodes = g.nodes;
+            var n = nodes.length;
+            var cx = 300, cy = 200, r = 150;
+            var positions = nodes.map(function(name, i) {
+                var angle = (2 * Math.PI * i / n) - Math.PI / 2;
+                return { name: name, x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
+            });
+            var colorMap = { 'React':'#064e3b','TypeScript':'#064e3b','JavaScript':'#064e3b','Next.js':'#064e3b','Node.js':'#064e3b','HTML':'#064e3b','CSS':'#064e3b','Webpack':'#064e3b','Python':'#155724','PyTorch':'#155724','CUDA':'#155724','大模型':'#155724','TensorFlow':'#155724','scikit-learn':'#155724','Java':'#155724','Spring Boot':'#155724','SQL':'#e65100','Redis':'#e65100','Kafka':'#e65100','Hive':'#e65100','Docker':'#6a1b9a','Kubernetes':'#6a1b9a','Jenkins':'#6a1b9a','Terraform':'#6a1b9a','Linux':'#6a1b9a','AWS':'#6a1b9a','Git':'#434656','Airflow':'#6a1b9a','产品设计':'#064e3b','B端':'#064e3b','数据分析':'#e65100','Axure':'#064e3b','用户研究':'#064e3b' };
+            g.edges.forEach(function(e) {
+                var from = positions.find(function(p){return p.name===e.from});
+                var to = positions.find(function(p){return p.name===e.to});
+                if (!from || !to) return;
+                var dash = e.type === 'PREREQUISITE' ? '' : ' stroke-dasharray="6,4"';
+                var strokeColor = e.type === 'PREREQUISITE' ? '#064e3b' : e.type === 'INCLUDES' ? '#e65100' : '#6a1b9a';
+                svg += '<line x1="'+from.x+'" y1="'+from.y+'" x2="'+to.x+'" y2="'+to.y+'" stroke="'+strokeColor+'" stroke-width="1.5"'+dash+'/>';
+            });
+            positions.forEach(function(p) {
+                var fill = colorMap[p.name] || '#434656';
+                svg += '<circle cx="'+p.x+'" cy="'+p.y+'" r="20" fill="'+fill+'" opacity="0.85"/>';
+                svg += '<text x="'+p.x+'" y="'+(p.y+4)+'" text-anchor="middle" fill="#fff" font-size="9" font-weight="600">'+p.name+'</text>';
+            });
+            document.getElementById('sg-graph-svg').innerHTML = svg;
+        }
+
+        function renderCoverage(g) {
+            var pct = g.coverage;
+            document.getElementById('sg-coverage').innerHTML =
+                '<div class="flex items-baseline gap-2 mb-2"><span class="text-2xl font-bold text-primary">'+pct+'%</span><span class="text-xs text-on-surface-variant">匹配度</span></div>' +
+                '<div class="w-full h-2 bg-surface-container rounded-full overflow-hidden mb-2"><div class="h-full bg-primary rounded-full transition-all" style="width:'+pct+'%"></div></div>' +
+                '<p class="text-xs text-on-surface-variant">已覆盖 '+g.nodes.length+' 项技能中的 '+(g.nodes.length-g.gaps.length)+' 项</p>';
+        }
+
+        function renderGaps(g) {
+            document.getElementById('sg-gaps').innerHTML = g.gaps.map(function(gap) {
+                return '<div class="flex items-center gap-2 py-1.5"><span class="material-symbols-outlined text-sm text-[#721c24]">warning</span><span class="text-xs text-on-surface">'+gap+'</span></div>';
+            }).join('');
+        }
+
+        // === 通知下拉 ===
+        function toggleNotifDropdown(e) {
+            e.stopPropagation();
+            var dd = document.getElementById('notif-dropdown');
+            dd.classList.toggle('hidden');
+        }
+        function closeNotifDropdown() {
+            var dd = document.getElementById('notif-dropdown');
+            if (dd) dd.classList.add('hidden');
+        }
+        document.addEventListener('click', function(e) {
+            var wrap = document.getElementById('notif-bell-wrap');
+            if (wrap && !wrap.contains(e.target)) closeNotifDropdown();
+        });
+
+        // === 移动端导航 ===
+        function openMobileNav() {
+            document.getElementById('mobileNavDrawer').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeMobileNav() {
+            document.getElementById('mobileNavDrawer').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        // 初始化
+        renderJobs();
+    </script>
+</body>
+</html>

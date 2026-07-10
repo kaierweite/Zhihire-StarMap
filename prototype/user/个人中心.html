@@ -1,0 +1,672 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 智聘星图</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="config.js"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                colors: {
+                    primary: '#003527', 'primary-dark': '#00251a', 'primary-container': '#064e3b',
+                    'on-primary': '#ffffff', 'on-primary-container': '#b0f0d6',
+                    surface: '#f8f9fa', 'surface-container-lowest': '#ffffff',
+                    'on-surface': '#191c1d', 'on-surface-variant': '#6b6f76',
+                    'outline-variant': '#c4c5d9', secondary: '#434656'
+                }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Inter', system-ui, sans-serif; }
+        .glass-card {
+            background: rgba(255,255,255,0.7); backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(196,197,217,0.4);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04); transition: all 0.3s; border-radius: 12px;
+        }
+        .glass-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+        .btn-primary {
+            position: relative; overflow: hidden; background: #064e3b; color: #fff;
+            padding: 12px 32px; border-radius: 9999px; font-weight: 600; font-size: 14px;
+            letter-spacing: 0.02em; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary:hover { background: #003527; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(6,78,59,0.25); }
+        .btn-primary::after {
+            content:""; position:absolute; top:0; left:-150%; width:100%; height:100%;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
+            transform:skewX(-20deg); animation:shimmer 4s infinite;
+        }
+        @keyframes shimmer { 0%{left:-150%} 30%{left:150%} 100%{left:150%} }
+        .btn-ghost {
+            border: 1px solid #191c1d; color: #191c1d; padding: 12px 32px;
+            border-radius: 9999px; font-weight: 600; font-size: 14px; transition: all 0.3s;
+            background: transparent; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-ghost:hover { background: #191c1d; color: #fff; }
+        .chip { display:inline-flex; align-items:center; gap:4px; padding:4px 12px; border-radius:4px; font-size:12px; font-weight:600; letter-spacing:0.05em; }
+        .chip-primary { background:#b0f0d6; color:#003527; }
+        .chip-success { background:#d4edda; color:#155724; }
+        .chip-warning { background:#fff3cd; color:#856404; }
+        .chip-neutral { background:#f3f4f5; color:#434656; }
+        .chip-danger { background:#f8d7da; color:#721c24; }
+        .chip-purple { background:#e8d5f5; color:#6a1b9a; }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .animate-fade-in-up { animation:fadeInUp 0.6s ease forwards; }
+        .bar-track { height:8px; border-radius:9999px; background:#e9ecef; overflow:hidden; }
+        .bar-fill { height:100%; border-radius:9999px; background:linear-gradient(90deg,#064e3b,#2b6954); transition:width 0.8s ease; }
+        .ambient-orb { position:absolute; border-radius:50%; filter:blur(100px); opacity:0.12; pointer-events:none; z-index:-1; }
+        ::selection { background: #b0f0d6; color: #002117; }
+        .filter-select {
+            appearance: none; -webkit-appearance: none; -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23747688' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 8px center; padding-right: 28px;
+        }
+        .filter-select::-ms-expand { display: none; }
+        .timeline-item { position: relative; padding-left: 24px; }
+        .timeline-item::before { content:''; position:absolute; left:0; top:8px; width:8px; height:8px; border-radius:50%; background:#064e3b; }
+        .timeline-item::after { content:''; position:absolute; left:3px; top:16px; width:2px; height:calc(100% + 8px); background:#c4c5d9; }
+        .timeline-item:last-child::after { display:none; }
+        .tab-active { color: #003527; border-bottom: 2px solid #003527; font-weight: 600; }
+        .tab-inactive { color: #6b6f76; border-bottom: 2px solid transparent; }
+        .tab-inactive:hover { color: #003527; }
+            .active-tab { color: #064e3b; border-bottom: 2px solid #064e3b; font-weight: 700; }
+    </style>
+</head>
+<body class="bg-surface min-h-screen">
+
+    <!-- Navigation -->
+    
+    
+    <nav class="fixed top-0 w-full z-50 bg-white h-14 border-b border-outline-variant/50 transition-all duration-300">
+        <div class="flex justify-between items-center w-full px-4 lg:px-10 max-w-[1440px] mx-auto h-full">
+            <a href="../common/首页着陆页.html" class="font-bold text-[22px] tracking-tight text-primary-container shrink-0">智聘星图</a>
+            <div class="hidden lg:flex items-center gap-6 xl:gap-8">
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="../common/首页着陆页.html">探索</a>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="职位推荐.html">职位推荐</a>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="职位搜索.html">职位搜索</a>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="简历中心.html">简历中心</a>
+                <div class="relative" id="interviewDD-wrap-desk">
+                    <button onclick="toggleInterviewDD(event, 'desk')" class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap cursor-pointer flex items-center gap-0.5">
+                        面试功能
+                        <span class="material-symbols-outlined text-sm transition-transform" id="interview-arrow-desk">expand_more</span>
+                    </button>
+                    <div id="interviewDD-desk" class="hidden absolute left-0 top-full mt-1 w-36 bg-white rounded-xl shadow-2xl border border-outline-variant/30 z-50 overflow-hidden">
+                        <a href="模拟面试.html" class="block px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors">智能面试</a>
+                        <a href="面试记录.html" class="block px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors">面试记录</a>
+                    </div>
+                </div>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="社交.html">社交</a>
+            </div>
+            <div class="flex items-center gap-2 lg:gap-3">
+                <a href="通知中心.html" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer hidden xl:block" title="通知中心">notifications</a>
+                <div class="hidden xl:flex items-center bg-surface-container rounded-full px-3 py-1.5 border border-outline-variant/60">
+                    <span class="material-symbols-outlined text-outline text-base">search</span>
+                    <input class="bg-transparent border-none focus:ring-0 text-sm w-32 ml-1 text-on-surface placeholder-on-surface-variant/60" placeholder="搜索职位..." type="text"/>
+                </div>
+                <div id="nav-guest" class="flex items-center gap-2">
+                    <a href="../common/登录.html" class="text-primary-container font-medium text-[13px] px-3 py-1.5 hover:bg-surface-container rounded-full transition-all hidden sm:inline-block">登录</a>
+                    <a href="../common/注册.html" class="bg-primary-container text-on-primary font-medium text-[13px] px-4 py-1.5 rounded-full hover:opacity-90 transition-all hidden sm:inline-block">注册</a>
+                </div>
+                <div id="nav-user" class="hidden items-center gap-3">
+                    <div class="relative">
+                        <div id="user-dropdown-trigger" class="flex items-center gap-2 cursor-pointer hover:bg-surface-container rounded-full px-3 py-1.5 transition-all">
+                            <div id="user-avatar" class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-xs font-bold">Q</div>
+                            <span id="user-nickname" class="text-sm font-medium text-on-surface hidden xl:inline-block">求职小能手</span>
+                            <span class="material-symbols-outlined text-sm text-on-surface-variant">expand_more</span>
+                        </div>
+                        <div id="user-dropdown" class="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-outline-variant/30 py-2 z-50 hidden">
+                            <a href="个人中心.html" class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-primary-container/10 hover:text-primary transition-colors"><span class="material-symbols-outlined text-base">person</span><span>个人中心</span></a>
+                            <a href="面试记录.html" class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-primary-container/10 hover:text-primary transition-colors"><span class="material-symbols-outlined text-base">calendar_today</span><span>我的面试</span></a>
+                            <div class="border-t border-outline-variant/20 my-1"></div>
+                            <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"><span class="material-symbols-outlined text-base">logout</span><span>退出登录</span></button>
+                        </div>
+                    </div>
+                </div>
+                <button id="mobile-menu-btn" class="lg:hidden p-1.5 hover:bg-surface-container rounded-lg transition-colors" onclick="toggleMobileMenu()"><span class="material-symbols-outlined text-on-surface text-xl">menu</span></button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-outline-variant/50 shadow-lg">
+            <div class="flex flex-col px-4 py-3 gap-1">
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="../common/首页着陆页.html">探索</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="职位推荐.html">职位推荐</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="职位搜索.html">职位搜索</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="简历中心.html">简历中心</a>
+                <div class="relative" id="interviewDD-wrap-mob">
+                    <button onclick="toggleInterviewDD(event, 'mob')" class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all cursor-pointer flex items-center justify-between w-full">
+                        面试功能
+                        <span class="material-symbols-outlined text-base transition-transform" id="interview-arrow-mob">expand_more</span>
+                    </button>
+                    <div id="interviewDD-mob" class="hidden ml-4 space-y-0.5 mt-0.5">
+                        <a href="模拟面试.html" class="block py-2 px-3 text-sm text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">智能面试</a>
+                        <a href="面试记录.html" class="block py-2 px-3 text-sm text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">面试记录</a>
+                    </div>
+                </div>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="社交.html">社交</a>
+                <div class="border-t border-outline-variant/30 my-2"></div>
+                <div id="mobile-guest" class="flex gap-2">
+                    <a href="../common/登录.html" class="flex-1 text-center text-primary-container font-medium text-sm py-2.5 border border-outline-variant/40 rounded-lg hover:bg-surface-container transition-all">登录</a>
+                    <a href="../common/注册.html" class="flex-1 text-center bg-primary-container text-on-primary font-medium text-sm py-2.5 rounded-lg hover:opacity-90 transition-all">注册</a>
+                </div>
+                <div id="mobile-user" class="hidden items-center gap-3 px-3 py-2">
+                    <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-sm font-bold" id="mobile-avatar">Q</div>
+                    <span class="text-sm font-medium text-on-surface flex-1" id="mobile-nickname">求职小能手</span>
+                    <button onclick="logout()" class="text-on-surface-variant hover:text-red-500 transition-all"><span class="material-symbols-outlined text-lg">logout</span></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-8">
+        <div class="w-full px-4 lg:px-10 max-w-[960px] mx-auto">
+
+            <!-- ========== 头像 + 基本信息 ========== -->
+            <section class="py-6 border-b border-outline-variant/30">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-start gap-5">
+                        <div id="header-avatar" class="w-20 h-20 rounded-xl bg-surface-container border border-outline-variant/30 flex items-center justify-center text-3xl font-bold text-on-surface-variant overflow-hidden flex-shrink-0">
+                            <img id="avatar-img" class="w-full h-full object-cover hidden" src="" alt="">
+                            <span id="avatar-letter">Q</span>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-3 mb-2">
+                                <h1 class="text-2xl font-bold text-on-surface" id="header-name">未填写</h1>
+                                <span class="px-2.5 py-0.5 rounded text-xs font-medium bg-[#dbeafe] text-[#1e3a8a]">学生</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 text-sm text-on-surface-variant flex-wrap">
+                                <span>男</span><span class="text-outline-variant mx-1">|</span>
+                                <span>22岁</span><span class="text-outline-variant mx-1">|</span>
+                                <span>成都</span><span class="text-outline-variant mx-1">|</span>
+                                <span>28年应届生</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 text-sm text-on-surface-variant mt-1">
+                                <span class="material-symbols-outlined text-base text-on-surface-variant">call</span>
+                                <span>151****0923</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="flex items-center gap-1 text-sm text-on-surface-variant hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-lg">edit</span>
+                        编辑
+                    </button>
+                </div>
+            </section>
+
+            <!-- ========== 个人优势 ========== -->
+            <section class="py-6 border-b border-outline-variant/30">
+                <div class="flex items-center gap-2 mb-4">
+                    <h2 class="text-xl font-bold text-on-surface">个人优势</h2>
+                   
+                </div>
+                <div id="personalStrengths" class="p-8 border-2 border-dashed border-outline-variant/40 rounded-xl text-center cursor-pointer hover:border-primary/40 hover:bg-surface-container/50 transition-all">
+                    <span class="material-symbols-outlined text-3xl text-on-surface-variant/30 mb-2 block">add</span>
+                    <span class="text-sm text-on-surface-variant/60">添加个人优势</span>
+                </div>
+            </section>
+
+            <!-- ========== 求职状态 ========== -->
+            <section class="py-6 border-b border-outline-variant/30">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-xl font-bold text-on-surface">求职状态</h2>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#f8d7da] text-[#721c24]">必填</span>
+                    </div>
+                    <button class="flex items-center gap-1 text-sm text-on-surface-variant hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-lg">edit</span>
+                        编辑
+                    </button>
+                </div>
+                <p class="text-on-surface" id="job-status-text">在校-看看机会</p>
+            </section>
+
+            <!-- ========== 求职意向 ========== -->
+            <section class="py-6 border-b border-outline-variant/30">
+                <div class="flex items-center gap-2 mb-4">
+                    <h2 class="text-xl font-bold text-on-surface">求职意向</h2>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#f8d7da] text-[#721c24]">必填</span>
+                </div>
+                <div id="job-intention-content">
+                    <p class="text-on-surface mb-4" id="intention-positions">未填写</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2 text-sm">
+                        <div class="flex items-center"><span class="text-on-surface-variant w-20 flex-shrink-0">薪资要求:</span><span class="text-on-surface" id="intention-salary">未填写</span></div>
+                        <div class="flex items-center"><span class="text-on-surface-variant w-20 flex-shrink-0">期望城市:</span><span class="text-on-surface" id="intention-cities">未填写</span></div>
+                        <div class="flex items-center"><span class="text-on-surface-variant w-20 flex-shrink-0">工作性质:</span><span class="text-on-surface" id="intention-worktype">未填写</span></div>
+                        <div class="flex items-center"><span class="text-on-surface-variant w-20 flex-shrink-0">期望行业:</span><span class="text-on-surface" id="intention-industry">未填写</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== 教育经历 ========== -->
+            <section class="py-6 border-b border-outline-variant/30">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-xl font-bold text-on-surface">教育经历</h2>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#f8d7da] text-[#721c24]">必填</span>
+                    </div>
+                    <button class="flex items-center gap-1.5 px-4 py-2 border border-outline-variant rounded-full text-sm font-medium text-on-surface hover:bg-surface-container transition-all">
+                        <span class="material-symbols-outlined text-base">add</span>
+                        添加教育经历
+                    </button>
+                </div>
+                <div id="education-list"></div>
+            </section>
+
+            <!-- ========== 工作/实习经历 ========== -->
+            <section class="py-6 border-b border-outline-variant/30">
+                <div class="flex items-center gap-2 mb-4">
+                    <h2 class="text-xl font-bold text-on-surface">工作 / 实习经历</h2>
+            
+                </div>
+                <div id="work-list"></div>
+                <div class="p-8 border-2 border-dashed border-outline-variant/40 rounded-xl text-center cursor-pointer hover:border-primary/40 hover:bg-surface-container/50 transition-all">
+                    <span class="material-symbols-outlined text-3xl text-on-surface-variant/30 mb-2 block">add</span>
+                    <span class="text-sm text-on-surface-variant/60">添加工作经验</span>
+                </div>
+            </section>
+
+            <!-- ========== 项目经历 ========== -->
+            <section class="py-6 border-b border-outline-variant/30">
+                <div class="flex items-center gap-2 mb-1">
+                    <h2 class="text-xl font-bold text-on-surface">项目经历</h2>
+                </div>
+                <p class="text-sm text-on-surface-variant mb-4">填写兼职、社会实践、校内活动等内容，展示你的丰富经历</p>
+                <div id="project-list"></div>
+                <div class="p-8 border-2 border-dashed border-outline-variant/40 rounded-xl text-center cursor-pointer hover:border-primary/40 hover:bg-surface-container/50 transition-all">
+                    <span class="material-symbols-outlined text-3xl text-on-surface-variant/30 mb-2 block">add</span>
+                    <span class="text-sm text-on-surface-variant/60">添加项目经历</span>
+                </div>
+            </section>
+
+            <!-- ========== 培训经历 ========== -->
+            <section class="py-6 border-b border-outline-variant/30">
+                <h2 class="text-xl font-bold text-on-surface mb-4">培训经历</h2>
+                <div id="training-list"></div>
+                <div class="p-8 border-2 border-dashed border-outline-variant/40 rounded-xl text-center cursor-pointer hover:border-primary/40 hover:bg-surface-container/50 transition-all">
+                    <span class="material-symbols-outlined text-3xl text-on-surface-variant/30 mb-2 block">add</span>
+                    <span class="text-sm text-on-surface-variant/60">添加培训经历</span>
+                </div>
+            </section>
+
+            <!-- ========== 语言能力 ========== -->
+            <section class="py-6 border-b border-outline-variant/30">
+                <h2 class="text-xl font-bold text-on-surface mb-4">语言能力</h2>
+                <div id="language-list"></div>
+                <div class="p-8 border-2 border-dashed border-outline-variant/40 rounded-xl text-center cursor-pointer hover:border-primary/40 hover:bg-surface-container/50 transition-all">
+                    <span class="material-symbols-outlined text-3xl text-on-surface-variant/30 mb-2 block">add</span>
+                    <span class="text-sm text-primary font-medium">添加语言能力</span>
+                </div>
+            </section>
+
+            <!-- ========== 专业技能 ========== -->
+            <section class="py-6 border-b border-outline-variant/30">
+                <h2 class="text-xl font-bold text-on-surface mb-4">专业技能</h2>
+                <div id="skills-list" class="flex flex-wrap gap-2 mb-4"></div>
+                <div class="p-8 border-2 border-dashed border-outline-variant/40 rounded-xl text-center cursor-pointer hover:border-primary/40 hover:bg-surface-container/50 transition-all">
+                    <span class="material-symbols-outlined text-3xl text-on-surface-variant/30 mb-2 block">add</span>
+                    <span class="text-sm text-on-surface-variant/60">添加专业技能</span>
+                </div>
+            </section>
+
+            <!-- ========== 证书 ========== -->
+            <section class="py-6 border-b border-outline-variant/30">
+                <h2 class="text-xl font-bold text-on-surface mb-4">证书</h2>
+                <div id="cert-list"></div>
+                <div class="p-8 border-2 border-dashed border-outline-variant/40 rounded-xl text-center cursor-pointer hover:border-primary/40 hover:bg-surface-container/50 transition-all">
+                    <span class="material-symbols-outlined text-3xl text-on-surface-variant/30 mb-2 block">add</span>
+                    <span class="text-sm text-on-surface-variant/60">添加证书</span>
+                </div>
+            </section>
+
+            <!-- ========== 个人作品 ========== -->
+            <section class="py-6 border-b border-outline-variant/30">
+                <div class="flex items-center gap-3 mb-4">
+                    <h2 class="text-xl font-bold text-on-surface">个人作品</h2>
+                    <span class="text-sm text-on-surface-variant">您最多可在此上传10个附件</span>
+                </div>
+                <div id="portfolio-list"></div>
+                <div class="p-8 border-2 border-dashed border-outline-variant/40 rounded-xl text-center cursor-pointer hover:border-primary/40 hover:bg-surface-container/50 transition-all">
+                    <span class="material-symbols-outlined text-3xl text-on-surface-variant/30 mb-2 block">add</span>
+                    <span class="text-sm text-on-surface-variant/60">添加附件</span>
+                </div>
+            </section>
+
+            <!-- ========== 学生干部经历 ========== -->
+            <section class="py-6">
+                <h2 class="text-xl font-bold text-on-surface mb-4">学生干部经历</h2>
+                <div id="student-leader-list"></div>
+                <div class="p-8 border-2 border-dashed border-outline-variant/40 rounded-xl text-center cursor-pointer hover:border-primary/40 hover:bg-surface-container/50 transition-all">
+                    <span class="material-symbols-outlined text-3xl text-on-surface-variant/30 mb-2 block">add</span>
+                    <span class="text-sm text-on-surface-variant/60">添加学生干部经历</span>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-surface-container-lowest border-t border-outline-variant w-full py-12 mt-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 lg:px-10 max-w-[1440px] mx-auto">
+            <div>
+                <div class="font-bold text-3xl text-on-surface mb-3">智聘星图</div>
+                <p class="text-on-surface-variant">AI 驱动的智能招聘平台<br>基于银河麒麟 · 人大金仓 · DeepSeek</p>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">平台</h4>
+                <div class="flex flex-col gap-1 text-secondary text-sm">
+                    <a href="../common/首页着陆页.html" class="hover:text-primary transition-colors">品牌宣言</a>
+                    <a href="职位推荐.html" class="hover:text-primary transition-colors">精选职位</a>
+                    <a href="能力图谱.html" class="hover:text-primary transition-colors">能力图谱</a>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">支持</h4>
+                <div class="flex flex-col gap-1 text-secondary text-sm">
+                    <a href="#" class="hover:text-primary transition-colors">隐私政策</a>
+                    <a href="#" class="hover:text-primary transition-colors">联系支持</a>
+                    <a href="#" class="hover:text-primary transition-colors">常见问题</a>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-6 text-sm text-on-surface-variant">&copy; 2024 智聘星图. 策就领导力的未来。</div>
+    </footer>
+
+    <script>
+        // === 默认演示数据 ===
+        var defaultProfile = {
+            name: '', gender: '', age: '', city: '', phone: '', graduationYear: '',
+            strengths: '',
+            jobStatus: '',
+            intention: { positions: '', salary: '', cities: '', worktype: '', industry: '' },
+            education: [],
+            work: [],
+            projects: [],
+            training: [],
+            languages: [],
+            skills: [],
+            certificates: [],
+            portfolio: [],
+            studentLeader: []
+        };
+
+        // === 读取简历数据 ===
+        function loadResumeData() {
+            try {
+                var raw = localStorage.getItem('zhihire_resume');
+                if (raw) return JSON.parse(raw);
+            } catch (e) {}
+            return null;
+        }
+
+        // === 合并用户数据 ===
+        function getUserProfile() {
+            var resume = loadResumeData();
+            var profile = Object.assign({}, defaultProfile);
+            if (resume) {
+                if (resume.name) profile.name = resume.name;
+                if (resume.education) profile.education = resume.education;
+                if (resume.skills && resume.skills.length) profile.skills = resume.skills;
+                if (resume.experience && resume.experience.length) profile.work = resume.experience;
+                if (resume.city) profile.city = resume.city;
+                if (resume.targetJob) profile.intention.positions = resume.targetJob;
+                if (resume.school) profile.education = [{ school: resume.school, degree: resume.education || '', major: '', period: '' }];
+                if (resume.industry) profile.intention.industry = resume.industry;
+                if (resume.years) profile.intention.worktype = resume.years + ' 年';
+            }
+            return profile;
+        }
+
+        // === 渲染个人中心 ===
+        function renderProfile(profile) {
+            // Header
+            if (profile.name) document.getElementById('header-name').textContent = profile.name;
+
+            // 个人优势
+            if (profile.strengths) {
+                document.getElementById('personalStrengths').innerHTML = '<p class="text-on-surface text-sm leading-relaxed">' + profile.strengths + '</p>';
+            }
+
+            // 求职状态
+            if (profile.jobStatus) {
+                document.getElementById('job-status-text').textContent = profile.jobStatus;
+            }
+
+            // 求职意向
+            if (profile.intention) {
+                if (profile.intention.positions) document.getElementById('intention-positions').textContent = profile.intention.positions;
+                if (profile.intention.salary) document.getElementById('intention-salary').textContent = profile.intention.salary;
+                if (profile.intention.cities) document.getElementById('intention-cities').textContent = profile.intention.cities;
+                if (profile.intention.worktype) document.getElementById('intention-worktype').textContent = profile.intention.worktype;
+                if (profile.intention.industry) document.getElementById('intention-industry').textContent = profile.intention.industry;
+            }
+
+            // 教育经历
+            if (profile.education && profile.education.length) {
+                var eduEl = document.getElementById('education-list');
+                eduEl.innerHTML = profile.education.map(function(e) {
+                    return '<div class="flex items-start gap-3 mb-3">' +
+                        '<span class="text-on-surface font-medium">' + (e.school || '') + '</span>' +
+                        '<span class="text-on-surface-variant ml-4">' + (e.degree || '') + ' ｜ ' + (e.major || '') + '  ' + (e.period || '') + '</span>' +
+                    '</div>';
+                }).join('');
+            }
+
+            // 工作/实习经历
+            if (profile.work && profile.work.length) {
+                var workEl = document.getElementById('work-list');
+                workEl.innerHTML = profile.work.map(function(w) {
+                    return '<div class="mb-3 pb-3 border-b border-outline-variant/20">' +
+                        '<div class="font-medium text-on-surface">' + (w.title || '') + '</div>' +
+                        '<div class="text-sm text-on-surface-variant">' + (w.company || '') + ' · ' + (w.period || '') + '</div>' +
+                        (w.desc ? '<p class="text-sm text-on-surface-variant mt-1">' + w.desc + '</p>' : '') +
+                    '</div>';
+                }).join('');
+            }
+
+            // 项目经历
+            if (profile.projects && profile.projects.length) {
+                var projEl = document.getElementById('project-list');
+                projEl.innerHTML = profile.projects.map(function(p) {
+                    return '<div class="mb-3 pb-3 border-b border-outline-variant/20">' +
+                        '<div class="font-medium text-on-surface">' + (p.name || '') + '</div>' +
+                        '<p class="text-sm text-on-surface-variant mt-1">' + (p.desc || '') + '</p>' +
+                    '</div>';
+                }).join('');
+            }
+
+            // 培训经历
+            if (profile.training && profile.training.length) {
+                var trainEl = document.getElementById('training-list');
+                trainEl.innerHTML = profile.training.map(function(t) {
+                    return '<div class="mb-3 pb-3 border-b border-outline-variant/20">' +
+                        '<div class="font-medium text-on-surface">' + (t.name || '') + '</div>' +
+                        '<div class="text-sm text-on-surface-variant">' + (t.period || '') + '</div>' +
+                    '</div>';
+                }).join('');
+            }
+
+            // 语言能力
+            if (profile.languages && profile.languages.length) {
+                var langEl = document.getElementById('language-list');
+                langEl.innerHTML = profile.languages.map(function(l) {
+                    return '<div class="flex items-center gap-3 mb-2">' +
+                        '<span class="text-on-surface font-medium">' + (l.name || '') + '</span>' +
+                        '<span class="text-on-surface-variant text-sm">' + (l.level || '') + '</span>' +
+                    '</div>';
+                }).join('');
+            }
+
+            // 专业技能
+            if (profile.skills && profile.skills.length) {
+                var skillsEl = document.getElementById('skills-list');
+                var chipTypes = ['chip-primary', 'chip-success', 'chip-neutral'];
+                skillsEl.innerHTML = profile.skills.map(function(s, i) {
+                    return '<span class="chip ' + chipTypes[i % chipTypes.length] + '">' + s + '</span>';
+                }).join('');
+            }
+
+            // 证书
+            if (profile.certificates && profile.certificates.length) {
+                var certEl = document.getElementById('cert-list');
+                certEl.innerHTML = profile.certificates.map(function(c) {
+                    return '<div class="mb-2 pb-2 border-b border-outline-variant/20">' +
+                        '<span class="text-on-surface font-medium">' + (c.name || '') + '</span>' +
+                    '</div>';
+                }).join('');
+            }
+
+            // 个人作品
+            if (profile.portfolio && profile.portfolio.length) {
+                var portEl = document.getElementById('portfolio-list');
+                portEl.innerHTML = profile.portfolio.map(function(p) {
+                    return '<div class="mb-2 pb-2 border-b border-outline-variant/20">' +
+                        '<span class="text-on-surface font-medium">' + (p.name || '') + '</span>' +
+                    '</div>';
+                }).join('');
+            }
+
+            // 学生干部经历
+            if (profile.studentLeader && profile.studentLeader.length) {
+                var slEl = document.getElementById('student-leader-list');
+                slEl.innerHTML = profile.studentLeader.map(function(s) {
+                    return '<div class="mb-3 pb-3 border-b border-outline-variant/20">' +
+                        '<div class="font-medium text-on-surface">' + (s.role || '') + '</div>' +
+                        '<div class="text-sm text-on-surface-variant">' + (s.org || '') + ' · ' + (s.period || '') + '</div>' +
+                    '</div>';
+                }).join('');
+            }
+        }
+
+        // === 登录状态管理 ===
+        function toggleMobileMenu() {
+            var menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function syncLoginState() {
+            var isLoggedIn = localStorage.getItem('loggedIn') === 'true';
+            var userNickname = localStorage.getItem('userNickname') || '用户';
+            var userAvatar = localStorage.getItem('userAvatar') || 'U';
+
+            if (isLoggedIn) {
+                document.getElementById('nav-guest').classList.add('hidden');
+                document.getElementById('nav-user').classList.remove('hidden');
+                document.getElementById('nav-user').classList.add('flex');
+                document.getElementById('user-avatar').textContent = userAvatar;
+                document.getElementById('user-nickname').textContent = userNickname;
+                var mg = document.getElementById('mobile-guest');
+                var mu = document.getElementById('mobile-user');
+                if (mg) mg.classList.add('hidden');
+                if (mu) { mu.classList.remove('hidden'); mu.classList.add('flex'); }
+                var ma = document.getElementById('mobile-avatar');
+                var mn = document.getElementById('mobile-nickname');
+                if (ma) ma.textContent = userAvatar;
+                if (mn) mn.textContent = userNickname;
+
+                // Update header avatar and name
+                document.getElementById('avatar-letter').textContent = userAvatar;
+                document.getElementById('header-name').textContent = userNickname;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('loggedIn');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('userNickname');
+            localStorage.removeItem('userAvatar');
+            localStorage.removeItem('zhihire_resume');
+            window.location.href = '首页着陆页.html';
+        }
+
+        // === 搜索框焦点交互 ===
+        function initSearchFocus() {
+            var searchInputs = document.querySelectorAll('input[type="text"]');
+            searchInputs.forEach(function(input) {
+                input.addEventListener('focus', function() {
+                    input.parentElement.classList.add('ring-2', 'ring-primary-container/40');
+                });
+                input.addEventListener('blur', function() {
+                    input.parentElement.classList.remove('ring-2', 'ring-primary-container/40');
+                });
+            });
+        }
+
+        // === 页面初始化 ===
+        document.addEventListener('DOMContentLoaded', function() {
+            syncLoginState();
+            initSearchFocus();
+
+            var profile = getUserProfile();
+
+            // Render all sections
+            renderProfile(profile);
+        });
+
+        function toggleUserDropdown(e) {
+            e.stopPropagation();
+            var dd = document.getElementById('user-dropdown');
+            dd.classList.toggle('hidden');
+        }
+        function closeUserDropdown() {
+            var dd = document.getElementById('user-dropdown');
+            if (dd) dd.classList.add('hidden');
+        }
+        document.addEventListener('click', function(e) {
+            var trigger = document.getElementById('user-dropdown-trigger');
+            if (trigger && !trigger.contains(e.target)) closeUserDropdown();
+        });
+        function _OLD_REMOVED(e, suffix) {
+            e.stopPropagation();
+            var dd = document.getElementById('interviewDD-' + suffix);
+            var arrow = document.getElementById('interview-arrow-' + suffix);
+            dd.classList.toggle('hidden');
+            if (arrow) arrow.style.transform = dd.classList.contains('hidden') ? '' : 'rotate(180deg)';
+        }
+        function closeInterviewDD(suffix) {
+            var dd = document.getElementById('interviewDD-' + suffix);
+            var arrow = document.getElementById('interview-arrow-' + suffix);
+            if (dd) dd.classList.add('hidden');
+            if (arrow) arrow.style.transform = '';
+        }
+        document.addEventListener('click', function(e) {
+            ['desk', 'mob'].forEach(function(s) {
+                var wrap = document.getElementById('interviewDD-wrap-' + s);
+                if (wrap && !wrap.contains(e.target)) closeInterviewDD(s);
+            });
+        });
+    </script>
+    <script>
+        function toggleInterviewDD(e, suffix) {
+            e.stopPropagation();
+            var dd = document.getElementById('interviewDD-' + suffix);
+            var arrow = document.getElementById('interview-arrow-' + suffix);
+            if (dd) dd.classList.toggle('hidden');
+            if (arrow) arrow.style.transform = dd && dd.classList.contains('hidden') ? '' : 'rotate(180deg)';
+        }
+        function closeInterviewDD(suffix) {
+            var dd = document.getElementById('interviewDD-' + suffix);
+            var arrow = document.getElementById('interview-arrow-' + suffix);
+            if (dd) dd.classList.add('hidden');
+            if (arrow) arrow.style.transform = '';
+        }
+        document.addEventListener('click', function(e) {
+            ['desk', 'mob'].forEach(function(s) {
+                var wrap = document.getElementById('interviewDD-wrap-' + s);
+                if (wrap && !wrap.contains(e.target)) closeInterviewDD(s);
+            });
+        });
+        function toggleMobileMenu() {
+            var menu = document.getElementById('mobile-menu');
+            if (menu) menu.classList.toggle('hidden');
+        }
+        function logout() {
+            localStorage.removeItem('loggedIn');
+            window.location.href = '../common/登录.html';
+        }
+    </script>
+</body>
+</html>

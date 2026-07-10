@@ -1,278 +1,368 @@
-<script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+﻿<script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import * as echarts from 'echarts'
-import { BarChart3, Lightbulb, TrendingUp, Briefcase, Loader2 } from 'lucide-vue-next'
+import { BarChart3, Lightbulb, Briefcase, Loader2 } from 'lucide-vue-next'
+import { ElMessage } from 'element-plus'
 import { getUserGraph, listRoles } from '@/api/graph'
-import type { GraphNode, GraphEdge, GapSkill, OccupationRole, UserGraphResult } from '@/types/graph'
+import type { OccupationRole, UserGraphResult } from '@/types/graph'
 
-const chartRef = ref<HTMLElement>()
-let chart: echarts.ECharts | null = null
+const chartRefSunburst = ref<HTMLElement>()
+let chartSunburst: echarts.ECharts | null = null
 const loading = ref(true)
 const rolesLoading = ref(true)
 const gapLoading = ref(false)
+const chartFullscreen = ref(false)
 const error = ref('')
-const graphData = ref<UserGraphResult>({ nodes: [], edges: [], gap_skills: [] })
-const gapGraphData = ref<UserGraphResult>({ nodes: [], edges: [], gap_skills: [] })
+const graphData = ref<UserGraphResult>({ nodes: [], edges: [], gap_skills: [], state: 'empty', categories: [] })
+const gapGraphData = ref<UserGraphResult>({ nodes: [], edges: [], gap_skills: [], state: 'empty', categories: [] })
 const roles = ref<OccupationRole[]>([])
-const selectedRoleId = ref<number | null>(null)
+const selectedRoleId = ref(0)
+const gapExpanded = ref(false)
 
-const categoryColors: Record<string, string> = {
-  "后端": '#5470C6', "前端": '#91CC75', "测试": '#FAC858',
-  "运维": '#EE6666', "数据": '#73C0DE', "算法": '#3BA272',
-  "移动端": '#FC8452', "通用": '#9A60B4',
-}
-
-const edgeStyleMap: Record<string, { type: string; color: string; curveness: number }> = {
-  'PREREQUISITE': { type: 'solid', color: '#5470C6', curveness: 0.1 },
-  'INCLUDES': { type: 'dashed', color: '#91CC75', curveness: 0.2 },
-  'SIMILAR': { type: 'dotted', color: '#FAC858', curveness: 0.15 },
-  'COMPLEMENTARY': { type: 'solid', color: '#9A60B4', curveness: 0.3 },
-}
-
-function getCategoryColor(cat: string | null): string {
-  return (cat && categoryColors[cat]) || '#9A60B4'
-}
-
+const colorMap = computed(() => {
+  const m: Record<string, string> = {}
+  for (const cat of graphData.value.categories) m[cat.name] = cat.color
+  return m
+})
 const categoryStats = computed(() => {
   const stats: Record<string, number> = {}
   for (const n of graphData.value.nodes) {
-    const cat = n.category || "通用"
+    const cat = n.category || '通用'
     stats[cat] = (stats[cat] || 0) + 1
   }
   return stats
 })
+function getCategoryColor(cat: string | null): string {
+  return (cat && colorMap.value[cat]) || '#9A60B4'
+}
 
-const levelDistribution = computed(() => {
-  let expert = 0, proficient = 0, basic = 0
-  for (const n of graphData.value.nodes) {
-    if (n.level >= 4) expert++
-    else if (n.level >= 2.5) proficient++
-    else basic++
-  }
-  return { "精通": expert, "熟练": proficient, "了解": basic }
-})
-
-const gapSkills = computed(() => {
-  if (selectedRoleId.value == null) return []
-  return gapGraphData.value.gap_skills || []
-})
-
+const gapSkills = computed(() => selectedRoleId.value <= 0 ? [] : gapGraphData.value.gap_skills || [])
 const gapMustSkills = computed(() => gapSkills.value.filter(g => g.requirement_level === 'MUST'))
-const gapBetterSkills = computed(() => gapSkills.value.filter(g => g.requirement_level === 'BETTER'))
-const gapOptionalSkills = computed(() => gapSkills.value.filter(g => g.requirement_level === 'OPTIONAL'))
+const gapNiceSkills = computed(() => gapSkills.value.filter(g => g.requirement_level === 'NICE'))
+const gapBonusSkills = computed(() => gapSkills.value.filter(g => g.requirement_level === 'BONUS'))
+const matchCount = computed(() => selectedRoleId.value <= 0 ? 0 : graphData.value.nodes.filter((n) => !new Set(gapSkills.value.map(g => g.skill_name)).has(n.name)).length)
+const coveragePercent = computed(() => { const t = matchCount.value + gapSkills.value.length; return t === 0 ? 0 : Math.round((matchCount.value / t) * 100) })
 
-const matchCount = computed(() => {
-  if (selectedRoleId.value == null) return 0
-  const gapNames = new Set(gapSkills.value.map(g => g.skill_name))
-  return graphData.value.nodes.filter(n => !gapNames.has(n.name)).length
-})
+const topCategory = computed(() => Object.entries(categoryStats.value).sort((a, b) => b[1] - a[1])[0])
 
-const coveragePercent = computed(() => {
-  const total = matchCount.value + gapSkills.value.length
-  return total === 0 ? 0 : Math.round((matchCount.value / total) * 100)
-})
+function initSunburstChart(data: UserGraphResult) {
+  if (!chartRefSunburst.value) return
+  let inst = chartSunburst
+  if (!inst) {
+    inst = echarts.init(chartRefSunburst.value)
+    chartSunburst = inst
+  } else {
+    inst.clear()
+  }
 
-onMounted(async () => {
-  await Promise.all([loadGraph(), loadRoles()])
-  loading.value = false
-  nextTick(() => renderGraph())
-})
+  const root = data.sunburst_data || {
+    name: '能力图谱',
+    itemStyle: { color: '#1a3a5c' },
+    children: data.categories.map((c) => ({ name: c.name, itemStyle: { color: c.color }, children: [] })),
+  }
 
-onUnmounted(() => { chart?.dispose() })
-
-async function loadGraph() {
-  try {
-    const resp = await getUserGraph()
-    graphData.value = resp.data.data
-  } catch { error.value = "加载技能图谱失败" }
+  inst.setOption({
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: 'rgba(255,255,255,0.96)',
+      borderColor: '#e8e8e8',
+      borderWidth: 1,
+      padding: [12, 16],
+      textStyle: { color: '#303133', fontSize: 13 },
+      formatter: function(params: any) {
+        const name = params.name || '';
+        const val = params.value || 0;
+        if (params.treePathInfo && params.treePathInfo.length >= 3) {
+          const category = params.treePathInfo[1]?.name || '';
+          return '<strong style="font-size:15px;color:#1a1a2e;">' + name + '</strong><br/>' +
+            '<span style="color:#999">分类</span><span style="float:right">' + category + '</span><br/>' +
+            '<span style="color:#999">熟练度</span><span style="float:right">' + val.toFixed(1) + ' / 5.0</span>';
+        }
+        if (params.treePathInfo && params.treePathInfo.length === 2) {
+          const childCount = params.treePathInfo[1]?.children?.length || 0;
+          return '<strong style="font-size:15px;color:#1a1a2e;">' + name + '</strong><br/>' +
+            '<span style="color:#999">技能数</span><span style="float:right">' + childCount + '</span>';
+        }
+        return name;
+      },
+    },
+    series: [{
+      type: 'sunburst',
+      data: [root],
+      radius: ['0%', '95%'],
+      sort: 'asc',
+      emphasis: { focus: 'ancestor' },
+      levels: [{}, {
+        r0: '12%',
+        r: '35%',
+        label: { rotate: 'tangential', fontSize: 14, fontWeight: 700, color: '#fff', textShadowBlur: 3, textShadowColor: 'rgba(0,0,0,0.5)' },
+      }, {
+        r0: '35%',
+        r: '80%',
+        label: { rotate: 'tangential', fontSize: 12, color: '#fff', textShadowBlur: 3, textShadowColor: 'rgba(0,0,0,0.5)' },
+      }],
+      label: {
+        rotate: 'tangential', color: '#fff', fontSize: 12, fontWeight: 600,
+        textShadowBlur: 4, textShadowColor: 'rgba(0,0,0,0.3)',
+      },
+      itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 },
+      animationDuration: 1000,
+      animationEasing: 'elasticOut',
+    }],
+  })
 }
 
-async function loadRoles() {
+async function fetchGraph() {
+  loading.value = true; error.value = ''
   try {
-    const resp = await listRoles()
-    roles.value = resp.data.data
-  } catch {} finally { rolesLoading.value = false }
+    const res = await getUserGraph()
+    const d = res.data.data || {}
+    graphData.value = { nodes: d.nodes || [], edges: d.edges || [], gap_skills: d.gap_skills || [], state: d.state || (d.nodes && d.nodes.length ? 'ready' : 'empty'), categories: d.categories || [], sunburst_data: d.sunburst_data }
+    await nextTick()
+    initSunburstChart(graphData.value)
+  } catch (e) {
+    error.value = (e as any).message || '加载图谱失败'
+  } finally {
+    loading.value = false
+  }
 }
 
-async function selectRole(roleId: number | null) {
-  selectedRoleId.value = roleId
-  if (roleId == null) {
-    await loadGraph()
-    nextTick(() => renderGraph())
+async function fetchRoles() {
+  rolesLoading.value = true
+  try {
+    const res = await listRoles()
+    roles.value = res.data || []
+  } catch { roles.value = [] }
+  finally { rolesLoading.value = false }
+}
+
+async function handleRoleChange(roleId: number | null) {
+  if (roleId <= 0) {
+    selectedRoleId.value = null
+    gapGraphData.value = { nodes: [], edges: [], gap_skills: [], state: 'empty', categories: [] }
     return
   }
-  gapLoading.value = true
+  selectedRoleId.value = roleId; gapLoading.value = true
   try {
-    const resp = await getUserGraph(roleId)
-    gapGraphData.value = resp.data.data
-    graphData.value = resp.data.data
-    nextTick(() => renderGraph(graphData.value, gapGraphData.value.gap_skills))
-  } catch { ElMessage.error("加载差距分析失败") }
+    const res = await getUserGraph(roleId)
+    const gd = res.data || {}
+    gapGraphData.value = { nodes: gd.nodes || [], edges: gd.edges || [], gap_skills: gd.gap_skills || [], state: gd.state || (gd.nodes && gd.nodes.length ? 'ready' : 'empty'), categories: gd.categories || [] }
+    await nextTick()
+  } catch { ElMessage.error('加载差距分析失败') }
   finally { gapLoading.value = false }
 }
 
-function renderGraph(data?: UserGraphResult, highlightGaps: GapSkill[] = []) {
-  if (!chartRef.value) return
-  const d = data || graphData.value
-  const gapNames = new Set(highlightGaps.map(g => g.skill_name))
-  const catSet = new Set<string>()
-  for (const n of d.nodes) catSet.add(n.category || "通用")
-  const categories = Array.from(catSet).map(name => ({ name }))
-
-  const nodes = d.nodes.map(n => ({
-    id: n.id, name: n.name,
-    value: n.category || "通用",
-    category: n.category || "通用",
-    symbolSize: Math.max(20, Math.min(n.symbolSize || 30, 60)),
-    itemStyle: {
-      color: highlightGaps.length > 0
-        ? (gapNames.has(n.name) ? '#f56c6c' : getCategoryColor(n.category))
-        : getCategoryColor(n.category),
-    },
-    label: {
-      show: n.level >= 3 || gapNames.has(n.name),
-      formatter: n.name,
-      fontSize: 11, color: gapNames.has(n.name) ? '#f56c6c' : '#303133',
-    },
-  }))
-
-  const edges = d.edges.map(e => {
-    const style = edgeStyleMap[e.relation_type] || { type: 'solid', color: '#ccc', curveness: 0.1 }
-    return {
-      source: e.source, target: e.target,
-      lineStyle: { color: style.color, width: e.weight || 1.5, type: style.type as any, curveness: style.curveness },
-      label: { show: true, formatter: e.relation_type, fontSize: 9, color: style.color },
-    }
-  })
-
-  if (!chart) chart = echarts.init(chartRef.value)
-  chart.setOption({
-    backgroundColor: 'transparent',
-    tooltip: {},
-    legend: [{ data: categories.map(c => c.name), bottom: 0, textStyle: { fontSize: 11 } }],
-    series: [{
-      type: 'graph', layout: 'force',
-      categories, data: nodes, edges,
-      roam: true, draggable: true, focusNodeAdjacency: true,
-      force: { repulsion: 500, edgeLength: [120, 250], gravity: 0.1, friction: 0.1 },
-      lineStyle: { width: 1.5, opacity: 0.7 },
-      label: { show: false },
-      emphasis: { focus: 'adjacency', lineStyle: { width: 3 } },
-      zoom: 0.85,
-    }],
-  })
-  chart.resize()
+function toggleChartSize() {
+  chartFullscreen.value = !chartFullscreen.value
+  nextTick(() => { chartSunburst?.resize() })
 }
 
-import { ElMessage } from 'element-plus'
+function handleResize() { chartSunburst?.resize() }
+
+onMounted(() => { fetchGraph(); fetchRoles(); window.addEventListener('resize', handleResize) })
+onUnmounted(() => {
+  chartSunburst?.dispose(); chartSunburst = null
+  window.removeEventListener('resize', handleResize)
+})
+
+watch(() => gapExpanded.value, (val) => {
+  if (val) { nextTick(() => chartSunburst?.resize()) }
+})
 </script>
 
 <template>
-  <div class="ability-section">
+  <div class="ability-section" :class="{ 'is-fullscreen': chartFullscreen }">
     <div class="section-header">
-      <div class="section-title">
-        <BarChart3 :size="20" />
-        <span>能力图谱</span>
-      </div>
-      <div class="role-selector" v-if="roles.length">
-        <select v-model="selectedRoleId" @change="selectRole(selectedRoleId)" class="role-select">
-          <option :value="null">全部技能</option>
-          <option v-for="r in roles" :key="r.id" :value="r.id">{{ r.name }}</option>
-        </select>
+      <h2 class="section-title"><BarChart3 :size="18" /> 能力图谱</h2>
+      <span class="section-summary" v-if="graphData.nodes.length">
+        {{ graphData.nodes.length }} 项技能
+        <template v-for="(count, name) in categoryStats" :key="name">
+          · {{ name }} <strong>{{ count }}</strong>
+        </template>
+      </span>
+    </div>
+
+    <div v-if="loading && !graphData.nodes.length" class="center-state">
+      <Loader2 :size="28" class="spin" />
+      <p>加载中...</p>
+    </div>
+    <div v-else-if="error && !graphData.nodes.length" class="center-state err">
+      <p>{{ error }}</p>
+      <button class="retry-btn" @click="fetchGraph">重新加载</button>
+    </div>
+
+    <div v-else-if="graphData.nodes.length" class="chart-area" @dblclick="toggleChartSize">
+      <div ref="chartRefSunburst" class="chart-box" :class="{ 'maximized': chartFullscreen }"></div>
+      <div class="legend-row">
+        <span v-for="cat in (graphData.categories || [])" :key="cat.name" class="legend-chip">
+          <span class="legend-dot" :style="{ background: cat.color }" /> {{ cat.name }}
+        </span>
+        <span class="legend-hint">双击全屏 · 悬停查看技能详情</span>
       </div>
     </div>
 
-    <div v-if="loading" class="chart-loading"><Loader2 :size="28" class="spin" /></div>
-    <div v-else-if="error" class="chart-error">{{ error }}</div>
-    <template v-else>
-      <!-- Stats Row -->
-      <div class="stats-row">
-        <div class="stat-card" v-for="(count, name) in categoryStats" :key="name">
-          <span class="stat-dot" :style="{ background: getCategoryColor(name) }"></span>
-          <span class="stat-name">{{ name }}</span>
-          <span class="stat-count">{{ count }}</span>
-        </div>
+    <div v-else class="empty-chart">
+      <p>暂无图谱数据。请先在简历中心上传简历，系统将自动解析并生成能力图谱。</p>
+    </div>
+
+    <div v-if="topCategory && graphData.nodes.length" class="tip-row">
+      <Lightbulb :size="14" class="tip-icon" />
+      <span class="tip-text">
+        <strong>{{ topCategory[0] }}</strong> 技术栈完整度较高（{{ topCategory[1] }}项技能），建议横向拓展相邻领域补齐全栈能力。
+      </span>
+    </div>
+
+    <div class="gap-toggle" v-if="graphData.nodes.length" @click="gapExpanded = !gapExpanded">
+      <Briefcase :size="15" />
+      <span>技能缺口分析</span>
+      <span class="toggle-arrow" :class="{ open: gapExpanded }">&#9654;</span>
+    </div>
+
+    <div v-show="gapExpanded" class="gap-body">
+      <div class="gap-row">
+        <span class="gap-label">目标角色：</span>
+        <el-select v-model="selectedRoleId" placeholder="请选择目标岗位角色" :loading="rolesLoading" style="width: 220px" @change="handleRoleChange">
+          <el-option v-for="role in roles" :key="role.id" :label="role.name" :value="role.id">
+            <span>{{ role.name }}</span>
+            <span v-if="role.category" class="role-cat-tag">{{ role.category }}</span>
+          </el-option>
+        </el-select>
       </div>
 
-      <!-- Level Distribution -->
-      <div class="level-row">
-        <div class="level-item" v-for="(count, name) in levelDistribution" :key="name">
-          <span class="level-name">{{ name }}</span>
-          <span class="level-count">{{ count }}</span>
-        </div>
-        <div class="level-item" v-if="selectedRoleId != null">
-          <span class="level-name">岗位匹配</span>
-          <span class="level-count highlight">{{ coveragePercent }}%</span>
-        </div>
+      <div v-if="selectedRoleId <= 0" class="gap-placeholder">
+        <Briefcase :size="32" class="hint-icon" />
+        <p>选择目标岗位后自动分析技能差距</p>
       </div>
 
-      <!-- ECharts Graph -->
-      <div ref="chartRef" class="chart-container"></div>
+      <div v-else-if="gapLoading" class="center-state">
+        <Loader2 :size="20" class="spin" />
+        <p>正在分析...</p>
+      </div>
 
-      <!-- Gap Skills -->
-      <div v-if="gapSkills.length && selectedRoleId != null" class="gap-section">
-        <div class="gap-title"><Lightbulb :size="16" /> 技能缺口分析</div>
-        <div class="gap-columns">
-          <div class="gap-col">
-            <h4 class="gap-col-title must">必需</h4>
-            <span v-for="g in gapMustSkills" :key="g.skill_name" class="gap-tag must">{{ g.skill_name }}</span>
-            <p v-if="!gapMustSkills.length" class="gap-empty">无</p>
+      <template v-else>
+        <div class="gap-stats">
+          <div class="target-job">
+            <strong>{{ roles.find(r => r.id === selectedRoleId)?.name || '未知岗位' }}</strong>
+            <span class="match-badge">匹配度 {{ coveragePercent }}%</span>
           </div>
-          <div class="gap-col">
-            <h4 class="gap-col-title better">加分</h4>
-            <span v-for="g in gapBetterSkills" :key="g.skill_name" class="gap-tag better">{{ g.skill_name }}</span>
-            <p v-if="!gapBetterSkills.length" class="gap-empty">无</p>
-          </div>
-          <div class="gap-col">
-            <h4 class="gap-col-title optional">可选</h4>
-            <span v-for="g in gapOptionalSkills" :key="g.skill_name" class="gap-tag optional">{{ g.skill_name }}</span>
-            <p v-if="!gapOptionalSkills.length" class="gap-empty">无</p>
+          <div class="gap-cards">
+            <div class="cov-card matched"><span class="cov-num">{{ matchCount }}</span> 已匹配</div>
+            <div class="cov-card miss"><span class="cov-num">{{ gapSkills.length }}</span> 缺口</div>
           </div>
         </div>
-      </div>
-    </template>
+
+        <div v-if="gapSkills.length" class="gap-lists">
+          <div v-if="gapMustSkills.length" class="gap-group">
+            <div class="gap-group-title"><span class="req-badge must">必备</span></div>
+            <div class="skill-tags">
+              <span v-for="s in gapMustSkills" :key="s.skill_name" class="skill-tag must">{{ s.skill_name }}</span>
+            </div>
+          </div>
+          <div v-if="gapNiceSkills.length" class="gap-group">
+            <div class="gap-group-title"><span class="req-badge nice">加分</span></div>
+            <div class="skill-tags">
+              <span v-for="s in gapNiceSkills" :key="s.skill_name" class="skill-tag nice">{{ s.skill_name }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="gapMustSkills.length" class="gap-ai-tip">
+          <Lightbulb :size="14" />
+          <span><strong>AI 建议</strong> 重点补齐 <strong>{{ gapMustSkills.slice(0, 3).map(s => s.skill_name).join('、') }}</strong> 等必备技能。</span>
+        </div>
+      </template>
+    </div>
+
+    <button v-if="chartFullscreen" class="fullscreen-close" @click="toggleChartSize">&#10005;</button>
+
   </div>
 </template>
 
 <style scoped lang="scss">
-.ability-section { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; padding: 20px 24px; margin-bottom: 16px; }
-
-.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.section-title { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; color: #303133; svg { color: #1a3a5c; } }
-.role-select { padding: 6px 12px; border: 1px solid #dcdfe6; border-radius: 8px; font-size: 13px; color: #303133; background: #fff; outline: none; cursor: pointer; &:focus { border-color: #1a3a5c; } }
-
-.chart-loading { display: flex; justify-content: center; padding: 40px 0; }
-.chart-error { text-align: center; padding: 40px 0; color: #f56c6c; font-size: 14px; }
-
-.stats-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.stat-card { display: flex; align-items: center; gap: 6px; padding: 4px 12px 4px 8px; border-radius: 6px; background: #f8f9fa; font-size: 12px; }
-.stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.stat-name { color: #606266; }
-.stat-count { color: #303133; font-weight: 700; margin-left: auto; }
-
-.level-row { display: flex; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
-.level-item { display: flex; align-items: center; gap: 6px; font-size: 13px; }
-.level-name { color: #909399; }
-.level-count { font-weight: 700; color: #303133; &.highlight { color: #1a3a5c; font-size: 15px; } }
-
-.chart-container { width: 100%; height: 380px; border-radius: 8px; background: #fafbfc; border: 1px solid #eef0f2; }
-
-.gap-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid #eef0f2; }
-.gap-title { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: #303133; margin-bottom: 12px; }
-.gap-columns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-.gap-col { }
-.gap-col-title { font-size: 12px; font-weight: 600; margin-bottom: 6px; padding: 2px 8px; border-radius: 4px; display: inline-block; }
-.gap-col-title.must { background: #fde8e8; color: #991b1b; }
-.gap-col-title.better { background: #fef3cd; color: #856404; }
-.gap-col-title.optional { background: #e8e8f5; color: #5a5a8a; }
-.gap-tag { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 12px; margin: 2px 4px 2px 0; }
-.gap-tag.must { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-.gap-tag.better { background: #fffbeb; color: #856404; border: 1px solid #fde68a; }
-.gap-tag.optional { background: #f5f3ff; color: #5a5a8a; border: 1px solid #ddd6fe; }
-.gap-empty { font-size: 12px; color: #c0c4cc; }
-
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .spin { animation: spin 1s linear infinite; color: #1a3a5c; }
 
-@media (max-width: 640px) { .gap-columns { grid-template-columns: 1fr; } .chart-container { height: 300px; } }
+.ability-section {
+  position: relative;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  transition: all 0.3s;
+}
+.ability-section.is-fullscreen {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 1000; padding: 12px 24px;
+  background: #fff; border: none; border-radius: 0;
+}
+
+.section-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 12px;
+}
+.section-title { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; color: #303133; margin: 0; flex-shrink: 0; svg { color: #1a3a5c; } }
+.section-summary { font-size: 12px; color: #909399; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.section-summary strong { color: #1a3a5c; }
+
+.center-state { text-align: center; padding: 32px 0; color: #909399; font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 10px; &.err { color: #f56c6c; } }
+.retry-btn { padding: 6px 16px; border-radius: 6px; border: 1px solid #1a3a5c; background: none; color: #1a3a5c; font-size: 13px; cursor: pointer; &:hover { background: #1a3a5c; color: #fff; } }
+
+.chart-area { margin-bottom: 10px; }
+.chart-box { width: 100%; min-height: 500px; height: calc(100vh - 420px); max-height: 750px; border-radius: 10px; background: #fafbfc; border: 1px solid #f0f0f0; transition: all 0.3s; }
+.chart-box.maximized { height: calc(100vh - 120px); max-height: none; }
+.empty-chart { height: 120px; display: flex; align-items: center; justify-content: center; color: #909399; font-size: 14px; background: #fafbfc; border-radius: 8px; border: 1px solid #eef0f2; }
+
+.legend-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 8px; font-size: 12px; color: #606266; }
+.legend-chip { display: inline-flex; align-items: center; gap: 4px; }
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.legend-hint { font-size: 11px; color: #c0c4cc; margin-left: auto; }
+
+.tip-row { display: flex; align-items: center; gap: 6px; padding: 8px 14px; margin-bottom: 10px; border-radius: 6px; background: rgba(245,158,11,0.06); border-left: 3px solid #f59e0b; font-size: 13px; color: #606266; }
+.tip-icon { color: #f59e0b; flex-shrink: 0; }
+.tip-text strong { color: #303133; }
+
+.gap-toggle { display: flex; align-items: center; gap: 8px; padding: 10px 14px; margin-bottom: 8px; border-radius: 6px; background: #f8f9fa; border: 1px solid #eef0f2; cursor: pointer; font-size: 14px; font-weight: 600; color: #303133; transition: all 0.2s; user-select: none; }
+.gap-toggle:hover { border-color: #1a3a5c; color: #1a3a5c; }
+.gap-toggle svg { color: #1a3a5c; }
+.toggle-arrow { font-size: 10px; margin-left: auto; transition: transform 0.25s; }
+.toggle-arrow.open { transform: rotate(90deg); }
+
+.gap-body { padding: 4px 0 10px; }
+.gap-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.gap-label { font-size: 13px; font-weight: 600; color: #303133; white-space: nowrap; }
+.role-cat-tag { font-size: 11px; color: #909399; margin-left: 6px; }
+.gap-placeholder { text-align: center; padding: 28px 0; color: #909399; }
+.gap-placeholder p { font-size: 13px; margin-top: 8px; }
+
+.gap-stats { margin-bottom: 12px; }
+.target-job { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #303133; margin-bottom: 10px; }
+.match-badge { padding: 2px 10px; border-radius: 999px; background: #1a3a5c; color: #fff; font-size: 12px; font-weight: 600; }
+.gap-cards { display: flex; gap: 16px; }
+.cov-card { font-size: 13px; color: #606266; }
+.cov-card .cov-num { font-size: 22px; font-weight: 700; margin-right: 4px; }
+.cov-card.matched .cov-num { color: #155724; }
+.cov-card.miss .cov-num { color: #991b1b; }
+
+.gap-lists { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.gap-group-title { margin-bottom: 6px; }
+.req-badge { font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 4px; }
+.req-badge.must { background: #fde8e8; color: #991b1b; }
+.req-badge.nice { background: #fef3cd; color: #856404; }
+.skill-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.skill-tag { padding: 3px 10px; border-radius: 4px; font-size: 12px; }
+.skill-tag.must { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.skill-tag.nice { background: #fffbeb; color: #856404; border: 1px solid #fde68a; }
+
+.gap-ai-tip { display: flex; align-items: flex-start; gap: 8px; padding: 8px 14px; border-radius: 8px; background: rgba(14,165,233,0.04); border-left: 3px solid #0ea5e9; font-size: 13px; color: #606266; }
+.gap-ai-tip svg { color: #0ea5e9; flex-shrink: 0; margin-top: 1px; }
+.gap-ai-tip strong { color: #303133; }
+
+.hint-icon { color: #c0c4cc; }
+.fullscreen-close { position: fixed; top: 16px; right: 24px; z-index: 1001; width: 40px; height: 40px; border-radius: 50%; border: none; background: rgba(0,0,0,0.06); color: #303133; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+@media (max-width: 640px) {
+  .chart-box { min-height: 320px; height: 50vh; }
+  .section-summary { display: none; }
+}
 </style>

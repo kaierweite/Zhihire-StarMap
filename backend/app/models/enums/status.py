@@ -21,3 +21,45 @@ class GenericStatusEnum(str, Enum):
 
     NORMAL = "NORMAL"  # 启用
     DISABLED = "DISABLED"  # 停用
+
+
+class CompanyAuditStatusEnum(str, Enum):
+    """企业审核状态枚举。
+
+    用于企业用户注册后的资质审核流转。
+    """
+
+    UNVERIFIED = "UNVERIFIED"  # 未提交审核（注册后默认状态）
+    PENDING = "PENDING"  # 审核中
+    VERIFIED = "VERIFIED"  # 审核通过
+    REJECTED = "REJECTED"  # 审核驳回
+
+
+class SkillStatusEnum(str, Enum):
+    """技能字典三态枚举。
+
+    ACTIVE 启用、CANDIDATE 待审（用户归一时新创建的候选技能）、
+    MERGED 已并入目标技能（不再独立使用）。
+    """
+
+    ACTIVE = "ACTIVE"  # 启用
+    CANDIDATE = "CANDIDATE"  # 待审候选
+    MERGED = "MERGED"  # 已合并
+
+
+class GenderEnum(str, Enum):
+    """性别枚举（与库中 user_profile.gender 对齐）。"""
+
+    MALE = "MALE"  # 男
+    FEMALE = "FEMALE"  # 女
+    OTHER = "OTHER"  # 其他
+
+
+class EducationEnum(str, Enum):
+    """学历枚举（与库中 user_profile.education 对齐）。"""
+
+    HIGH_SCHOOL = "高中"  # 高中
+    COLLEGE = "专科"  # 专科
+    BACHELOR = "本科"  # 本科
+    MASTER = "硕士"  # 硕士
+    DOCTOR = "博士"  # 博士

@@ -34,7 +34,7 @@ async def list_questions_by_session(db: AsyncSession, sid: int) -> list[Intervie
     return list(r.scalars().all())
 
 async def list_bank_questions(db: AsyncSession, question_type=None, page=1, size=20):
-    cond = [InterviewQuestion.is_bank_visible == "1", InterviewQuestion.deleted_at == "0"]
+    cond = [InterviewQuestion.is_bank_visible == True, InterviewQuestion.deleted_at == "0"]
     if question_type: cond.append(InterviewQuestion.question_type == question_type)
     total = (await db.execute(select(func.count()).select_from(InterviewQuestion).where(*cond))).scalar() or 0
     off = (page - 1) * size

@@ -1,0 +1,317 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>面试报告 - 智聘星图</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: {
+            primary: '#003527', 'primary-dark': '#00251a', 'primary-container': '#064e3b',
+            'on-primary': '#ffffff', 'on-primary-container': '#b0f0d6',
+            surface: '#f8f9fa', 'surface-container-lowest': '#ffffff',
+            'on-surface': '#191c1d', 'on-surface-variant': '#6b6f76',
+            'outline-variant': '#c4c5d9', secondary: '#434656'
+        }}}}
+    </script>
+    <style>
+        * { font-family: 'Inter', system-ui, sans-serif; }
+        .glass-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(196,197,217,0.4); box-shadow: 0 4px 20px rgba(0,0,0,0.04); transition: all 0.3s; border-radius: 12px; }
+        .glass-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+        .btn-primary { position: relative; overflow: hidden; background: #064e3b; color: #fff; padding: 12px 32px; border-radius: 9999px; font-weight: 600; font-size: 14px; letter-spacing: 0.02em; transition: all 0.3s; }
+        .btn-primary:hover { background: #003527; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(6,78,59,0.25); }
+        .btn-ghost { border: 1px solid #191c1d; color: #191c1d; padding: 12px 32px; border-radius: 9999px; font-weight: 600; font-size: 14px; transition: all 0.3s; background: transparent; }
+        .btn-ghost:hover { background: #191c1d; color: #fff; }
+        .chip { display:inline-flex; align-items:center; gap:4px; padding:4px 12px; border-radius:4px; font-size:12px; font-weight:600; letter-spacing:0.05em; }
+        .chip-primary { background: #b0f0d6; color: #003527; }
+        .chip-neutral { background: #f3f4f5; color: #434656; }
+        .chip-success { background: #d4edda; color: #155724; }
+        .chip-warning { background: #fff3cd; color: #856404; }
+        .chip-danger { background: #f8d7da; color: #721c24; }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .animate-fade-in-up { animation:fadeInUp 0.6s ease forwards; }
+        ::selection { background: #b0f0d6; color: #002117; }
+        .bar-track { height: 8px; border-radius: 9999px; background: #e9ecef; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 9999px; transition: width 0.8s ease; }
+        .qtype-tech { background:#bbf7d0; color:#14532d; }
+        .qtype-behav { background:#dbeafe; color:#1e3a8a; }
+        .qtype-situation { background:#fef3c7; color:#78350f; }
+        .qtype-resume { background:#ede9fe; color:#4c1d95; }
+            .active-tab { color: #064e3b; border-bottom: 2px solid #064e3b; font-weight: 700; }
+    </style>
+</head>
+<body class="bg-surface min-h-screen">
+    
+    
+    <nav class="fixed top-0 w-full z-50 bg-white h-14 border-b border-outline-variant/50 transition-all duration-300">
+        <div class="flex justify-between items-center w-full px-4 lg:px-10 max-w-[1440px] mx-auto h-full">
+            <a href="../common/首页着陆页.html" class="font-bold text-[22px] tracking-tight text-primary-container shrink-0">智聘星图</a>
+            <div class="hidden lg:flex items-center gap-6 xl:gap-8">
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="../common/首页着陆页.html">探索</a>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="职位推荐.html">职位推荐</a>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="职位搜索.html">职位搜索</a>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="简历中心.html">简历中心</a>
+                <div class="relative" id="interviewDD-wrap-desk">
+                    <button onclick="toggleInterviewDD(event, 'desk')" class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap cursor-pointer flex items-center gap-0.5">
+                        面试功能
+                        <span class="material-symbols-outlined text-sm transition-transform" id="interview-arrow-desk">expand_more</span>
+                    </button>
+                    <div id="interviewDD-desk" class="hidden absolute left-0 top-full mt-1 w-36 bg-white rounded-xl shadow-2xl border border-outline-variant/30 z-50 overflow-hidden">
+                        <a href="模拟面试.html" class="block px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors">智能面试</a>
+                        <a href="面试记录.html" class="block px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors">面试记录</a>
+                    </div>
+                </div>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="社交.html">社交</a>
+            </div>
+            <div class="flex items-center gap-2 lg:gap-3">
+                <a href="通知中心.html" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer hidden xl:block" title="通知中心">notifications</a>
+                <div class="hidden xl:flex items-center bg-surface-container rounded-full px-3 py-1.5 border border-outline-variant/60">
+                    <span class="material-symbols-outlined text-outline text-base">search</span>
+                    <input class="bg-transparent border-none focus:ring-0 text-sm w-32 ml-1 text-on-surface placeholder-on-surface-variant/60" placeholder="搜索职位..." type="text"/>
+                </div>
+                <div id="nav-guest" class="flex items-center gap-2">
+                    <a href="../common/登录.html" class="text-primary-container font-medium text-[13px] px-3 py-1.5 hover:bg-surface-container rounded-full transition-all hidden sm:inline-block">登录</a>
+                    <a href="../common/注册.html" class="bg-primary-container text-on-primary font-medium text-[13px] px-4 py-1.5 rounded-full hover:opacity-90 transition-all hidden sm:inline-block">注册</a>
+                </div>
+                <div id="nav-user" class="hidden items-center gap-3">
+                    <div class="relative">
+                        <div id="user-dropdown-trigger" class="flex items-center gap-2 cursor-pointer hover:bg-surface-container rounded-full px-3 py-1.5 transition-all">
+                            <div id="user-avatar" class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-xs font-bold">Q</div>
+                            <span id="user-nickname" class="text-sm font-medium text-on-surface hidden xl:inline-block">求职小能手</span>
+                            <span class="material-symbols-outlined text-sm text-on-surface-variant">expand_more</span>
+                        </div>
+                        <div id="user-dropdown" class="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-outline-variant/30 py-2 z-50 hidden">
+                            <a href="个人中心.html" class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-primary-container/10 hover:text-primary transition-colors"><span class="material-symbols-outlined text-base">person</span><span>个人中心</span></a>
+                            <a href="面试记录.html" class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-primary-container/10 hover:text-primary transition-colors"><span class="material-symbols-outlined text-base">calendar_today</span><span>我的面试</span></a>
+                            <div class="border-t border-outline-variant/20 my-1"></div>
+                            <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"><span class="material-symbols-outlined text-base">logout</span><span>退出登录</span></button>
+                        </div>
+                    </div>
+                </div>
+                <button id="mobile-menu-btn" class="lg:hidden p-1.5 hover:bg-surface-container rounded-lg transition-colors" onclick="toggleMobileMenu()"><span class="material-symbols-outlined text-on-surface text-xl">menu</span></button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-outline-variant/50 shadow-lg">
+            <div class="flex flex-col px-4 py-3 gap-1">
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="../common/首页着陆页.html">探索</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="职位推荐.html">职位推荐</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="职位搜索.html">职位搜索</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="简历中心.html">简历中心</a>
+                <div class="relative" id="interviewDD-wrap-mob">
+                    <button onclick="toggleInterviewDD(event, 'mob')" class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all cursor-pointer flex items-center justify-between w-full">
+                        面试功能
+                        <span class="material-symbols-outlined text-base transition-transform" id="interview-arrow-mob">expand_more</span>
+                    </button>
+                    <div id="interviewDD-mob" class="hidden ml-4 space-y-0.5 mt-0.5">
+                        <a href="模拟面试.html" class="block py-2 px-3 text-sm text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">智能面试</a>
+                        <a href="面试记录.html" class="block py-2 px-3 text-sm text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">面试记录</a>
+                    </div>
+                </div>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="社交.html">社交</a>
+                <div class="border-t border-outline-variant/30 my-2"></div>
+                <div id="mobile-guest" class="flex gap-2">
+                    <a href="../common/登录.html" class="flex-1 text-center text-primary-container font-medium text-sm py-2.5 border border-outline-variant/40 rounded-lg hover:bg-surface-container transition-all">登录</a>
+                    <a href="../common/注册.html" class="flex-1 text-center bg-primary-container text-on-primary font-medium text-sm py-2.5 rounded-lg hover:opacity-90 transition-all">注册</a>
+                </div>
+                <div id="mobile-user" class="hidden items-center gap-3 px-3 py-2">
+                    <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-sm font-bold" id="mobile-avatar">Q</div>
+                    <span class="text-sm font-medium text-on-surface flex-1" id="mobile-nickname">求职小能手</span>
+                    <button onclick="logout()" class="text-on-surface-variant hover:text-red-500 transition-all"><span class="material-symbols-outlined text-lg">logout</span></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+
+    <main class="pt-20 pb-8">
+        <section class="px-16 max-w-[1440px] mx-auto mb-6">
+            <div class="flex items-center gap-2 text-xs text-on-surface-variant mb-2">
+                <a href="模拟面试.html" class="hover:text-primary">模拟面试</a><span>/</span><span class="text-on-surface">面试报告</span>
+            </div>
+            <div class="flex items-end justify-between">
+                <div>
+                    <h1 class="text-4xl font-bold text-on-surface mb-2" style="letter-spacing:-0.02em; animation: fadeInUp 0.6s ease forwards;">面试报告</h1>
+                    <p class="text-on-surface-variant text-lg" style="animation: fadeInUp 0.6s ease 0.1s forwards; opacity:0;">高级前端工程师 · 字节跳动 · 2026-07-04 15:42 完成</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button class="btn-ghost flex items-center gap-2"><span class="material-symbols-outlined text-base">download</span>导出</button>
+                    <button onclick="window.location.href='简历优化.html'" class="btn-primary flex items-center gap-2"><span class="material-symbols-outlined text-base">auto_fix_high</span>生成简历优化</button>
+                </div>
+            </div>
+        </section>
+
+        <div class="px-16 max-w-[1440px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Radar -->
+                <div class="lg:col-span-5">
+                    <div class="glass-card p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="material-symbols-outlined text-primary text-xl">radar</span>
+                            <h3 class="text-base font-semibold text-on-surface">能力雷达图</h3>
+                        </div>
+                        <div id="radar-chart" style="width:100%; height:380px;"></div>
+                        <div class="mt-3 flex items-baseline justify-between pt-4 border-t border-outline-variant/40">
+                            <div>
+                                <p class="text-xs text-on-surface-variant uppercase tracking-wider font-semibold">综合评分</p>
+                                <p class="text-3xl font-bold text-primary" style="letter-spacing:-0.02em;">82<span class="text-base text-on-surface-variant font-normal"> / 100</span></p>
+                            </div>
+                            <span class="chip chip-success">较上次 +6</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dimension feedback -->
+                <div class="lg:col-span-7">
+                    <div class="glass-card p-6">
+                        <div class="flex items-center gap-3 mb-5">
+                            <span class="material-symbols-outlined text-primary text-xl">assessment</span>
+                            <h3 class="text-base font-semibold text-on-surface">五维量化评测</h3>
+                        </div>
+                        <div class="flex flex-col gap-4">
+                            <div class="dim-row" data-dim="technical">
+                                <div class="flex items-center justify-between mb-1.5"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#064e3b]"></span><span class="text-sm font-semibold text-on-surface">技术深度</span></div><span class="text-sm font-bold text-on-surface">87</span></div>
+                                <div class="bar-track"><div class="bar-fill" style="width:87%; background:#064e3b;"></div></div>
+                                <p class="text-xs text-on-surface-variant mt-2">React 原理掌握扎实；微前端与性能优化场景题偏弱，建议补强 Module Federation 与首屏指标。</p>
+                            </div>
+                            <div class="dim-row" data-dim="communication">
+                                <div class="flex items-center justify-between mb-1.5"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#2b6954]"></span><span class="text-sm font-semibold text-on-surface">沟通表达</span></div><span class="text-sm font-bold text-on-surface">79</span></div>
+                                <div class="bar-track"><div class="bar-fill" style="width:79%; background:#2b6954;"></div></div>
+                                <p class="text-xs text-on-surface-variant mt-2">STAR 结构清晰，但技术深度回答时缺少「先总结后展开」，建议用金字塔表达。</p>
+                            </div>
+                            <div class="dim-row" data-dim="problem_solving">
+                                <div class="flex items-center justify-between mb-1.5"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#e65100]"></span><span class="text-sm font-semibold text-on-surface">问题解决</span></div><span class="text-sm font-bold text-on-surface">84</span></div>
+                                <div class="bar-track"><div class="bar-fill" style="width:84%; background:#e65100;"></div></div>
+                                <p class="text-xs text-on-surface-variant mt-2">排查维度全面，但未提及回滚预案与监控埋点，工程闭环意识需加强。</p>
+                            </div>
+                            <div class="dim-row" data-dim="culture_fit">
+                                <div class="flex items-center justify-between mb-1.5"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#6a1b9a]"></span><span class="text-sm font-semibold text-on-surface">文化契合</span></div><span class="text-sm font-bold text-on-surface">78</span></div>
+                                <div class="bar-track"><div class="bar-fill" style="width:78%; background:#6a1b9a;"></div></div>
+                                <p class="text-xs text-on-surface-variant mt-2">数据驱动与字节价值观契合度高；建议补充对开源协作与文化案例的延展。</p>
+                            </div>
+                            <div class="dim-row" data-dim="depth">
+                                <div class="flex items-center justify-between mb-1.5"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#993100]"></span><span class="text-sm font-semibold text-on-surface">技术纵深</span></div><span class="text-sm font-bold text-on-surface">82</span></div>
+                                <div class="bar-track"><div class="bar-fill" style="width:82%; background:#993100;"></div></div>
+                                <p class="text-xs text-on-surface-variant mt-2">沿 PREREQUISITE 链深度推断：JS→React→微前端链路完整，WebGL/GraphQL 节点为缺口。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two columns: question recap + feedback advice -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+                <div class="lg:col-span-7">
+                    <div class="glass-card p-6">
+                        <div class="flex items-center gap-3 mb-5"><span class="material-symbols-outlined text-primary text-xl">format_list_numbered</span><h3 class="text-base font-semibold text-on-surface">逐题回顾</h3></div>
+                        <div class="flex flex-col gap-4">
+                            <div class="p-4 rounded-xl bg-surface-container/60">
+                                <div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="chip qtype-tech text-[10px] px-2 py-0.5">技术题</span><span class="text-[11px] text-on-surface-variant">第 1 题</span></div><span class="text-base font-bold text-[#155724]">88</span></div>
+                                <p class="text-sm text-on-surface mb-2">useEffect 依赖数组机制及执行时机</p>
+                                <p class="text-xs text-on-surface-variant"><strong class="text-[#155724]">命中：</strong>三场景时机准确 · 清理函数清晰 &nbsp; <strong class="text-[#721c24]">缺失：</strong>闭包陷阱未涉及</p>
+                            </div>
+                            <div class="p-4 rounded-xl bg-surface-container/60">
+                                <div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="chip qtype-behav text-[10px] px-2 py-0.5">行为题</span><span class="text-[11px] text-on-surface-variant">第 2 题</span></div><span class="text-base font-bold text-[#856404]">76</span></div>
+                                <p class="text-sm text-on-surface mb-2">团队中推动技术方案落地的经历</p>
+                                <p class="text-xs text-on-surface-variant"><strong class="text-[#155724]">命中：</strong>STAR 结构清晰 · 数据驱动 &nbsp; <strong class="text-[#721c24]">缺失：</strong>收益未量化</p>
+                            </div>
+                            <div class="p-4 rounded-xl bg-surface-container/60">
+                                <div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="chip qtype-situation text-[10px] px-2 py-0.5">情境题</span><span class="text-[11px] text-on-surface-variant">第 3 题</span></div><span class="text-base font-bold text-[#155724]">84</span></div>
+                                <p class="text-sm text-on-surface mb-2">线上首屏渲染从 1.2s 升至 3.8s 的排查</p>
+                                <p class="text-xs text-on-surface-variant"><strong class="text-[#155724]">命中：</strong>排查维度全面 &nbsp; <strong class="text-[#721c24]">缺失：</strong>回滚预案未提</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 flex flex-col gap-6">
+                    <div class="glass-card p-6">
+                        <div class="flex items-center gap-3 mb-4"><span class="material-symbols-outlined text-primary text-xl">tips_and_updates</span><h3 class="text-base font-semibold text-on-surface">反馈建议</h3></div>
+                        <div class="flex flex-col gap-3">
+                            <div class="p-3 rounded-xl bg-primary-container/15 border border-primary/15"><p class="text-xs text-on-surface leading-relaxed"><strong class="text-primary">优先补强</strong>：微前端架构（Module Federation）、性能优化指标体系。</p></div>
+                            <div class="p-3 rounded-xl bg-[#fff3cd]/40 border border-[#856404]/15"><p class="text-xs text-on-surface leading-relaxed"><strong class="text-[#856404]">表达</strong>：技术深度题先给结论再展开，控制每答 ≤2 分。</p></div>
+                            <div class="p-3 rounded-xl bg-[#d4edda]/40 border border-[#155724]/15"><p class="text-xs text-on-surface leading-relaxed"><strong class="text-[#155724]">优势保持</strong>：React 原理链路完整，继续向源码层延伸。</p></div>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6">
+                        <div class="flex items-center gap-3 mb-3"><span class="material-symbols-outlined text-primary text-xl">route</span><h3 class="text-base font-semibold text-on-surface">生成学习路径</h3></div>
+                        <p class="text-xs text-on-surface-variant leading-relaxed mb-4">反馈建议已识别 <strong class="text-on-surface">4 项缺口技能</strong>，可直接复用能力图谱的前置链拓扑排序出有序学习路线。</p>
+                        <button onclick="window.location.href='AI职业规划.html'" class="btn-primary w-full flex items-center justify-center gap-2"><span class="material-symbols-outlined text-base">arrow_forward</span>一键生成针对性学习路径</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-surface-container-lowest border-t border-outline-variant w-full py-12 mt-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-16 max-w-[1440px] mx-auto">
+            <div><div class="font-bold text-3xl text-on-surface mb-3">智聘星图</div><p class="text-on-surface-variant">AI 驱动的智能招聘与面试赋能平台<br>基于银河麒麟 · 人大金仓 · DeepSeek</p></div>
+            <div><h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">平台</h4><div class="flex flex-col gap-1 text-secondary text-sm"><a href="#" class="hover:text-primary transition-colors">品牌宣言</a><a href="#" class="hover:text-primary transition-colors">精选职位</a><a href="#" class="hover:text-primary transition-colors">能力图谱</a></div></div>
+            <div><h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">支持</h4><div class="flex flex-col gap-1 text-secondary text-sm"><a href="#" class="hover:text-primary transition-colors">隐私政策</a><a href="#" class="hover:text-primary transition-colors">联系支持</a></div></div>
+        </div>
+        <div class="text-center mt-6 text-sm text-on-surface-variant">&copy; 2024 智聘星图.</div>
+    </footer>
+
+    <script>
+        const chart = echarts.init(document.getElementById('radar-chart'));
+        chart.setOption({
+            tooltip: { trigger: 'item' },
+            radar: {
+                indicator: [
+                    { name: '技术深度', max: 100 },
+                    { name: '沟通表达', max: 100 },
+                    { name: '问题解决', max: 100 },
+                    { name: '文化契合', max: 100 },
+                    { name: '技术纵深', max: 100 }
+                ],
+                radius: '68%',
+                axisName: { color: '#434656', fontSize: 12, fontWeight: 600 },
+                splitArea: { areaStyle: { color: ['rgba(6,78,59,0.04)','rgba(6,78,59,0.02)'] } },
+                splitLine: { lineStyle: { color: '#c4c5d9' } },
+                axisLine: { lineStyle: { color: '#c4c5d9' } }
+            },
+            series: [{
+                type: 'radar',
+                data: [
+                    { value: [87, 79, 84, 78, 82], name: '本次面试', areaStyle: { color: 'rgba(6,78,59,0.28)' }, lineStyle: { color: '#064e3b', width: 2 }, itemStyle: { color: '#064e3b' } },
+                    { value: [80, 75, 78, 72, 76], name: '上次面试', areaStyle: { color: 'rgba(196,197,217,0.25)' }, lineStyle: { color: '#c4c5d9', width: 1, type: 'dashed' }, itemStyle: { color: '#94a3b8' } }
+                ]
+            }],
+            legend: { data: ['本次面试','上次面试'], bottom: 0, textStyle: { fontSize: 11, color: '#6b6f76' } }
+        });
+        window.addEventListener('resize', () => chart.resize());
+    </script>
+    <script>
+        function toggleInterviewDD(e, suffix) {
+            e.stopPropagation();
+            var dd = document.getElementById('interviewDD-' + suffix);
+            var arrow = document.getElementById('interview-arrow-' + suffix);
+            if (dd) dd.classList.toggle('hidden');
+            if (arrow) arrow.style.transform = dd && dd.classList.contains('hidden') ? '' : 'rotate(180deg)';
+        }
+        function closeInterviewDD(suffix) {
+            var dd = document.getElementById('interviewDD-' + suffix);
+            var arrow = document.getElementById('interview-arrow-' + suffix);
+            if (dd) dd.classList.add('hidden');
+            if (arrow) arrow.style.transform = '';
+        }
+        document.addEventListener('click', function(e) {
+            ['desk', 'mob'].forEach(function(s) {
+                var wrap = document.getElementById('interviewDD-wrap-' + s);
+                if (wrap && !wrap.contains(e.target)) closeInterviewDD(s);
+            });
+        });
+        function toggleMobileMenu() {
+            var menu = document.getElementById('mobile-menu');
+            if (menu) menu.classList.toggle('hidden');
+        }
+        function logout() {
+            localStorage.removeItem('loggedIn');
+            window.location.href = '../common/登录.html';
+        }
+    </script>
+        
+</body>
+</html>

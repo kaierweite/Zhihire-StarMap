@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    try {
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#27313e",
+                        "surface-tint": "#2b6954",
+                        "on-error": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-surface-variant": "#404944",
+                        "surface-variant": "#d9e3f4",
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#95d3ba",
+                        "primary-fixed": "#b0f0d6",
+                        "outline": "#707974",
+                        "surface-dim": "#d1dbec",
+                        "on-primary-fixed-variant": "#0b513d",
+                        "surface": "#f8f9ff",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#f8f9ff",
+                        "on-background": "#121c28",
+                        "tertiary-fixed": "#e1e3e4",
+                        "on-tertiary": "#ffffff",
+                        "primary": "#003527",
+                        "secondary": "#575e70",
+                        "background": "#f8f9ff",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#064e3b",
+                        "outline-variant": "#bfc9c3",
+                        "tertiary-container": "#424546",
+                        "on-primary-fixed": "#002117",
+                        "primary-fixed-dim": "#95d3ba",
+                        "secondary-fixed-dim": "#c0c6db",
+                        "on-primary-container": "#80bea6",
+                        "on-surface": "#121c28"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit-xl": "48px",
+                        "margin-mobile": "16px",
+                        "container-max": "1280px",
+                        "gutter": "24px",
+                        "unit-lg": "24px",
+                        "margin-desktop": "40px",
+                        "unit-md": "16px",
+                        "unit-xs": "4px",
+                        "unit-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-xl": ["Inter"],
+                        "label-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-xl-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    } catch (_e) {}
+</script>
+<style>
+    /* 搜索框微光效果 */
+    .shimmer-button {
+        position: relative;
+        overflow: hidden;
+    }
+    .shimmer-button::after {
+        content: "";
+        position: absolute;
+        top: 0; left: -150%;
+        width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15) 50%, transparent);
+        transform: skewX(-20deg);
+        animation: shimmer 4s infinite;
+    }
+    @keyframes shimmer {
+        0% { left: -150%; }
+        30% { left: 150%; }
+        100% { left: 150%; }
+    }
+    /* 英雄渐变遮罩 */
+    .hero-gradient {
+        background: linear-gradient(to right, rgba(0,33,23,0.7) 0%, rgba(0,33,23,0.35) 50%, transparent 100%);
+    }
+    /* 轮播图 */
+    .hero-slide {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        opacity: 0;
+        transition: opacity 1.2s ease-in-out;
+    }
+    .hero-slide.active {
+        opacity: 1;
+    }
+    /* 横幅轮播 */
+    .promo-slide {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        opacity: 0;
+        transition: opacity 1s ease-in-out;
+    }
+    .promo-slide.active {
+        opacity: 1;
+    }
+    /* 指示点 */
+    .hero-dot.active, .promo-dot.active {
+        background: white !important;
+        width: 20px;
+        border-radius: 10px;
+    }
+    /* 选中状态底部线 */
+    .active-tab {
+        color: #064e3b;
+        border-bottom: 2px solid #064e3b;
+        font-weight: 700;
+    }
+    /* 卡片悬停 */
+    .job-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+    }
+    .job-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 16px 40px rgba(0,0,0,0.08);
+    }
+    /* 自定义滚动条 */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #bfc9c3; border-radius: 3px; }
+    /* 链接按钮去下划线 */
+    a.job-card, a.bg-primary-container, a.bg-white, a.bg-surface-container {
+        text-decoration: none;
+    }
+    /* === 导航切换 === */
+    .nav-section { animation: fadeIn 0.3s ease; }
+    .nav-section.active-section { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body class="bg-background text-on-surface relative min-h-screen">
+
+<!-- ====== 顶部导航栏 ====== -->
+<nav class="fixed top-0 w-full z-50 bg-white h-14 border-b border-outline-variant/50 transition-all duration-300">
+    <div class="flex justify-between items-center w-full px-4 lg:px-10 max-w-[1440px] mx-auto h-full">
+        <a href="首页着陆页.html" class="font-bold text-[22px] tracking-tight text-primary-container shrink-0">智聘星图</a>
+        <!-- 桌面端导航 -->
+        <div class="hidden lg:flex items-center gap-6 xl:gap-8">
+            <a class="active-tab font-medium text-[13px] pb-1 transition-all whitespace-nowrap" href="首页着陆页.html">探索</a>
+            <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="../user/职位推荐.html">职位推荐</a>
+            <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="../user/职位搜索.html">职位搜索</a>
+            <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="../user/简历中心.html">简历中心</a>
+                <div class="relative" id="interviewDD-wrap-desk">
+                    <button onclick="toggleInterviewDD(event, 'desk')" class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap cursor-pointer flex items-center gap-0.5">
+                        面试功能
+                        <span class="material-symbols-outlined text-sm transition-transform" id="interview-arrow-desk">expand_more</span>
+                    </button>
+                    <div id="interviewDD-desk" class="hidden absolute left-0 top-full mt-1 w-36 bg-white rounded-xl shadow-2xl border border-outline-variant/30 z-50 overflow-hidden">
+                        <a href="../user/模拟面试.html" class="block px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors">智能面试</a>
+                        <a href="../user/面试记录.html" class="block px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors">面试记录</a>
+                    </div>
+                </div>
+            <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="../user/社交.html">社交</a>
+        </div>
+        <div class="flex items-center gap-2 lg:gap-3">
+            <a href="../user/通知中心.html" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer hidden xl:block" title="通知中心">
+                notifications
+            </a>
+            <div class="hidden xl:flex items-center bg-surface-container rounded-full px-3 py-1.5 border border-outline-variant/60">
+                <span class="material-symbols-outlined text-outline text-base">search</span>
+                <input class="bg-transparent border-none focus:ring-0 text-sm w-32 ml-1 text-on-surface placeholder-on-surface-variant/60" placeholder="搜索职位..." type="text"/>
+            </div>
+            <!-- 未登录：显示登录/注册 -->
+            <div id="nav-guest" class="flex items-center gap-2">
+                <a href="登录.html" class="text-primary-container font-medium text-[13px] px-3 py-1.5 hover:bg-surface-container rounded-full transition-all hidden sm:inline-block">登录</a>
+                <a href="注册.html" class="bg-primary-container text-on-primary font-medium text-[13px] px-4 py-1.5 rounded-full hover:opacity-90 transition-all hidden sm:inline-block">注册</a>
+            </div>
+            <!-- 已登录：显示用户信息 -->
+            <div id="nav-user" class="hidden items-center gap-3">
+                <div class="relative">
+                    <div id="user-dropdown-trigger" class="flex items-center gap-2 cursor-pointer hover:bg-surface-container rounded-full px-3 py-1.5 transition-all">
+                        <div id="user-avatar" class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-xs font-bold">Q</div>
+                        <span id="user-nickname" class="text-sm font-medium text-on-surface hidden xl:inline-block">求职小能手</span>
+                        <span class="material-symbols-outlined text-sm text-on-surface-variant">expand_more</span>
+                    </div>
+                    <div id="user-dropdown" class="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-outline-variant/30 py-2 z-50 hidden">
+                        <a href="../user/个人中心.html" class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-primary-container/10 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-base">person</span>
+                            <span>个人中心</span>
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-primary-container/10 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-base">calendar_today</span>
+                            <span>我的面试</span>
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-primary-container/10 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-base">send</span>
+                            <span>我的投递</span>
+                        </a>
+                        <div class="border-t border-outline-variant/20 my-1"></div>
+                        <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
+                            <span class="material-symbols-outlined text-base">logout</span>
+                            <span>退出登录</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- 移动端菜单按钮 -->
+            <button id="mobile-menu-btn" class="lg:hidden p-1.5 hover:bg-surface-container rounded-lg transition-colors" onclick="toggleMobileMenu()">
+                <span class="material-symbols-outlined text-on-surface text-xl">menu</span>
+            </button>
+        </div>
+    </div>
+    <!-- 移动端下拉菜单 -->
+    <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-outline-variant/50 shadow-lg">
+        <div class="flex flex-col px-4 py-3 gap-1">
+            <a class="active-tab font-medium text-sm py-2.5 px-3 rounded-lg" href="首页着陆页.html">探索</a>
+            <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="../user/职位推荐.html">职位推荐</a>
+            <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="../user/职位搜索.html">职位搜索</a>
+            <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="../user/简历中心.html">简历中心</a>
+                <div class="relative" id="interviewDD-wrap-mob">
+                    <button onclick="toggleInterviewDD(event, 'mob')" class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all cursor-pointer flex items-center justify-between w-full">
+                        面试功能
+                        <span class="material-symbols-outlined text-base transition-transform" id="interview-arrow-mob">expand_more</span>
+                    </button>
+                    <div id="interviewDD-mob" class="hidden ml-4 space-y-0.5 mt-0.5">
+                        <a href="../user/模拟面试.html" class="block py-2 px-3 text-sm text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">智能面试</a>
+                        <a href="../user/面试记录.html" class="block py-2 px-3 text-sm text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">面试记录</a>
+                    </div>
+                </div>
+            <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="../user/社交.html">社交</a>
+            <div class="border-t border-outline-variant/30 my-2"></div>
+            <!-- 未登录 -->
+            <div id="mobile-guest" class="flex gap-2">
+                <a href="登录.html" class="flex-1 text-center text-primary-container font-medium text-sm py-2.5 border border-outline-variant/40 rounded-lg hover:bg-surface-container transition-all">登录</a>
+                <a href="注册.html" class="flex-1 text-center bg-primary-container text-on-primary font-medium text-sm py-2.5 rounded-lg hover:opacity-90 transition-all">注册</a>
+            </div>
+            <!-- 已登录 -->
+            <div id="mobile-user" class="hidden items-center gap-3 px-3 py-2">
+                <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-sm font-bold" id="mobile-avatar">Q</div>
+                <span class="text-sm font-medium text-on-surface flex-1" id="mobile-nickname">求职小能手</span>
+                <button onclick="logout()" class="text-on-surface-variant hover:text-red-500 transition-colors">
+                    <span class="material-symbols-outlined text-lg">logout</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ====== 英雄板块 ====== -->
+<section class="relative h-screen w-full flex items-center overflow-hidden">
+    <!-- 轮播背景图 -->
+    <div class="absolute inset-0 z-0" id="hero-carousel">
+        <div class="hero-slide active" style="background-image: url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1920&q=80&auto=format');"></div>
+        <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1920&q=80&auto=format');"></div>
+        <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1920&q=80&auto=format');"></div>
+        <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1920&q=80&auto=format');"></div>
+    </div>
+    <!-- 渐变遮罩 -->
+    <div class="absolute inset-0 hero-gradient z-1"></div>
+
+    <!-- 轮播左右箭头 -->
+    <button onclick="heroPrev()" class="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white/20 hover:bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-all border border-white/20">
+        <span class="material-symbols-outlined text-white text-xl">chevron_left</span>
+    </button>
+    <button onclick="heroNext()" class="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white/20 hover:bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-all border border-white/20">
+        <span class="material-symbols-outlined text-white text-xl">chevron_right</span>
+    </button>
+
+    <!-- 轮播指示点 -->
+    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2.5" id="hero-dots">
+        <button class="hero-dot w-2.5 h-2.5 rounded-full bg-white transition-all" data-index="0"></button>
+        <button class="hero-dot w-2.5 h-2.5 rounded-full bg-white/40 transition-all" data-index="1"></button>
+        <button class="hero-dot w-2.5 h-2.5 rounded-full bg-white/40 transition-all" data-index="2"></button>
+        <button class="hero-dot w-2.5 h-2.5 rounded-full bg-white/40 transition-all" data-index="3"></button>
+    </div>
+
+    <div class="relative z-10 w-full px-10 max-w-[1280px] mx-auto">
+        <div class="max-w-4xl">
+            <h1 class="text-5xl lg:text-6xl font-bold text-white mb-5 drop-shadow-lg tracking-tight">
+                策就你的非凡成就。
+            </h1>
+            <p class="text-xl lg:text-2xl text-white/90 mb-10 max-w-2xl drop-shadow leading-relaxed">
+                触达全球最具影响力的科技职位。我们将大师级人才与追求精准与意义的精品机构紧密相连。
+            </p>
+            <!-- 搜索栏 - 深色背景 -->
+            <div class="bg-[#064e3b]/90 p-4 rounded-xl flex flex-col md:flex-row gap-4 items-center max-w-3xl shadow-2xl border border-white/10">
+                <div class="flex flex-1 items-center gap-3 px-4 w-full border-b md:border-b-0 md:border-r border-white/20 pb-4 md:pb-0">
+                    <span class="material-symbols-outlined text-white/80">work</span>
+                    <input class="bg-transparent border-none focus:ring-0 w-full text-base text-white placeholder-white/60" placeholder="职位或专长领域" type="text"/>
+                </div>
+                <div class="flex flex-1 items-center gap-3 px-4 w-full">
+                    <span class="material-symbols-outlined text-white/80">location_on</span>
+                    <input class="bg-transparent border-none focus:ring-0 w-full text-base text-white placeholder-white/60" placeholder="全球中心" type="text"/>
+                </div>
+                <a href="#hot-jobs" class="bg-primary text-on-primary shimmer-button font-medium text-base px-10 py-4 w-full md:w-auto transition-all hover:opacity-90 hover:shadow-lg rounded-full inline-block text-center">
+                    发现机遇
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 向下滚动提示 -->
+    <div class="absolute bottom-16 left-1/2 -translate-x-1/2 animate-bounce z-10">
+        <span class="material-symbols-outlined text-white text-4xl opacity-70">expand_more</span>
+    </div>
+</section>
+
+<!-- ====== 分类侧栏 + 推广横幅 ====== -->
+<section class="py-12 px-4 lg:px-10 max-w-[1280px] mx-auto relative z-10">
+    <div class="grid grid-cols-12 gap-6">
+        <!-- 左侧分类导航 -->
+        <aside class="col-span-12 lg:col-span-3 bg-white rounded-xl shadow-sm border border-outline-variant/40 relative" id="category-sidebar">
+            <div class="flex border-b border-outline-variant/30">
+                <button class="flex-1 py-3 text-xs font-bold tracking-wider active-tab transition-all rounded-tl-xl" id="tab-profession">按专业筛选</button>
+                <button class="flex-1 py-3 text-xs font-bold tracking-wider text-on-surface-variant opacity-60 hover:opacity-100 transition-all rounded-tr-xl" id="tab-category">按职类筛选</button>
+            </div>
+            <div class="py-2" id="nav-profession">
+                <div class="category-item flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-surface-container/50 transition-all" data-submenu="sub-engineering">
+                    <div class="flex items-center gap-3">
+                        <span class="text-base">🔧</span>
+                        <span class="font-medium text-sm text-on-surface">工学</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-on-surface-variant/60">
+                        <span>安全科学与工程类</span>
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </div>
+                </div>
+                <div class="category-item flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-surface-container/50 transition-all" data-submenu="sub-science">
+                    <div class="flex items-center gap-3">
+                        <span class="text-base">🔬</span>
+                        <span class="font-medium text-sm text-on-surface">理学</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-on-surface-variant/60">
+                        <span>大气科学类</span>
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </div>
+                </div>
+                <div class="category-item flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-surface-container/50 transition-all" data-submenu="sub-medical">
+                    <div class="flex items-center gap-3">
+                        <span class="text-base">🩺</span>
+                        <span class="font-medium text-sm text-on-surface">医学</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-on-surface-variant/60">
+                        <span>动物医学类</span>
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </div>
+                </div>
+                <div class="category-item flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-surface-container/50 transition-all" data-submenu="sub-agriculture">
+                    <div class="flex items-center gap-3">
+                        <span class="text-base">🌿</span>
+                        <span class="font-medium text-sm text-on-surface">农学</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-on-surface-variant/60">
+                        <span>草学类</span>
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </div>
+                </div>
+                <div class="category-item flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-surface-container/50 transition-all" data-submenu="sub-management">
+                    <div class="flex items-center gap-3">
+                        <span class="text-base">📊</span>
+                        <span class="font-medium text-sm text-on-surface">管理学</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-on-surface-variant/60">
+                        <span>工商管理类</span>
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </div>
+                </div>
+                <div class="category-item flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-surface-container/50 transition-all" data-submenu="sub-literature">
+                    <div class="flex items-center gap-3">
+                        <span class="text-base">📖</span>
+                        <span class="font-medium text-sm text-on-surface">文学</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-on-surface-variant/60">
+                        <span>历史学类</span>
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </div>
+                </div>
+                <div class="category-item flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-surface-container/50 transition-all" data-submenu="sub-law">
+                    <div class="flex items-center gap-3">
+                        <span class="text-base">⚖️</span>
+                        <span class="font-medium text-sm text-on-surface">法学</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-on-surface-variant/60">
+                        <span>法学类</span>
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </div>
+                </div>
+            </div>
+            <div class="py-2 hidden" id="nav-category">
+                <div class="category-item flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-surface-container/50 transition-all" data-submenu="sub-sales">
+                    <div class="flex items-center gap-3">
+                        <span class="text-base">💼</span>
+                        <span class="font-medium text-sm text-on-surface">销售/商务拓展</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-on-surface-variant/60">
+                        <span>销售顾问</span>
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </div>
+                </div>
+                <div class="category-item flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-surface-container/50 transition-all" data-submenu="sub-hr">
+                    <div class="flex items-center gap-3">
+                        <span class="text-base">👥</span>
+                        <span class="font-medium text-sm text-on-surface">人事/行政/财务/法务</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-on-surface-variant/60">
+                        <span>人事</span>
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </div>
+                </div>
+                <div class="category-item flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-surface-container/50 transition-all" data-submenu="sub-tech">
+                    <div class="flex items-center gap-3">
+                        <span class="text-base">💻</span>
+                        <span class="font-medium text-sm text-on-surface">互联网/通信及硬件</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-on-surface-variant/60">
+                        <span>软件研...</span>
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </div>
+                </div>
+                <div class="category-item flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-surface-container/50 transition-all" data-submenu="sub-ops">
+                    <div class="flex items-center gap-3">
+                        <span class="text-base">🛠️</span>
+                        <span class="font-medium text-sm text-on-surface">运维/测试</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-on-surface-variant/60">
+                        <span>运维支持</span>
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </div>
+                </div>
+                <div class="category-item flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-surface-container/50 transition-all" data-submenu="sub-design">
+                    <div class="flex items-center gap-3">
+                        <span class="text-base">🎨</span>
+                        <span class="font-medium text-sm text-on-surface">视觉/交互/设计</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-on-surface-variant/60">
+                        <span>视觉/交互...</span>
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </div>
+                </div>
+                <div class="category-item flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-surface-container/50 transition-all" data-submenu="sub-cs">
+                    <div class="flex items-center gap-3">
+                        <span class="text-base">📞</span>
+                        <span class="font-medium text-sm text-on-surface">运营/客服</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-on-surface-variant/60">
+                        <span>电商运营</span>
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </div>
+                </div>
+                <div class="category-item flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-surface-container/50 transition-all" data-submenu="sub-pm">
+                    <div class="flex items-center gap-3">
+                        <span class="text-base">📋</span>
+                        <span class="font-medium text-sm text-on-surface">产品/项目/高级管理</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-on-surface-variant/60">
+                        <span>产品...</span>
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </div>
+                </div>
+            </div>
+            <div class="p-3 border-t border-outline-variant/30">
+                <a class="text-sm text-primary-container font-semibold hover:underline flex items-center justify-center gap-1" href="../user/职位推荐.html">
+                    全部专业 <span class="material-symbols-outlined text-sm">arrow_right_alt</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- 右侧：二级菜单面板（悬浮显示）+ 推广横幅 -->
+        <div class="col-span-12 lg:col-span-9 relative" id="submenu-area">
+            <!-- 二级菜单面板 -->
+            <div id="submenu-panel" class="hidden absolute inset-0 z-20 bg-white rounded-xl shadow-lg border border-outline-variant/40 p-6 overflow-y-auto">
+                <div id="submenu-content"></div>
+            </div>
+
+            <!-- 推广横幅（轮播） -->
+            <div id="promo-banner" class="relative h-full min-h-[400px] rounded-xl overflow-hidden group border border-outline-variant/40 transition-opacity duration-300">
+                <div class="promo-slide active" style="background-image: url('https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&q=80&auto=format');"></div>
+                <div class="promo-slide" style="background-image: url('https://images.unsplash.com/photo-1553877522-43269d4ea984?w=1200&q=80&auto=format');"></div>
+                <div class="promo-slide" style="background-image: url('https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=1200&q=80&auto=format');"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-primary-container/90 via-primary-container/50 to-transparent z-1"></div>
+                        <a href="../user/职位推荐.html" class="bg-white text-primary-container font-medium text-base px-10 py-4 shadow-lg hover:shadow-xl hover:bg-white/90 transition-all rounded-full flex items-center gap-2 inline-block">
+                            立即探索 <span class="material-symbols-outlined">arrow_forward</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- 横幅轮播箭头 -->
+                <button onclick="promoPrev()" class="absolute left-12 top-1/2 -translate-y-1/2 z-20 w-9 h-9 bg-white/20 hover:bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-all border border-white/20">
+                    <span class="material-symbols-outlined text-white text-lg">chevron_left</span>
+                </button>
+                <button onclick="promoNext()" class="absolute right-12 top-1/2 -translate-y-1/2 z-20 w-9 h-9 bg-white/20 hover:bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-all border border-white/20">
+                    <span class="material-symbols-outlined text-white text-lg">chevron_right</span>
+                </button>
+                <!-- 横幅指示点 -->
+                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2" id="promo-dots">
+                    <button class="promo-dot w-2 h-2 rounded-full bg-white transition-all" data-index="0"></button>
+                    <button class="promo-dot w-2 h-2 rounded-full bg-white/40 transition-all" data-index="1"></button>
+                    <button class="promo-dot w-2 h-2 rounded-full bg-white/40 transition-all" data-index="2"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== 精选职位板块 ====== -->
+<section id="hot-jobs" class="py-12 px-10 max-w-[1280px] mx-auto overflow-hidden relative z-10">
+    <div class="text-center mb-10">
+        <h2 class="text-4xl lg:text-5xl font-bold text-on-surface mb-5">热招职位</h2>
+        <div class="flex flex-wrap justify-center gap-6 border-b border-outline-variant/40 pb-4">
+            <button class="active-tab text-base px-2 pb-2 transition-all">销售</button>
+            <button class="text-secondary hover:text-primary-container text-base transition-colors pb-2 px-2">直播/影视/传媒</button>
+            <button class="text-secondary hover:text-primary-container text-base transition-colors pb-2 px-2">客服/运营</button>
+            <button class="text-secondary hover:text-primary-container text-base transition-colors pb-2 px-2">人力/财务/行政</button>
+            <button class="text-secondary hover:text-primary-container text-base transition-colors pb-2 px-2">供应链/物流</button>
+            <button class="text-secondary hover:text-primary-container text-base transition-colors pb-2 px-2">服务业</button>
+            <button class="text-secondary hover:text-primary-container text-base transition-colors pb-2 px-2">设计</button>
+            <button class="text-secondary hover:text-primary-container text-base transition-colors pb-2 px-2">金融</button>
+            <button class="text-secondary hover:text-primary-container text-base transition-colors pb-2 px-2">教育培训</button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
+        <!-- Job Card 1 -->
+        <a href="../user/职位推荐.html" class="job-card bg-white p-5 rounded-xl border border-outline-variant/30 hover:shadow-md transition-all block">
+            <div class="flex justify-between items-start mb-3">
+                <h3 class="font-semibold text-on-surface text-base truncate pr-4">二手车销售/无责保底4600</h3>
+                <span class="text-primary-container font-bold text-base shrink-0">6-8千</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">经验不限</span>
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">大专</span>
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">4S店经验</span>
+            </div>
+            <div class="flex items-center gap-3 pt-3 border-t border-outline-variant/20">
+                <div class="w-9 h-9 rounded border border-outline-variant/40 bg-white flex items-center justify-center text-[10px] font-bold text-primary-container shrink-0">瓜子</div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm text-on-surface font-medium truncate">瓜子二手车</div>
+                    <div class="text-xs text-on-surface-variant">互联网 · 1000-9999人 · D轮及以上</div>
+                </div>
+                <span class="text-xs text-on-surface-variant shrink-0">成都</span>
+            </div>
+        </a>
+
+        <!-- Job Card 2 -->
+        <a href="../user/职位推荐.html" class="job-card bg-white p-5 rounded-xl border border-outline-variant/30 hover:shadow-md transition-all block">
+            <div class="flex justify-between items-start mb-3">
+                <h3 class="font-semibold text-on-surface text-base truncate pr-4">国药网销/无责4500</h3>
+                <span class="text-primary-container font-bold text-base shrink-0">5-7千</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">经验不限</span>
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">高中</span>
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">医疗/大健康</span>
+            </div>
+            <div class="flex items-center gap-3 pt-3 border-t border-outline-variant/20">
+                <div class="w-9 h-9 rounded border border-outline-variant/40 bg-white flex items-center justify-center text-[10px] font-bold text-green-700 shrink-0">云南</div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm text-on-surface font-medium truncate">云南金七制药</div>
+                    <div class="text-xs text-on-surface-variant">医疗健康 · 100-499人 · 不需要融资</div>
+                </div>
+                <span class="text-xs text-on-surface-variant shrink-0">成都</span>
+            </div>
+        </a>
+
+        <!-- Job Card 3 -->
+        <a href="../user/职位推荐.html" class="job-card bg-white p-5 rounded-xl border border-outline-variant/30 hover:shadow-md transition-all block">
+            <div class="flex justify-between items-start mb-3">
+                <h3 class="font-semibold text-on-surface text-base truncate pr-4">业务代表（国客）</h3>
+                <span class="text-primary-container font-bold text-base shrink-0">4-6千</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">1-3年</span>
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">大专</span>
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">快消品</span>
+            </div>
+            <div class="flex items-center gap-3 pt-3 border-t border-outline-variant/20">
+                <div class="w-9 h-9 rounded border border-outline-variant/40 bg-white flex items-center justify-center text-[10px] font-bold text-blue-700 shrink-0">国客</div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm text-on-surface font-medium truncate">国客食品</div>
+                    <div class="text-xs text-on-surface-variant">其他行业 · 50-99人 · 未融资</div>
+                </div>
+                <span class="text-xs text-on-surface-variant shrink-0">成都</span>
+            </div>
+        </a>
+
+        <!-- Job Card 4 -->
+        <a href="../user/职位推荐.html" class="job-card bg-white p-5 rounded-xl border border-outline-variant/30 hover:shadow-md transition-all block">
+            <div class="flex justify-between items-start mb-3">
+                <h3 class="font-semibold text-on-surface text-base truncate pr-4">Java高级开发工程师</h3>
+                <span class="text-primary-container font-bold text-base shrink-0">20-30K</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">3-5年</span>
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">本科</span>
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">微服务架构</span>
+            </div>
+            <div class="flex items-center gap-3 pt-3 border-t border-outline-variant/20">
+                <div class="w-9 h-9 rounded border border-outline-variant/40 bg-white flex items-center justify-center text-[10px] font-bold text-black shrink-0">字节</div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm text-on-surface font-medium truncate">字节跳动</div>
+                    <div class="text-xs text-on-surface-variant">互联网 · 10000人以上 · 已上市</div>
+                </div>
+                <span class="text-xs text-on-surface-variant shrink-0">北京</span>
+            </div>
+        </a>
+
+        <!-- Job Card 5 -->
+        <a href="../user/职位推荐.html" class="job-card bg-white p-5 rounded-xl border border-outline-variant/30 hover:shadow-md transition-all block">
+            <div class="flex justify-between items-start mb-3">
+                <h3 class="font-semibold text-on-surface text-base truncate pr-4">产品经理/B端SaaS方向</h3>
+                <span class="text-primary-container font-bold text-base shrink-0">18-25K</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">3-5年</span>
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">本科</span>
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">B端产品</span>
+            </div>
+            <div class="flex items-center gap-3 pt-3 border-t border-outline-variant/20">
+                <div class="w-9 h-9 rounded border border-outline-variant/40 bg-white flex items-center justify-center text-[10px] font-bold text-blue-600 shrink-0">钉钉</div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm text-on-surface font-medium truncate">钉钉科技</div>
+                    <div class="text-xs text-on-surface-variant">互联网 · 1000-9999人 · C轮</div>
+                </div>
+                <span class="text-xs text-on-surface-variant shrink-0">杭州</span>
+            </div>
+        </a>
+
+        <!-- Job Card 6 -->
+        <a href="../user/职位推荐.html" class="job-card bg-white p-5 rounded-xl border border-outline-variant/30 hover:shadow-md transition-all block">
+            <div class="flex justify-between items-start mb-3">
+                <h3 class="font-semibold text-on-surface text-base truncate pr-4">UI/UX设计师/金融科技</h3>
+                <span class="text-primary-container font-bold text-base shrink-0">15-22K</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">1-3年</span>
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">本科</span>
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">Figma</span>
+            </div>
+            <div class="flex items-center gap-3 pt-3 border-t border-outline-variant/20">
+                <div class="w-9 h-9 rounded border border-outline-variant/40 bg-white flex items-center justify-center text-[10px] font-bold text-blue-800 shrink-0">蚂蚁</div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm text-on-surface font-medium truncate">蚂蚁集团</div>
+                    <div class="text-xs text-on-surface-variant">金融科技 · 10000人以上 · 已上市</div>
+                </div>
+                <span class="text-xs text-on-surface-variant shrink-0">上海</span>
+            </div>
+        </a>
+
+        <!-- Job Card 7 -->
+        <a href="../user/职位推荐.html" class="job-card bg-white p-5 rounded-xl border border-outline-variant/30 hover:shadow-md transition-all block">
+            <div class="flex justify-between items-start mb-3">
+                <h3 class="font-semibold text-on-surface text-base truncate pr-4">数据分析师/电商运营</h3>
+                <span class="text-primary-container font-bold text-base shrink-0">12-18K</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">1-3年</span>
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">本科</span>
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">Python/SQL</span>
+            </div>
+            <div class="flex items-center gap-3 pt-3 border-t border-outline-variant/20">
+                <div class="w-9 h-9 rounded border border-outline-variant/40 bg-white flex items-center justify-center text-[10px] font-bold text-pink-600 shrink-0">唯品</div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm text-on-surface font-medium truncate">唯品会</div>
+                    <div class="text-xs text-on-surface-variant">电商 · 10000人以上 · 已上市</div>
+                </div>
+                <span class="text-xs text-on-surface-variant shrink-0">广州</span>
+            </div>
+        </a>
+
+        <!-- Job Card 8 -->
+        <a href="../user/职位推荐.html" class="job-card bg-white p-5 rounded-xl border border-outline-variant/30 hover:shadow-md transition-all block">
+            <div class="flex justify-between items-start mb-3">
+                <h3 class="font-semibold text-on-surface text-base truncate pr-4">人力资源经理/集团总部</h3>
+                <span class="text-primary-container font-bold text-base shrink-0">25-35K</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">5-10年</span>
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">本科</span>
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">薪酬绩效</span>
+            </div>
+            <div class="flex items-center gap-3 pt-3 border-t border-outline-variant/20">
+                <div class="w-9 h-9 rounded border border-outline-variant/40 bg-white flex items-center justify-center text-[10px] font-bold text-red-600 shrink-0">华为</div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm text-on-surface font-medium truncate">华为技术</div>
+                    <div class="text-xs text-on-surface-variant">通信/硬件 · 10000人以上 · 已上市</div>
+                </div>
+                <span class="text-xs text-on-surface-variant shrink-0">深圳</span>
+            </div>
+        </a>
+
+        <!-- Job Card 9 -->
+        <a href="../user/职位推荐.html" class="job-card bg-white p-5 rounded-xl border border-outline-variant/30 hover:shadow-md transition-all block">
+            <div class="flex justify-between items-start mb-3">
+                <h3 class="font-semibold text-on-surface text-base truncate pr-4">前端开发工程师/Vue+React</h3>
+                <span class="text-primary-container font-bold text-base shrink-0">15-25K</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">1-3年</span>
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">本科</span>
+                <span class="bg-surface-container px-2.5 py-1 rounded text-xs text-on-surface-variant">Vue/React</span>
+            </div>
+            <div class="flex items-center gap-3 pt-3 border-t border-outline-variant/20">
+                <div class="w-9 h-9 rounded border border-outline-variant/40 bg-white flex items-center justify-center text-[10px] font-bold text-yellow-600 shrink-0">美团</div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm text-on-surface font-medium truncate">美团</div>
+                    <div class="text-xs text-on-surface-variant">本地生活 · 10000人以上 · 已上市</div>
+                </div>
+                <span class="text-xs text-on-surface-variant shrink-0">成都</span>
+            </div>
+        </a>
+    </div>
+
+    <div class="flex justify-center">
+        <a href="../user/职位搜索.html" class="bg-surface-container text-primary-container font-medium text-base px-10 py-3.5 rounded-full hover:bg-surface-container-high transition-all border border-outline-variant/40 inline-block">查看更多</a>
+    </div>
+</section>
+
+<!-- ====== 页脚 ====== -->
+<footer class="w-full py-12 bg-white border-t border-outline-variant/40 relative z-10">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 px-10 max-w-[1280px] mx-auto">
+        <div class="space-y-4">
+            <div class="text-2xl font-bold text-on-surface">智聘星图</div>
+            <p class="text-on-surface-variant">© 2024 智聘星图. 策就领导力的未来。</p>
+            <div class="flex gap-4">
+                <span class="material-symbols-outlined text-secondary cursor-pointer hover:text-primary-container transition-colors">public</span>
+                <span class="material-symbols-outlined text-secondary cursor-pointer hover:text-primary-container transition-colors">share</span>
+                <span class="material-symbols-outlined text-secondary cursor-pointer hover:text-primary-container transition-colors">mail</span>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col gap-3">
+                <h5 class="text-xs font-bold uppercase tracking-widest text-on-surface mb-1">平台</h5>
+                <a class="text-secondary hover:text-primary-container transition-all hover:underline" href="首页着陆页.html">品牌宣言</a>
+                <a class="text-secondary hover:text-primary-container transition-all hover:underline" href="../user/个人中心.html">个人中心</a>
+                <a class="text-secondary hover:text-primary-container transition-all hover:underline" href="../user/职位推荐.html">精选职位</a>
+            </div>
+            <div class="flex flex-col gap-3">
+                <h5 class="text-xs font-bold uppercase tracking-widest text-on-surface mb-1">支持</h5>
+                <a class="text-secondary hover:text-primary-container transition-all hover:underline" href="#">隐私政策</a>
+                <a class="text-secondary hover:text-primary-container transition-all hover:underline" href="#">联系支持</a>
+                <a class="text-secondary hover:text-primary-container transition-all hover:underline" href="#">常见问题</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // 移动端菜单切换
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobile-menu');
+        menu.classList.toggle('hidden');
+    }
+
+    // 英雄区轮播图
+    let heroIndex = 0;
+    const heroSlides = document.querySelectorAll('.hero-slide');
+    const heroDots = document.querySelectorAll('.hero-dot');
+
+    function heroGoTo(i) {
+        heroSlides[heroIndex].classList.remove('active');
+        heroDots[heroIndex].classList.remove('active');
+        heroIndex = (i + heroSlides.length) % heroSlides.length;
+        heroSlides[heroIndex].classList.add('active');
+        heroDots[heroIndex].classList.add('active');
+    }
+    function heroNext() { heroGoTo(heroIndex + 1); resetHeroTimer(); }
+    function heroPrev() { heroGoTo(heroIndex - 1); resetHeroTimer(); }
+
+    heroDots.forEach(dot => {
+        dot.addEventListener('click', () => {
+            heroGoTo(parseInt(dot.dataset.index));
+            resetHeroTimer();
+        });
+    });
+
+    let heroTimer = setInterval(heroNext, 2000);
+    function resetHeroTimer() {
+        clearInterval(heroTimer);
+        heroTimer = setInterval(heroNext, 2000);
+    }
+
+    // 横幅轮播图
+    let promoIndex = 0;
+    const promoSlides = document.querySelectorAll('.promo-slide');
+    const promoDots = document.querySelectorAll('.promo-dot');
+
+    function promoGoTo(i) {
+        promoSlides[promoIndex].classList.remove('active');
+        promoDots[promoIndex].classList.remove('active');
+        promoIndex = (i + promoSlides.length) % promoSlides.length;
+        promoSlides[promoIndex].classList.add('active');
+        promoDots[promoIndex].classList.add('active');
+    }
+    function promoNext() { promoGoTo(promoIndex + 1); resetPromoTimer(); }
+    function promoPrev() { promoGoTo(promoIndex - 1); resetPromoTimer(); }
+
+    promoDots.forEach(dot => {
+        dot.addEventListener('click', () => {
+            promoGoTo(parseInt(dot.dataset.index));
+            resetPromoTimer();
+        });
+    });
+
+    let promoTimer = setInterval(promoNext, 2000);
+    function resetPromoTimer() {
+        clearInterval(promoTimer);
+        promoTimer = setInterval(promoNext, 2000);
+    }
+
+    // 导航栏滚动 - 仅加阴影，不改高度
+    window.addEventListener('scroll', () => {
+        const nav = document.querySelector('nav');
+        if (window.scrollY > 50) {
+            nav.classList.add('shadow-md');
+        } else {
+            nav.classList.remove('shadow-md');
+        }
+    });
+
+    // Tab 切换
+    document.getElementById('tab-profession').addEventListener('click', function() {
+        this.classList.add('active-tab');
+        this.style.opacity = '1';
+        document.getElementById('tab-category').classList.remove('active-tab');
+        document.getElementById('tab-category').style.opacity = '0.6';
+        document.getElementById('nav-profession').classList.remove('hidden');
+        document.getElementById('nav-category').classList.add('hidden');
+        hideSubmenu();
+    });
+    document.getElementById('tab-category').addEventListener('click', function() {
+        this.classList.add('active-tab');
+        this.style.opacity = '1';
+        document.getElementById('tab-profession').classList.remove('active-tab');
+        document.getElementById('tab-profession').style.opacity = '0.6';
+        document.getElementById('nav-category').classList.remove('hidden');
+        document.getElementById('nav-profession').classList.add('hidden');
+        hideSubmenu();
+    });
+
+    // 二级菜单数据
+    const submenuData = {
+        'sub-engineering': { title: '工学', sections: [
+            { name: '计算机类', items: ['计算机科学与技术', '软件工程', '信息安全', '网络工程', '物联网工程', '数字媒体技术', '数据科学与大数据技术', '人工智能', '区块链工程'] },
+            { name: '电子信息类', items: ['电子信息工程', '通信工程', '微电子科学与工程', '光电信息科学与工程', '信息工程', '集成电路设计与集成系统'] },
+            { name: '机械类', items: ['机械工程', '机械设计制造及其自动化', '车辆工程', '机器人工程', '智能制造工程', '材料成型及控制工程'] },
+            { name: '自动化类', items: ['自动化', '机器人工程', '控制理论与控制工程', '过程装备与控制工程'] },
+            { name: '土木/建筑类', items: ['土木工程', '建筑学', '城市规划', '给排水科学与工程', '建筑环境与能源应用工程', '工程管理'] },
+            { name: '环境/化工类', items: ['环境工程', '环境科学', '化学工程与工艺', '制药工程', '生物工程', '能源化学工程'] }
+        ]},
+        'sub-science': { title: '理学', sections: [
+            { name: '数学类', items: ['数学与应用数学', '信息与计算科学', '统计学', '应用统计学', '数据科学'] },
+            { name: '物理类', items: ['物理学', '应用物理学', '核物理', '声学', '光学'] },
+            { name: '化学类', items: ['化学', '应用化学', '化学生物学', '分子科学与工程'] },
+            { name: '生物类', items: ['生物科学', '生物技术', '生态学', '生物信息学', '神经科学'] },
+            { name: '地学类', items: ['大气科学', '海洋科学', '地理信息科学', '地质学', '地球物理学'] },
+            { name: '心理类', items: ['心理学', '应用心理学', '认知科学'] }
+        ]},
+        'sub-medical': { title: '医学', sections: [
+            { name: '临床医学类', items: ['临床医学', '麻醉学', '医学影像学', '眼视光医学', '精神医学', '放射医学'] },
+            { name: '口腔类', items: ['口腔医学', '口腔修复工艺学'] },
+            { name: '中医类', items: ['中医学', '中西医临床医学', '针灸推拿学', '中药学', '药学'] },
+            { name: '护理类', items: ['护理学', '助产学', '社区护理'] },
+            { name: '公共卫生类', items: ['预防医学', '卫生检验与检疫', '妇幼保健医学', '流行病学'] },
+            { name: '医学技术类', items: ['医学检验技术', '医学影像技术', '康复治疗学', '眼视光学', '听力与言语康复学'] }
+        ]},
+        'sub-agriculture': { title: '农学', sections: [
+            { name: '植物生产类', items: ['农学', '园艺', '植物保护', '种子科学与工程', '设施农业科学与工程'] },
+            { name: '林业类', items: ['林学', '园林', '森林保护', '森林资源保护与游憩'] },
+            { name: '动物科学类', items: ['动物科学', '动物医学', '水产养殖学', '水族科学与技术'] },
+            { name: '草业/资源类', items: ['草业科学', '农业资源与环境', '土地资源管理', '农业智能装备工程'] }
+        ]},
+        'sub-management': { title: '管理学', sections: [
+            { name: '工商管理类', items: ['工商管理', '市场营销', '会计学', '财务管理', '国际商务', '人力资源管理', '审计学'] },
+            { name: '管理科学类', items: ['信息管理与信息系统', '工程管理', '房地产开发与管理', '工程造价', '大数据管理与应用'] },
+            { name: '公共管理类', items: ['公共事业管理', '行政管理', '劳动与社会保障', '城市管理', '土地资源管理'] },
+            { name: '物流/电商类', items: ['物流管理', '物流工程', '供应链管理', '电子商务', '跨境电子商务'] },
+            { name: '农林经济类', items: ['农林经济管理', '农村区域发展'] }
+        ]},
+        'sub-literature': { title: '文学', sections: [
+            { name: '中国语言文学类', items: ['汉语言文学', '汉语言', '秘书学', '中国少数民族语言文学', '古典文献学'] },
+            { name: '外国语言文学类', items: ['英语', '日语', '韩语', '法语', '德语', '西班牙语', '俄语', '翻译'] },
+            { name: '新闻传播类', items: ['新闻学', '广播电视学', '广告学', '编辑出版学', '网络与新媒体', '数字出版'] },
+            { name: '历史/哲学类', items: ['历史学', '世界史', '考古学', '文物与博物馆学', '哲学', '逻辑学'] }
+        ]},
+        'sub-law': { title: '法学', sections: [
+            { name: '法学类', items: ['法学', '知识产权', '监狱学', '国际法', '刑事科学技术'] },
+            { name: '社会学类', items: ['社会学', '社会工作', '人类学', '女性学'] },
+            { name: '政治学类', items: ['政治学与行政学', '国际政治', '外交学', '思想政治教育'] },
+            { name: '公安学类', items: ['治安学', '侦查学', '公安情报学', '犯罪学', '公安管理学'] },
+            { name: '马克思主义类', items: ['科学社会主义', '中国共产党历史', '马克思主义理论'] }
+        ]},
+        'sub-sales': { title: '销售/商务拓展', sections: [
+            { name: '销售管理', items: ['销售经理', '销售总监', '区域销售经理', '大客户经理', '销售运营经理'] },
+            { name: '销售执行', items: ['销售代表', '客户经理', '商务拓展经理', '渠道销售', '电话销售', '网络销售'] },
+            { name: '销售支持', items: ['销售助理', '销售分析师', '销售培训师', '售前工程师'] }
+        ]},
+        'sub-hr': { title: '人事/行政/财务/法务', sections: [
+            { name: '人力资源', items: ['人力资源总监', '人力资源经理', '招聘经理', '招聘专员', '薪酬绩效经理', '培训经理', 'HRBP', '员工关系专员'] },
+            { name: '行政管理', items: ['行政总监', '行政经理', '行政主管', '前台/行政助理', '办公室主任'] },
+            { name: '财务会计', items: ['财务总监', '财务经理', '会计主管', '会计', '出纳', '审计经理', '审计专员', '税务经理'] },
+            { name: '法务合规', items: ['法务总监', '法务经理', '法务专员', '合规经理', '合规专员', '知识产权专员'] }
+        ]},
+        'sub-tech': { title: '互联网/通信及硬件', sections: [
+            { name: '后端开发', items: ['Java开发工程师', 'Python开发工程师', 'Go开发工程师', 'C++开发工程师', 'PHP开发工程师', 'Ruby开发工程师'] },
+            { name: '前端/移动', items: ['前端开发工程师', 'React开发工程师', 'Vue开发工程师', 'iOS开发工程师', 'Android开发工程师', 'Flutter开发工程师', '全栈工程师'] },
+            { name: '算法/AI', items: ['算法工程师', '机器学习工程师', '深度学习工程师', 'NLP工程师', '计算机视觉工程师', '推荐系统工程师'] },
+            { name: '数据工程', items: ['数据工程师', '大数据开发工程师', 'ETL工程师', '数据仓库工程师', 'Hadoop工程师'] },
+            { name: '基础架构', items: ['架构师', 'DevOps工程师', '云计算工程师', 'SRE工程师', '网络工程师', '系统工程师'] },
+            { name: '嵌入式/硬件', items: ['嵌入式开发工程师', 'FPGA工程师', '硬件工程师', '射频工程师', '驱动开发工程师'] }
+        ]},
+        'sub-ops': { title: '运维/测试', sections: [
+            { name: '运维', items: ['运维工程师', '高级运维工程师', 'SRE工程师', 'DBA数据库管理员', '云计算运维', 'Linux运维', '容器运维'] },
+            { name: '测试', items: ['测试工程师', '高级测试工程师', '测试开发工程师', '自动化测试工程师', '性能测试工程师', '安全测试工程师'] },
+            { name: '安全', items: ['安全工程师', '渗透测试工程师', '安全运维工程师', '安全架构师', '漏洞分析工程师'] }
+        ]},
+        'sub-design': { title: '视觉/交互/设计', sections: [
+            { name: 'UI/UX设计', items: ['UI设计师', 'UX设计师', '产品设计师', '交互设计师', '用户研究员'] },
+            { name: '视觉设计', items: ['视觉设计师', '平面设计师', '品牌设计师', '插画师', '包装设计师'] },
+            { name: '动效/3D', items: ['动效设计师', '3D设计师', '特效设计师', '游戏视觉设计师', 'AR/VR设计师'] },
+            { name: '设计管理', items: ['设计总监', '创意总监', '设计经理', '设计主管'] }
+        ]},
+        'sub-cs': { title: '运营/客服', sections: [
+            { name: '内容运营', items: ['内容运营经理', '内容策划', '新媒体运营', '短视频运营', '直播运营', '文案策划'] },
+            { name: '用户/活动运营', items: ['用户运营经理', '社区运营', '活动运营', '数据运营', '增长运营', '游戏运营'] },
+            { name: '电商运营', items: ['电商运营经理', '店铺运营', '品类运营', '直播电商运营', '跨境电商运营'] },
+            { name: '客服', items: ['客服主管', '客服经理', '客户成功经理', 'VIP客户经理', '在线客服'] }
+        ]},
+        'sub-pm': { title: '产品/项目/高级管理', sections: [
+            { name: '产品经理', items: ['产品经理', '高级产品经理', '产品总监', '产品策略经理', 'AI产品经理', 'B端产品经理', 'C端产品经理'] },
+            { name: '项目管理', items: ['项目经理', '高级项目经理', '项目总监', 'PMO经理', '敏捷教练'] },
+            { name: '技术管理', items: ['技术总监', '技术经理', 'CTO', '首席架构师', '研发经理'] },
+            { name: '高管/战略', items: ['COO', 'CEO', '事业部负责人', '战略规划总监', '投资分析总监', '变革管理'] }
+        ]}
+    };
+
+    // 鼠标悬停显示二级菜单
+    document.querySelectorAll('.category-item').forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            const key = this.dataset.submenu;
+            const data = submenuData[key];
+            if (!data) return;
+            const content = document.getElementById('submenu-content');
+            content.innerHTML = `
+                <h3 class="text-lg font-bold text-on-surface mb-5">${data.title}</h3>
+                <div class="space-y-5">
+                    ${data.sections.map(sec => `
+                        <div>
+                            <h4 class="text-sm font-bold text-primary-container mb-2 tracking-wide">${sec.name}</h4>
+                            <div class="flex flex-wrap gap-2">
+                                ${sec.items.map(i => `<a href="../user/职位搜索.html" class="px-3 py-1.5 rounded bg-surface-container/50 hover:bg-primary-container hover:text-on-primary text-sm text-on-surface-variant transition-all cursor-pointer">${i}</a>`).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            document.getElementById('submenu-panel').classList.remove('hidden');
+            document.getElementById('promo-banner').style.opacity = '0';
+        });
+    });
+
+    // 鼠标离开侧栏隐藏二级菜单
+    function hideSubmenu() {
+        document.getElementById('submenu-panel').classList.add('hidden');
+        document.getElementById('promo-banner').style.opacity = '1';
+    }
+    document.getElementById('category-sidebar').addEventListener('mouseleave', function() {
+        setTimeout(() => {
+            if (!document.getElementById('submenu-panel').matches(':hover')) {
+                hideSubmenu();
+            }
+        }, 100);
+    });
+    document.getElementById('submenu-panel').addEventListener('mouseleave', function() {
+        hideSubmenu();
+    });
+
+    // 搜索框焦点交互
+    const searchInputs = document.querySelectorAll('input[type="text"]');
+    searchInputs.forEach(input => {
+        input.addEventListener('focus', () => {
+            input.parentElement.classList.add('ring-2', 'ring-primary-container/40');
+        });
+        input.addEventListener('blur', () => {
+            input.parentElement.classList.remove('ring-2', 'ring-primary-container/40');
+        });
+    });
+
+    // === 登录状态管理 ===
+    const isLoggedIn = localStorage.getItem('loggedIn') === 'true';
+    const userNickname = localStorage.getItem('userNickname') || '用户';
+    const userAvatar = localStorage.getItem('userAvatar') || 'U';
+
+    // 更新导航栏显示
+    if (isLoggedIn) {
+        document.getElementById('nav-guest').classList.add('hidden');
+        document.getElementById('nav-user').classList.remove('hidden');
+        document.getElementById('nav-user').classList.add('flex');
+        document.getElementById('user-avatar').textContent = userAvatar;
+        document.getElementById('user-nickname').textContent = userNickname;
+        // 移动端菜单
+        const mg = document.getElementById('mobile-guest');
+        const mu = document.getElementById('mobile-user');
+        if (mg) mg.classList.add('hidden');
+        if (mu) { mu.classList.remove('hidden'); mu.classList.add('flex'); }
+        const ma = document.getElementById('mobile-avatar');
+        const mn = document.getElementById('mobile-nickname');
+        if (ma) ma.textContent = userAvatar;
+        if (mn) mn.textContent = userNickname;
+    }
+
+    // 退出登录
+    function logout() {
+        localStorage.removeItem('loggedIn');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userNickname');
+        localStorage.removeItem('userAvatar');
+        window.location.href = '首页着陆页.html';
+    }
+
+    // 用户下拉菜单
+    const dropdownTrigger = document.getElementById('user-dropdown-trigger');
+    const dropdown = document.getElementById('user-dropdown');
+    if (dropdownTrigger && dropdown) {
+        dropdownTrigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('hidden');
+        });
+        document.addEventListener('click', function(e) {
+            if (!dropdown.contains(e.target) && !dropdownTrigger.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    }
+
+    // 未登录时拦截导航链接
+    const protectedLinks = ['../user/职位推荐.html', '../user/简历中心.html', '../user/能力图谱.html', '../user/岗位详情.html', '../user/通知中心.html'];
+    document.querySelectorAll('a[href]').forEach(link => {
+        const href = link.getAttribute('href');
+        if (protectedLinks.includes(href)) {
+            link.addEventListener('click', function(e) {
+                if (!isLoggedIn) {
+                    e.preventDefault();
+                    alert('请先登录后再访问此页面');
+                    window.location.href = '登录.html';
+                }
+            });
+        }
+    });
+
+    // 未登录时拦截二级菜单链接
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('#submenu-content a[href="../user/职位推荐.html"]');
+        if (link && !isLoggedIn) {
+            e.preventDefault();
+            alert('请先登录后查看职位推荐');
+            window.location.href = '登录.html';
+        }
+    });
+    function toggleInterviewDD(e, suffix) {
+        e.stopPropagation();
+        var dd = document.getElementById('interviewDD-' + suffix);
+        var arrow = document.getElementById('interview-arrow-' + suffix);
+        dd.classList.toggle('hidden');
+        if (arrow) arrow.style.transform = dd.classList.contains('hidden') ? '' : 'rotate(180deg)';
+    }
+    function closeInterviewDD(suffix) {
+        var dd = document.getElementById('interviewDD-' + suffix);
+        var arrow = document.getElementById('interview-arrow-' + suffix);
+        if (dd) dd.classList.add('hidden');
+        if (arrow) arrow.style.transform = '';
+    }
+    document.addEventListener('click', function(e) {
+        ['desk', 'mob'].forEach(function(s) {
+            var wrap = document.getElementById('interviewDD-wrap-' + s);
+            if (wrap && !wrap.contains(e.target)) closeInterviewDD(s);
+        });
+    });
+</script>
+
+<script>
+// ===== 导航栏内容切换 =====
+const sectionPages = {
+    'jobs': '../user/职位推荐.html',
+    'search': '../user/职位搜索.html',
+    'resume': '../user/简历中心.html',
+    'campus': '../user/面试功能.html',
+    'insight': '../user/社交.html',
+    'notifications': '../user/通知中心.html'
+};
+
+const sectionTitles = {};
+
+const loadedSections = {};
+
+document.addEventListener('DOMContentLoaded', function() {
+    const body = document.querySelector('body');
+    if (!body) return;
+
+    const nav = document.querySelector('nav');
+    const footer = body.querySelector('footer');
+    if (!nav || !footer) return;
+
+    // 收集 nav 和 footer 之间的所有直接兄弟元素
+    const allNodes = [];
+    let node = nav.nextElementSibling;
+    while (node && node !== footer) {
+        const next = node.nextElementSibling;
+        allNodes.push(node);
+        node = next;
+    }
+
+    // 创建 explore 区域，包裹所有原有内容
+    const exploreDiv = document.createElement('div');
+    exploreDiv.id = 'section-explore';
+    exploreDiv.className = 'nav-section active-section';
+    body.insertBefore(exploreDiv, footer);
+    allNodes.forEach(s => exploreDiv.appendChild(s));
+
+    // 为需要远程加载的页面创建空占位区块
+    for (const key of Object.keys(sectionPages)) {
+        const div = document.createElement('div');
+        div.id = 'section-' + key;
+        div.className = 'nav-section';
+        div.style.display = 'none';
+        div.innerHTML = '<div class="flex items-center justify-center min-h-[60vh]"><div class="text-center"><div class="w-12 h-12 border-3 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><p class="text-gray-400 text-sm">加载中...</p></div></div>';
+        body.insertBefore(div, footer);
+    }
+
+    // 为暂未实现的页面创建占位区块
+    for (const [key, info] of Object.entries(sectionTitles)) {
+        const div = document.createElement('div');
+        div.id = 'section-' + key;
+        div.className = 'nav-section';
+        div.style.display = 'none';
+        div.innerHTML = '<section class="min-h-[70vh] flex items-center justify-center py-20"><div class="text-center max-w-lg mx-auto px-4"><div class="w-20 h-20 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-6"><span class="material-symbols-outlined text-4xl text-gray-400">construction</span></div><h2 class="text-2xl font-bold text-gray-900 mb-3">' + info.title + '</h2><p class="text-gray-500 text-base">' + info.desc + '</p><p class="text-sm text-gray-300 mt-4">功能开发中，敬请期待...</p></div></section>';
+        body.insertBefore(div, footer);
+    }
+
+    // 导航链接映射（每个导航项独立）
+    const navMap = {
+        '首页着陆页': 'explore',
+        '职位推荐': 'jobs',
+        '面试功能': 'campus',
+        '职位搜索': 'search',
+        '简历中心': 'resume',
+        '人脉': 'network',
+        '职场资讯': 'news',
+        '社交': 'insight',
+        '通知中心': 'notifications'
+    };
+
+    // 修改导航链接
+    document.querySelectorAll('a[href]').forEach(a => {
+        const href = a.getAttribute('href');
+        if (!href || href === '#') return;
+        if (href.includes('登录') || href.includes('注册')) return;
+        if (!href.endsWith('.html')) return;
+
+        let sectionKey = null;
+        for (const [name, key] of Object.entries(navMap)) {
+            if (href.includes(name)) { sectionKey = key; break; }
+        }
+        if (!sectionKey) return;
+
+        const isProtected = ['职位推荐', '简历中心', '职场资讯', '面试功能', '面试记录', '人脉', '社交', '通知中心'].some(n => href.includes(n));
+        const currentLoggedIn = localStorage.getItem('loggedIn') === 'true';
+
+        a.removeAttribute('href');
+        a.setAttribute('data-section', sectionKey);
+        a.style.cursor = 'pointer';
+        a.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (isProtected && !currentLoggedIn) {
+                alert('请先登录后再访问此页面');
+                window.location.href = '登录.html';
+                return;
+            }
+            switchSection(sectionKey);
+        });
+    });
+});
+
+// 加载远程页面内容
+const loadedStyles = {};
+
+async function loadPageContent(key) {
+    if (loadedSections[key]) return;
+    const url = sectionPages[key];
+    if (!url) return;
+    
+    const section = document.getElementById('section-' + key);
+    if (!section) return;
+    
+    try {
+        const resp = await fetch(url);
+        const html = await resp.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // 注入 <head> 中的 <style> 标签（避免重复注入）
+        if (!loadedStyles[key]) {
+            doc.querySelectorAll('head style').forEach(style => {
+                const cloned = style.cloneNode(true);
+                cloned.setAttribute('data-page', key);
+                document.head.appendChild(cloned);
+            });
+            // 注入 <head> 中的 <link rel="stylesheet"> 
+            doc.querySelectorAll('head link[rel="stylesheet"]').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && !document.querySelector('link[href="' + href + '"]')) {
+                    const cloned = link.cloneNode(true);
+                    document.head.appendChild(cloned);
+                }
+            });
+            // 注入 <head> 中的 <script src="..."> (外部脚本)
+            doc.querySelectorAll('head script[src]').forEach(script => {
+                const src = script.getAttribute('src');
+                if (src && !document.querySelector('script[src="' + src + '"]')) {
+                    const cloned = script.cloneNode(true);
+                    document.head.appendChild(cloned);
+                }
+            });
+            loadedStyles[key] = true;
+        }
+        
+        // 提取 nav/footer 或 aside+main 之间的所有内容
+        content = doc.createElement('div');
+        const bodyNodes = doc.body.childNodes;
+        let capturing = false;
+        let hasNav = false;
+        // 先检查 body 直接子节点中是否有 nav
+        for (const node of bodyNodes) {
+            if (node.nodeType === 1 && node.tagName.toLowerCase() === 'nav') { hasNav = true; break; }
+        }
+        for (const node of bodyNodes) {
+            if (node.nodeType === 1) {
+                const tag = node.tagName.toLowerCase();
+                if (hasNav) {
+                    // 标准模式：nav → footer
+                    if (tag === 'nav') { capturing = true; continue; }
+                    if (tag === 'footer') break;
+                    if (capturing) content.appendChild(node.cloneNode(true));
+                } else {
+                    // 侧边栏模式：抓取 aside + main 内容
+                    if (tag === 'footer') break;
+                    content.appendChild(node.cloneNode(true));
+                }
+            }
+        }
+        
+        // 移除内容中可能残留的顶部 <nav> 和 <footer>（保留 aside 内的 nav）
+        content.querySelectorAll(':scope > nav, :scope > footer').forEach(el => el.remove());
+        
+        // 提取并执行内容中的内联 <script>
+        const scripts = content.querySelectorAll('script');
+        const scriptContents = [];
+        scripts.forEach(s => {
+            if (s.textContent.trim()) scriptContents.push(s.textContent);
+            s.remove();
+        });
+        
+        // 提取内容中的 <style> (内联样式)
+        content.querySelectorAll('style').forEach(style => {
+            const cloned = style.cloneNode(true);
+            section.appendChild(cloned);
+        });
+        content.querySelectorAll('style').forEach(s => s.remove());
+        
+        section.innerHTML = '';
+        section.appendChild(content);
+        
+        // 执行提取的脚本（通过 script 标签注入，确保全局作用域可用）
+        scriptContents.forEach(code => {
+            try {
+                const s = document.createElement('script');
+                s.textContent = code;
+                document.body.appendChild(s);
+                s.remove();
+            } catch(e) { console.error('Script error in ' + key + ':', e); }
+        });
+        
+        loadedSections[key] = true;
+    } catch (err) {
+        console.error('Failed to load ' + url + ':', err);
+        section.innerHTML = '<div class="flex items-center justify-center min-h-[60vh]"><div class="text-center"><p class="text-gray-400">加载失败，请刷新页面重试</p></div></div>';
+    }
+}
+
+function switchSection(key) {
+    // 隐藏所有 section
+    document.querySelectorAll('.nav-section').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('active-section');
+    });
+    // 显示目标 section
+    const target = document.getElementById('section-' + key);
+    if (target) {
+        target.style.display = '';
+        target.classList.add('active-section');
+    }
+    // 如果是远程页面，加载内容
+    if (sectionPages[key]) loadPageContent(key);
+    // 更新导航高亮（只在 nav 内部操作）
+    const navEl = document.querySelector('nav');
+    if (navEl) {
+        navEl.querySelectorAll('[data-section]').forEach(a => {
+            const isActive = a.dataset.section === key;
+            if (isActive) {
+                a.classList.add('active-tab');
+                a.classList.remove('text-on-surface-variant');
+            } else {
+                a.classList.remove('active-tab');
+                if (!a.classList.contains('text-on-surface-variant') && !a.classList.contains('bg-primary-container')) {
+                    a.classList.add('text-on-surface-variant');
+                }
+            }
+        });
+    }
+    // 移动端菜单关闭
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+        mobileMenu.classList.add('hidden');
+    }
+    // 滚动到顶部
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

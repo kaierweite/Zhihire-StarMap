@@ -15,6 +15,8 @@ export interface ResumeListItem {
   title: string | null
   status: string
   created_at: string | null
+  updated_at: string | null
+  file_name: string | null
 }
 
 export interface ResumeDetail {
@@ -34,6 +36,13 @@ export interface TaskStatus {
   task_id: number
   status: 'WAITING' | 'PARSING' | 'SUCCESS' | 'FAILED'
   result: Record<string, any> | null
+}
+
+export interface SyncProfileResult {
+  auto_synced: boolean
+  synced_to_profile: boolean
+  synced_fields: string[]
+  reason?: string
 }
 
 export interface OptimizeSuggestion {
@@ -98,4 +107,9 @@ export function optimizeResume(resumeId: number, jobDescription?: string | null)
     resume_id: resumeId,
     job_description: jobDescription ?? null,
   })
+}
+
+/** Sync parsed resume data to user profile (one-click sync to profile) */
+export function syncToProfile(resumeId: number) {
+  return request.post<ApiResponse<SyncProfileResult>>(`/resume/${resumeId}/sync-profile`)
 }

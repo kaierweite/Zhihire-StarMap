@@ -20,7 +20,7 @@ from app.config.settings import settings  # 全局配置单例
 # 配置连接池参数：pool_size、max_overflow、recycle 均来自配置
 # echo 关闭以避免日志噪音；future=True 确保使用 SQLAlchemy 2.0 行为
 async_engine = create_async_engine(
-    settings.database_url,  # KingbaseES 兼容 PostgreSQL，asyncpg 驱动
+    settings.database_url,  # KingbaseES 兼容 PostgreSQL，psycopg v3 异步驱动
     pool_size=settings.db_pool_size,  # 常驻连接数
     max_overflow=settings.db_max_overflow,  # 溢出连接数
     pool_recycle=settings.db_pool_recycle,  # 连接回收周期（秒）
@@ -48,11 +48,13 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     Yields:
         AsyncSession: 当前请求范围内的异步数据库会话。
     """
-    # 为每个请求创建独立会话
     async with AsyncSessionLocal() as session:
-        # 交出会话供路由使用
-        yield session
-        # 作用域结束时自动关闭并归还连接
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
 
 
 async def check_db_connection() -> bool:

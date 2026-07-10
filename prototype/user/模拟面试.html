@@ -1,0 +1,961 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模拟面试 - 智聘星图</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="config.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#003527',
+                        'primary-dark': '#00251a',
+                        'primary-container': '#064e3b',
+                        'on-primary': '#ffffff',
+                        'on-primary-container': '#b0f0d6',
+                        surface: '#f8f9fa',
+                        'surface-container': '#edeeef',
+                        'surface-container-lowest': '#ffffff',
+                        'on-surface': '#191c1d',
+                        'on-surface-variant': '#6b6f76',
+                        'outline-variant': '#c4c5d9',
+                        secondary: '#434656'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(196, 197, 217, 0.4);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s;
+            border-radius: 12px;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        .btn-primary {
+            position: relative;
+            overflow: hidden;
+            background: #064e3b;
+            color: #fff;
+            padding: 12px 32px;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 0.02em;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #003527;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(6, 78, 59, 0.25);
+        }
+
+        .btn-primary::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transform: skewX(-20deg);
+            animation: shimmer 4s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                left: -150%
+            }
+
+            30% {
+                left: 150%
+            }
+
+            100% {
+                left: 150%
+            }
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .chip-primary {
+            background: #b0f0d6;
+            color: #003527;
+        }
+
+        .chip-neutral {
+            background: #f3f4f5;
+            color: #434656;
+        }
+
+        .chip-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        ::selection {
+            background: #b0f0d6;
+            color: #002117;
+        }
+
+        .stage-card {
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .stage-card:hover {
+            border-color: #064e3b;
+            background: rgba(6, 78, 59, 0.05);
+        }
+
+        .stage-card.selected {
+            border-color: #064e3b;
+            background: rgba(6, 78, 59, 0.1);
+        }
+
+        .pressure-option {
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .pressure-option:hover {
+            border-color: #064e3b;
+        }
+
+        .pressure-option.selected {
+            border-color: #064e3b;
+            background: rgba(6, 78, 59, 0.1);
+        }
+
+        .scene-card {
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .scene-card:hover {
+            border-color: #064e3b;
+            transform: translateY(-4px);
+        }
+
+        .scene-card.selected {
+            border-color: #064e3b;
+            background: rgba(6, 78, 59, 0.05);
+        }
+            .active-tab { color: #064e3b; border-bottom: 2px solid #064e3b; font-weight: 700; }
+    </style>
+</head>
+
+<body class="bg-surface min-h-screen">
+
+
+    
+    <nav class="fixed top-0 w-full z-50 bg-white h-14 border-b border-outline-variant/50 transition-all duration-300">
+        <div class="flex justify-between items-center w-full px-4 lg:px-10 max-w-[1440px] mx-auto h-full">
+            <a href="../common/首页着陆页.html" class="font-bold text-[22px] tracking-tight text-primary-container shrink-0">智聘星图</a>
+            <div class="hidden lg:flex items-center gap-6 xl:gap-8">
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="../common/首页着陆页.html">探索</a>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="职位推荐.html">职位推荐</a>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="职位搜索.html">职位搜索</a>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="简历中心.html">简历中心</a>
+                <div class="relative" id="interviewDD-wrap-desk">
+                    <button onclick="toggleInterviewDD(event, 'desk')" class="active-tab font-medium text-[13px] hover:text-primary-container transition-all pb-1 whitespace-nowrap cursor-pointer flex items-center gap-0.5">
+                        面试功能
+                        <span class="material-symbols-outlined text-sm transition-transform" id="interview-arrow-desk">expand_more</span>
+                    </button>
+                    <div id="interviewDD-desk" class="hidden absolute left-0 top-full mt-1 w-36 bg-white rounded-xl shadow-2xl border border-outline-variant/30 z-50 overflow-hidden">
+                        <a href="模拟面试.html" class="block px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors">智能面试</a>
+                        <a href="面试记录.html" class="block px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors">面试记录</a>
+                    </div>
+                </div>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="社交.html">社交</a>
+            </div>
+            <div class="flex items-center gap-2 lg:gap-3">
+                <a href="通知中心.html" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer hidden xl:block" title="通知中心">notifications</a>
+                <div class="hidden xl:flex items-center bg-surface-container rounded-full px-3 py-1.5 border border-outline-variant/60">
+                    <span class="material-symbols-outlined text-outline text-base">search</span>
+                    <input class="bg-transparent border-none focus:ring-0 text-sm w-32 ml-1 text-on-surface placeholder-on-surface-variant/60" placeholder="搜索职位..." type="text"/>
+                </div>
+                <div id="nav-guest" class="flex items-center gap-2">
+                    <a href="../common/登录.html" class="text-primary-container font-medium text-[13px] px-3 py-1.5 hover:bg-surface-container rounded-full transition-all hidden sm:inline-block">登录</a>
+                    <a href="../common/注册.html" class="bg-primary-container text-on-primary font-medium text-[13px] px-4 py-1.5 rounded-full hover:opacity-90 transition-all hidden sm:inline-block">注册</a>
+                </div>
+                <div id="nav-user" class="hidden items-center gap-3">
+                    <div class="relative">
+                        <div id="user-dropdown-trigger" class="flex items-center gap-2 cursor-pointer hover:bg-surface-container rounded-full px-3 py-1.5 transition-all">
+                            <div id="user-avatar" class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-xs font-bold">Q</div>
+                            <span id="user-nickname" class="text-sm font-medium text-on-surface hidden xl:inline-block">求职小能手</span>
+                            <span class="material-symbols-outlined text-sm text-on-surface-variant">expand_more</span>
+                        </div>
+                        <div id="user-dropdown" class="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-outline-variant/30 py-2 z-50 hidden">
+                            <a href="个人中心.html" class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-primary-container/10 hover:text-primary transition-colors"><span class="material-symbols-outlined text-base">person</span><span>个人中心</span></a>
+                            <a href="面试记录.html" class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-primary-container/10 hover:text-primary transition-colors"><span class="material-symbols-outlined text-base">calendar_today</span><span>我的面试</span></a>
+                            <div class="border-t border-outline-variant/20 my-1"></div>
+                            <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"><span class="material-symbols-outlined text-base">logout</span><span>退出登录</span></button>
+                        </div>
+                    </div>
+                </div>
+                <button id="mobile-menu-btn" class="lg:hidden p-1.5 hover:bg-surface-container rounded-lg transition-colors" onclick="toggleMobileMenu()"><span class="material-symbols-outlined text-on-surface text-xl">menu</span></button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-outline-variant/50 shadow-lg">
+            <div class="flex flex-col px-4 py-3 gap-1">
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="../common/首页着陆页.html">探索</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="职位推荐.html">职位推荐</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="职位搜索.html">职位搜索</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="简历中心.html">简历中心</a>
+                <div class="relative" id="interviewDD-wrap-mob">
+                    <button onclick="toggleInterviewDD(event, 'mob')" class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all cursor-pointer flex items-center justify-between w-full">
+                        面试功能
+                        <span class="material-symbols-outlined text-base transition-transform" id="interview-arrow-mob">expand_more</span>
+                    </button>
+                    <div id="interviewDD-mob" class="hidden ml-4 space-y-0.5 mt-0.5">
+                        <a href="模拟面试.html" class="block py-2 px-3 text-sm text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">智能面试</a>
+                        <a href="面试记录.html" class="block py-2 px-3 text-sm text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">面试记录</a>
+                    </div>
+                </div>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="社交.html">社交</a>
+                <div class="border-t border-outline-variant/30 my-2"></div>
+                <div id="mobile-guest" class="flex gap-2">
+                    <a href="../common/登录.html" class="flex-1 text-center text-primary-container font-medium text-sm py-2.5 border border-outline-variant/40 rounded-lg hover:bg-surface-container transition-all">登录</a>
+                    <a href="../common/注册.html" class="flex-1 text-center bg-primary-container text-on-primary font-medium text-sm py-2.5 rounded-lg hover:opacity-90 transition-all">注册</a>
+                </div>
+                <div id="mobile-user" class="hidden items-center gap-3 px-3 py-2">
+                    <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-sm font-bold" id="mobile-avatar">Q</div>
+                    <span class="text-sm font-medium text-on-surface flex-1" id="mobile-nickname">求职小能手</span>
+                    <button onclick="logout()" class="text-on-surface-variant hover:text-red-500 transition-all"><span class="material-symbols-outlined text-lg">logout</span></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+
+<main class="pt-20 pb-8">
+    <div class="px-4 lg:px-8 max-w-[1400px] mx-auto">
+        
+        <!-- 用户信息和专业信息显示 -->
+        <section class="mb-8 animate-fade-in-up">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-on-surface" style="letter-spacing:-0.02em;">模拟面试训练</h1>
+                    <p class="text-on-surface-variant text-sm mt-1">AI 扮演面试官，针对你的专业和岗位实时出题、评分与反馈</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- 用户信息卡片 -->
+                <div class="glass-card p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="material-symbols-outlined text-primary text-xl">person</span>
+                        <h3 class="text-base font-semibold text-on-surface">我的信息</h3>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-16 h-16 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-2xl font-bold" id="user-info-avatar">Q</div>
+                        <div class="flex-1">
+                            <div class="font-semibold text-on-surface text-lg" id="user-info-name">求职小能手</div>
+                            <div class="text-sm text-on-surface-variant mt-1" id="user-info-role">前端开发工程师</div>
+                            <div class="flex flex-wrap gap-2 mt-3" id="user-skills">
+                                <span class="chip chip-primary">React</span>
+                                <span class="chip chip-primary">Vue</span>
+                                <span class="chip chip-primary">TypeScript</span>
+                                <span class="chip chip-neutral">+5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 专业/职位信息卡片 -->
+                <div class="glass-card p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="material-symbols-outlined text-primary text-xl">school</span>
+                        <h3 class="text-base font-semibold text-on-surface">目标岗位信息</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-surface-container rounded-lg">
+                            <span class="text-sm text-on-surface-variant">目标岗位</span>
+                            <span class="text-sm font-semibold text-on-surface" id="user-target-job">高级前端工程师</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-surface-container rounded-lg">
+                            <span class="text-sm text-on-surface-variant">目标公司</span>
+                            <span class="text-sm font-semibold text-on-surface" id="user-target-company">字节跳动</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-surface-container rounded-lg">
+                            <span class="text-sm text-on-surface-variant">工作城市</span>
+                            <span class="text-sm font-semibold text-on-surface" id="user-city">北京</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-surface-container rounded-lg">
+                            <span class="text-sm text-on-surface-variant">专业方向</span>
+                            <span class="text-sm font-semibold text-on-surface" id="user-major">计算机科学与技术</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-primary-container/10 rounded-lg">
+                            <span class="text-sm text-primary font-medium">AI匹配度</span>
+                            <span class="text-lg font-bold text-primary" id="user-match">92%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 岗位快速选择 -->
+            <div class="glass-card p-4 mt-4">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="material-symbols-outlined text-primary text-lg">work</span>
+                    <h3 class="text-sm font-semibold text-on-surface">快速选择目标岗位</h3>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button class="job-select-btn px-4 py-2 rounded-full text-xs font-medium bg-primary-container text-on-primary transition-all" data-job="1" onclick="selectJob(1)">高级前端工程师 · 字节跳动</button>
+                    <button class="job-select-btn px-4 py-2 rounded-full text-xs font-medium bg-surface-container text-on-surface-variant transition-all" data-job="6" onclick="selectJob(6)">Java高级工程师 · 美团</button>
+                    <button class="job-select-btn px-4 py-2 rounded-full text-xs font-medium bg-surface-container text-on-surface-variant transition-all" data-job="3" onclick="selectJob(3)">数据分析师 · 阿里巴巴</button>
+                    <button class="job-select-btn px-4 py-2 rounded-full text-xs font-medium bg-surface-container text-on-surface-variant transition-all" data-job="4" onclick="selectJob(4)">UI/UX设计师 · 网易</button>
+                    <button class="job-select-btn px-4 py-2 rounded-full text-xs font-medium bg-surface-container text-on-surface-variant transition-all" data-job="8" onclick="selectJob(8)">AI算法工程师 · 百度</button>
+                    <button class="job-select-btn px-4 py-2 rounded-full text-xs font-medium bg-surface-container text-on-surface-variant transition-all" data-job="2" onclick="selectJob(2)">产品经理 · 腾讯</button>
+                    <button class="job-select-btn px-4 py-2 rounded-full text-xs font-medium bg-surface-container text-on-surface-variant transition-all" data-job="5" onclick="selectJob(5)">投资分析师 · 中信证券</button>
+                    <button class="job-select-btn px-4 py-2 rounded-full text-xs font-medium bg-surface-container text-on-surface-variant transition-all" data-job="9" onclick="selectJob(9)">人力资源专员 · 华为</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 面试配置区域 -->
+        <section class="mb-8 animate-fade-in-up" style="animation-delay:0.1s; opacity:0;">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- 左侧：面试阶段选择 -->
+                <div class="glass-card p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="material-symbols-outlined text-primary text-xl">flag</span>
+                        <h3 class="text-base font-semibold text-on-surface">选择面试阶段</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="stage-card p-4 rounded-xl border border-outline-variant/60" onclick="selectStage(this, '初面')">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-blue-600 text-xl">1</span>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-on-surface">初面阶段</div>
+                                    <div class="text-xs text-on-surface-variant mt-1">基础能力考察，侧重技术基础和项目经验</div>
+                                </div>
+                                <div class="w-5 h-5 rounded-full border-2 border-outline-variant flex items-center justify-center" id="stage-初面">
+                                    <div class="w-3 h-3 rounded-full bg-primary hidden"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stage-card p-4 rounded-xl border border-outline-variant/60" onclick="selectStage(this, '复面')">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-orange-600 text-xl">2</span>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-on-surface">复面阶段</div>
+                                    <div class="text-xs text-on-surface-variant mt-1">深度技术考察，系统设计和架构能力</div>
+                                </div>
+                                <div class="w-5 h-5 rounded-full border-2 border-outline-variant flex items-center justify-center" id="stage-复面">
+                                    <div class="w-3 h-3 rounded-full bg-primary hidden"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stage-card p-4 rounded-xl border border-outline-variant/60" onclick="selectStage(this, '终面')">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-purple-600 text-xl">3</span>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-on-surface">终面阶段</div>
+                                    <div class="text-xs text-on-surface-variant mt-1">综合能力考察，领导力和团队协作</div>
+                                </div>
+                                <div class="w-5 h-5 rounded-full border-2 border-outline-variant flex items-center justify-center" id="stage-终面">
+                                    <div class="w-3 h-3 rounded-full bg-primary hidden"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 右侧：压力设置 -->
+                <div class="glass-card p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="material-symbols-outlined text-primary text-xl">speed</span>
+                        <h3 class="text-base font-semibold text-on-surface">面试压力设置</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="pressure-option p-4 rounded-xl border border-outline-variant/60" onclick="selectPressure(this, '轻松')">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-green-600 text-xl">sentiment_satisfied</span>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-on-surface">轻松模式</div>
+                                    <div class="text-xs text-on-surface-variant mt-1">友好面试官，适合初次面试练习</div>
+                                </div>
+                                <div class="w-5 h-5 rounded-full border-2 border-outline-variant flex items-center justify-center" id="pressure-轻松">
+                                    <div class="w-3 h-3 rounded-full bg-primary hidden"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="pressure-option p-4 rounded-xl border border-outline-variant/60" onclick="selectPressure(this, '标准')">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-yellow-600 text-xl">sentiment_neutral</span>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-on-surface">标准模式</div>
+                                    <div class="text-xs text-on-surface-variant mt-1">正常面试节奏，真实模拟面试场景</div>
+                                </div>
+                                <div class="w-5 h-5 rounded-full border-2 border-outline-variant flex items-center justify-center" id="pressure-标准">
+                                    <div class="w-3 h-3 rounded-full bg-primary hidden"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="pressure-option p-4 rounded-xl border border-outline-variant/60" onclick="selectPressure(this, '高压')">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-red-600 text-xl">sentiment_dissatisfied</span>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-on-surface">高压模式</div>
+                                    <div class="text-xs text-on-surface-variant mt-1">压力面试，追问刁难，锻炼抗压能力</div>
+                                </div>
+                                <div class="w-5 h-5 rounded-full border-2 border-outline-variant flex items-center justify-center" id="pressure-高压">
+                                    <div class="w-3 h-3 rounded-full bg-primary hidden"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="pressure-option p-4 rounded-xl border border-outline-variant/60" onclick="selectPressure(this, '地狱')">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-gray-600 text-xl">skull</span>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-on-surface">地狱模式</div>
+                                    <div class="text-xs text-on-surface-variant mt-1">极限挑战，适合经验丰富者突破自我</div>
+                                </div>
+                                <div class="w-5 h-5 rounded-full border-2 border-outline-variant flex items-center justify-center" id="pressure-地狱">
+                                    <div class="w-3 h-3 rounded-full bg-primary hidden"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+
+        <!-- 面试场景选择 -->
+        <section class="mb-8 animate-fade-in-up" style="animation-delay:0.2s; opacity:0;">
+            <div class="glass-card p-6">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary text-xl">videocam</span>
+                    <h3 class="text-base font-semibold text-on-surface">选择面试场景</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="scene-card p-6 rounded-xl border border-outline-variant/60 text-center" onclick="selectScene(this, '直播')">
+                        <div class="w-16 h-16 mx-auto rounded-full bg-red-100 flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined text-red-600 text-3xl">live_tv</span>
+                        </div>
+                        <div class="font-semibold text-on-surface mb-2">视频面试</div>
+                        <div class="text-xs text-on-surface-variant">实时视频面试，模拟真实面试场景，支持摄像头和麦克风</div>
+                        <div class="mt-3">
+                            <span class="chip chip-primary">推荐</span>
+                        </div>
+                    </div>
+                    
+                    <div class="scene-card p-6 rounded-xl border border-outline-variant/60 text-center" onclick="selectScene(this, '音频')">
+                        <div class="w-16 h-16 mx-auto rounded-full bg-blue-100 flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined text-blue-600 text-3xl">phone_in_talk</span>
+                        </div>
+                        <div class="font-semibold text-on-surface mb-2">纯音频电话</div>
+                        <div class="text-xs text-on-surface-variant">电话面试模式，专注于语音表达和沟通能力</div>
+                        <div class="mt-3">
+                            <span class="chip chip-neutral">经典</span>
+                        </div>
+                    </div>
+                    
+                    <div class="scene-card p-6 rounded-xl border border-outline-variant/60 text-center" onclick="selectScene(this, '聊天')">
+                        <div class="w-16 h-16 mx-auto rounded-full bg-green-100 flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined text-green-600 text-3xl">chat</span>
+                        </div>
+                        <div class="font-semibold text-on-surface mb-2">聊天式</div>
+                        <div class="text-xs text-on-surface-variant">文字对话模式，适合练习思考和表达逻辑</div>
+                        <div class="mt-3">
+                            <span class="chip chip-neutral">便捷</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 开始面试按钮 -->
+        <section class="mb-8 animate-fade-in-up" style="animation-delay:0.3s; opacity:0;">
+            <div class="glass-card p-8">
+                <div class="flex flex-col items-center">
+                    <div class="text-center mb-6">
+                        <div class="text-lg font-semibold text-on-surface mb-2">准备好了吗？</div>
+                        <div class="text-sm text-on-surface-variant" id="config-summary">请先选择面试阶段、压力设置和面试场景</div>
+                    </div>
+                    <button onclick="startInterview()" class="btn-primary flex items-center gap-2 px-8 py-4 text-lg" id="start-btn" disabled>
+                        <span class="material-symbols-outlined text-xl">play_arrow</span>
+                        开始模拟面试
+                    </button>
+                    <div class="mt-4 text-xs text-on-surface-variant">
+                        <span class="material-symbols-outlined text-sm align-middle">info</span>
+                        面试过程中可以随时暂停或结束
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+    </div>
+</main>
+
+<script>
+    // 岗位数据字典 - 与职位推荐页面的jobData保持一致
+    var JOB_DATABASE = {
+        '1': {
+            id: 1,
+            title: '高级前端工程师',
+            company: '字节跳动',
+            city: '北京',
+            major: '计算机科学与技术',
+            skills: ['React', 'Vue', 'TypeScript', 'JavaScript', 'HTML5', 'CSS3', 'Webpack', 'Git'],
+            description: '负责前端架构设计与核心模块开发',
+            match: 92
+        },
+        '2': {
+            id: 2,
+            title: '产品经理',
+            company: '腾讯',
+            city: '深圳',
+            major: '工商管理',
+            skills: ['需求分析', '原型设计', '数据分析', '项目管理', 'Axure', 'SQL', '用户研究'],
+            description: '负责产品规划与设计',
+            match: 85
+        },
+        '3': {
+            id: 3,
+            title: '数据分析师',
+            company: '阿里巴巴',
+            city: '杭州',
+            major: '数据科学与大数据技术',
+            skills: ['Python', 'SQL', 'Tableau', 'Excel', '统计学', '机器学习', '数据可视化'],
+            description: '负责数据分析与洞察',
+            match: 78
+        },
+        '4': {
+            id: 4,
+            title: 'UI/UX设计师',
+            company: '网易',
+            city: '杭州',
+            major: '视觉传达设计',
+            skills: ['Figma', 'Sketch', 'Adobe XD', 'Photoshop', 'Illustrator', '交互设计', '用户研究'],
+            description: '负责产品界面与用户体验设计',
+            match: 82
+        },
+        '5': {
+            id: 5,
+            title: '投资分析师',
+            company: '中信证券',
+            city: '北京',
+            major: '金融学',
+            skills: ['财务建模', '估值分析', '行业研究', 'Excel', 'Python', 'Wind', 'Bloomberg'],
+            description: '负责投资研究与分析',
+            match: 75
+        },
+        '6': {
+            id: 6,
+            title: 'Java高级工程师',
+            company: '美团',
+            city: '北京',
+            major: '软件工程',
+            skills: ['Java', 'Spring Boot', 'MySQL', 'Redis', 'Kafka', '微服务', 'Docker'],
+            description: '负责后端服务设计与开发',
+            match: 88
+        },
+        '7': {
+            id: 7,
+            title: '市场运营经理',
+            company: '小米',
+            city: '北京',
+            major: '市场营销',
+            skills: ['数字营销', '内容运营', '数据分析', '活动策划', '新媒体', '品牌管理', 'SEO/SEM'],
+            description: '负责市场推广与运营',
+            match: 80
+        },
+        '8': {
+            id: 8,
+            title: 'AI算法工程师',
+            company: '百度',
+            city: '北京',
+            major: '人工智能',
+            skills: ['Python', 'TensorFlow', 'PyTorch', '机器学习', '深度学习', 'NLP', '计算机视觉'],
+            description: '负责AI算法研究与模型开发',
+            match: 90
+        },
+        '9': {
+            id: 9,
+            title: '人力资源专员',
+            company: '华为',
+            city: '深圳',
+            major: '人力资源管理',
+            skills: ['招聘', '培训', '绩效管理', '薪酬福利', '员工关系', 'HRIS', '劳动法'],
+            description: '负责人力资源管理工作',
+            match: 72
+        }
+    };
+
+    // 当前选中的岗位
+    var currentJobId = null;
+    var interviewConfig = {
+        stage: null,
+        pressure: null,
+        scene: null
+    };
+
+    // 从URL参数获取岗位ID
+    function getJobIdFromUrl() {
+        var params = new URLSearchParams(window.location.search);
+        return params.get('jobId') || params.get('job');
+    }
+
+    // 从localStorage获取选中的岗位
+    function getJobIdFromStorage() {
+        return localStorage.getItem('selectedJobId') || localStorage.getItem('interviewJobId');
+    }
+
+    // 选择岗位
+    function selectJob(jobId) {
+        jobId = String(jobId);
+        if (!JOB_DATABASE[jobId]) return;
+        
+        currentJobId = jobId;
+        var job = JOB_DATABASE[jobId];
+        
+        // 更新页面显示
+        document.getElementById('user-major').textContent = job.major;
+        document.getElementById('user-target-job').textContent = job.title;
+        document.getElementById('user-target-company').textContent = job.company;
+        document.getElementById('user-info-role').textContent = job.description;
+        document.getElementById('user-city').textContent = job.city;
+        document.getElementById('user-match').textContent = job.match + '%';
+        
+        // 更新技能标签
+        var skillsHtml = '';
+        var showSkills = job.skills.slice(0, 4);
+        showSkills.forEach(function(skill) {
+            skillsHtml += '<span class="chip chip-primary">' + skill + '</span>';
+        });
+        if (job.skills.length > 4) {
+            skillsHtml += '<span class="chip chip-neutral">+' + (job.skills.length - 4) + '</span>';
+        }
+        document.getElementById('user-skills').innerHTML = skillsHtml;
+        
+        // 保存到localStorage
+        localStorage.setItem('selectedJobId', jobId);
+        localStorage.setItem('userTargetJob', job.title);
+        localStorage.setItem('userTargetCompany', job.company);
+        localStorage.setItem('userMajor', job.major);
+        
+        // 更新岗位选择按钮状态
+        document.querySelectorAll('.job-select-btn').forEach(function(btn) {
+            btn.classList.remove('selected');
+            btn.classList.remove('bg-primary-container', 'text-on-primary');
+            btn.classList.add('bg-surface-container', 'text-on-surface-variant');
+        });
+        var activeBtn = document.querySelector('[data-job="' + jobId + '"]');
+        if (activeBtn) {
+            activeBtn.classList.add('selected');
+            activeBtn.classList.remove('bg-surface-container', 'text-on-surface-variant');
+            activeBtn.classList.add('bg-primary-container', 'text-on-primary');
+        }
+        
+        updateConfigSummary();
+    }
+
+    // 选择面试阶段
+    function selectStage(el, stage) {
+        document.querySelectorAll('.stage-card').forEach(function(card) {
+            card.classList.remove('selected');
+            var indicator = card.querySelector('.w-3.h-3');
+            if (indicator) indicator.classList.add('hidden');
+        });
+        
+        el.classList.add('selected');
+        var indicator = el.querySelector('.w-3.h-3');
+        if (indicator) indicator.classList.remove('hidden');
+        
+        interviewConfig.stage = stage;
+        updateConfigSummary();
+    }
+
+    // 选择压力设置
+    function selectPressure(el, pressure) {
+        document.querySelectorAll('.pressure-option').forEach(function(option) {
+            option.classList.remove('selected');
+            var indicator = option.querySelector('.w-3.h-3');
+            if (indicator) indicator.classList.add('hidden');
+        });
+        
+        el.classList.add('selected');
+        var indicator = el.querySelector('.w-3.h-3');
+        if (indicator) indicator.classList.remove('hidden');
+        
+        interviewConfig.pressure = pressure;
+        updateConfigSummary();
+    }
+
+    // 选择面试场景
+    function selectScene(el, scene) {
+        document.querySelectorAll('.scene-card').forEach(function(card) {
+            card.classList.remove('selected');
+        });
+        
+        el.classList.add('selected');
+        
+        interviewConfig.scene = scene;
+        updateConfigSummary();
+    }
+
+    // 更新配置摘要
+    function updateConfigSummary() {
+        var summaryEl = document.getElementById('config-summary');
+        var startBtn = document.getElementById('start-btn');
+        var jobName = currentJobId ? JOB_DATABASE[currentJobId].title : '未选择岗位';
+        
+        if (currentJobId && interviewConfig.stage && interviewConfig.pressure && interviewConfig.scene) {
+            summaryEl.textContent = jobName + ' · ' + interviewConfig.stage + ' · ' + interviewConfig.pressure + '模式 · ' + interviewConfig.scene + '面试';
+            startBtn.disabled = false;
+            startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        } else {
+            var missing = [];
+            if (!currentJobId) missing.push('目标岗位');
+            if (!interviewConfig.stage) missing.push('面试阶段');
+            if (!interviewConfig.pressure) missing.push('压力设置');
+            if (!interviewConfig.scene) missing.push('面试场景');
+            summaryEl.textContent = '请选择：' + missing.join('、');
+            startBtn.disabled = true;
+            startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    }
+
+    // 开始面试
+    function startInterview() {
+        if (!currentJobId || !interviewConfig.stage || !interviewConfig.pressure || !interviewConfig.scene) {
+            alert('请先完成所有配置选项');
+            return;
+        }
+        
+        var config = {
+            jobId: currentJobId,
+            job: JOB_DATABASE[currentJobId],
+            stage: interviewConfig.stage,
+            pressure: interviewConfig.pressure,
+            scene: interviewConfig.scene
+        };
+        
+        localStorage.setItem('interviewConfig', JSON.stringify(config));
+        
+        // 根据场景跳转到对应的面试页面
+        var targetPage = '';
+        if (interviewConfig.scene === '直播') {
+            targetPage = '面试-视频面试.html';
+        } else if (interviewConfig.scene === '音频') {
+            targetPage = '面试-纯音频电话.html';
+        } else if (interviewConfig.scene === '聊天') {
+            targetPage = '面试-聊天式.html';
+        }
+        
+        if (targetPage) {
+            window.location.href = targetPage;
+        }
+    }
+
+    // 从localStorage加载用户信息
+    function loadUserInfo() {
+        var userNickname = localStorage.getItem('userNickname') || '求职小能手';
+        var userAvatar = localStorage.getItem('userAvatar') || 'U';
+        
+        document.getElementById('user-info-avatar').textContent = userAvatar.charAt(0).toUpperCase();
+        document.getElementById('user-info-name').textContent = userNickname;
+        
+        // 尝试从URL或localStorage获取岗位ID
+        var jobId = getJobIdFromUrl() || getJobIdFromStorage();
+        if (jobId && JOB_DATABASE[String(jobId)]) {
+            // 从职位推荐/搜索页面带过来的岗位
+            selectJob(jobId);
+        } else {
+            // 默认显示第一个岗位
+            selectJob(1);
+        }
+    }
+
+    // 移动端菜单切换
+    function toggleMobileMenu() {
+        var menu = document.getElementById('mobile-menu');
+        menu.classList.toggle('hidden');
+    }
+
+    // 用户下拉菜单
+    function toggleUserDropdown(e) {
+        e.stopPropagation();
+        var dd = document.getElementById('user-dropdown');
+        dd.classList.toggle('hidden');
+    }
+
+    function closeUserDropdown() {
+        var dd = document.getElementById('user-dropdown');
+        if (dd) dd.classList.add('hidden');
+    }
+
+    document.addEventListener('click', function(e) {
+        var trigger = document.getElementById('user-dropdown-trigger');
+        if (trigger && !trigger.contains(e.target)) closeUserDropdown();
+        ['desk', 'mob'].forEach(function(s) {
+            var wrap = document.getElementById('interviewDD-wrap-' + s);
+            if (wrap && !wrap.contains(e.target)) closeInterviewDD(s);
+        });
+    });
+
+    function _OLD_REMOVED(e, suffix) {
+        e.stopPropagation();
+        var dd = document.getElementById('interviewDD-' + suffix);
+        var arrow = document.getElementById('interview-arrow-' + suffix);
+        dd.classList.toggle('hidden');
+        if (arrow) arrow.style.transform = dd.classList.contains('hidden') ? '' : 'rotate(180deg)';
+    }
+
+    function closeInterviewDD(suffix) {
+        var dd = document.getElementById('interviewDD-' + suffix);
+        var arrow = document.getElementById('interview-arrow-' + suffix);
+        if (dd) dd.classList.add('hidden');
+        if (arrow) arrow.style.transform = '';
+    }
+
+    // 同步登录状态
+    function syncLoginState() {
+        var isLoggedIn = localStorage.getItem('loggedIn') === 'true';
+        var userNickname = localStorage.getItem('userNickname') || '用户';
+        var userAvatar = localStorage.getItem('userAvatar') || 'U';
+        
+        if (isLoggedIn) {
+            var ng = document.getElementById('nav-guest');
+            var nu = document.getElementById('nav-user');
+            if (ng) ng.classList.add('hidden');
+            if (nu) { nu.classList.remove('hidden'); nu.classList.add('flex'); }
+            var ua = document.getElementById('user-avatar');
+            var un = document.getElementById('user-nickname');
+            if (ua) ua.textContent = userAvatar;
+            if (un) un.textContent = userNickname;
+            
+            var mg = document.getElementById('mobile-guest');
+            var mu = document.getElementById('mobile-user');
+            if (mg) mg.classList.add('hidden');
+            if (mu) { mu.classList.remove('hidden'); mu.classList.add('flex'); }
+            var ma = document.getElementById('mobile-avatar');
+            var mn = document.getElementById('mobile-nickname');
+            if (ma) ma.textContent = userAvatar;
+            if (mn) mn.textContent = userNickname;
+        }
+    }
+
+    // 退出登录
+    function logout() {
+        localStorage.removeItem('loggedIn');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userNickname');
+        localStorage.removeItem('userAvatar');
+        localStorage.removeItem('zhihire_resume');
+        window.location.href = '../common/首页着陆页.html';
+    }
+
+    // 页面加载
+    document.addEventListener('DOMContentLoaded', function() {
+        syncLoginState();
+        loadUserInfo();
+        updateConfigSummary();
+    });
+</script>
+    <script>
+        function toggleInterviewDD(e, suffix) {
+            e.stopPropagation();
+            var dd = document.getElementById('interviewDD-' + suffix);
+            var arrow = document.getElementById('interview-arrow-' + suffix);
+            if (dd) dd.classList.toggle('hidden');
+            if (arrow) arrow.style.transform = dd && dd.classList.contains('hidden') ? '' : 'rotate(180deg)';
+        }
+        function closeInterviewDD(suffix) {
+            var dd = document.getElementById('interviewDD-' + suffix);
+            var arrow = document.getElementById('interview-arrow-' + suffix);
+            if (dd) dd.classList.add('hidden');
+            if (arrow) arrow.style.transform = '';
+        }
+        document.addEventListener('click', function(e) {
+            ['desk', 'mob'].forEach(function(s) {
+                var wrap = document.getElementById('interviewDD-wrap-' + s);
+                if (wrap && !wrap.contains(e.target)) closeInterviewDD(s);
+            });
+        });
+        function toggleMobileMenu() {
+            var menu = document.getElementById('mobile-menu');
+            if (menu) menu.classList.toggle('hidden');
+        }
+        function logout() {
+            localStorage.removeItem('loggedIn');
+            window.location.href = '../common/登录.html';
+        }
+    </script>
+</body>
+
+</html>

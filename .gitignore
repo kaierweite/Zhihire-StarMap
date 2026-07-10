@@ -36,8 +36,8 @@ Thumbs.db
 backend/target/
 frontend/dist/
 frontend/node_modules/
-ai-service/venv/
-ai-service/__pycache__/
+backend/.venv/
+backend/__pycache__/
 deploy/*.tar.gz
 video/
 ppt/

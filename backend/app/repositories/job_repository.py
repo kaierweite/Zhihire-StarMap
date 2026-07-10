@@ -78,6 +78,8 @@ async def search_jobs(
     salary_min: float | None = None,
     salary_max: float | None = None,
     job_type: str | None = None,
+    major: str | None = None,
+    job_category: str | None = None,
     company_id: int | None = None,
     status: str | None = None,
     page: int = 1,
@@ -89,9 +91,9 @@ async def search_jobs(
         Company.deleted_at == "0",
         Company.audit_status == "VERIFIED",
     ]
-    if status:
+    if status and status != "ALL":
         base_cond.append(Job.status == status)
-    else:
+    elif not status:
         base_cond.append(Job.status == "OPEN")
     if company_id is not None:
         base_cond.append(Job.company_id == company_id)

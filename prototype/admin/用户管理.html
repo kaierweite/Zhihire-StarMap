@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理 - 智聘星图</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="../config.js"></script>
+    <style>
+        .glass-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(196,197,217,0.4); box-shadow: 0 4px 20px rgba(0,0,0,0.04); transition: all 0.3s; border-radius: 12px; }
+        .glass-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+        .btn-primary { position: relative; overflow: hidden; background: #064e3b; color: #fff; padding: 12px 32px; border-radius: 9999px; font-weight: 600; font-size: 14px; letter-spacing: 0.02em; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; }
+        .btn-primary:hover { background: #003527; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(6,78,59,0.25); }
+        .btn-primary::after { content:""; position:absolute; top:0; left:-150%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent); transform:skewX(-20deg); animation:shimmer 4s infinite; }
+        @keyframes shimmer { 0%{left:-150%} 30%{left:150%} 100%{left:150%} }
+        .btn-ghost { border: 1px solid #191c1d; color: #191c1d; padding: 12px 32px; border-radius: 9999px; font-weight: 600; font-size: 14px; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; background: transparent; cursor: pointer; }
+        .btn-ghost:hover { background: #191c1d; color: #fff; }
+        .btn-danger { background: #ba1a1a; color: #fff; padding: 8px 20px; border-radius: 9999px; font-weight: 600; font-size: 13px; transition: all 0.3s; border: none; cursor: pointer; }
+        .btn-danger:hover { background: #93000a; }
+        .btn-success { background: #155724; color: #fff; padding: 6px 16px; border-radius: 9999px; font-weight: 600; font-size: 13px; transition: all 0.3s; border: none; cursor: pointer; }
+        .btn-success:hover { background: #0d3b16; }
+        .btn-sm { padding: 6px 14px; border-radius: 9999px; font-weight: 600; font-size: 12px; transition: all 0.3s; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+        .chip { display:inline-flex; align-items:center; gap:4px; padding:4px 12px; border-radius:4px; font-size:12px; font-weight:600; letter-spacing:0.05em; }
+        .chip-primary { background: #b0f0d6; color: #003527; }
+        .chip-success { background: #d4edda; color: #155724; }
+        .chip-warning { background: #fff3cd; color: #856404; }
+        .chip-error { background: #ffdad6; color: #93000a; }
+        .chip-neutral { background: #f3f4f5; color: #434656; }
+        .ambient-orb { position:absolute; border-radius:50%; filter:blur(100px); opacity:0.12; pointer-events:none; z-index:-1; }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .animate-fade-in-up { animation:fadeInUp 0.6s ease forwards; }
+        ::selection { background: #b0f0d6; color: #002117; }
+        .mobile-nav-drawer { display:none; position:fixed; inset:0; z-index:100; }
+        .mobile-nav-drawer.open { display:flex; }
+        .mobile-nav-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.4); }
+        .mobile-nav-panel { position:absolute; right:0; top:0; bottom:0; width:280px; background:#fff; box-shadow:-4px 0 24px rgba(0,0,0,0.15); padding:24px; overflow-y:auto; }
+        .stat-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(16px); border: 1px solid rgba(196,197,217,0.3); border-radius: 12px; padding: 24px; transition: all 0.3s; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.06); }
+        .table-header { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #434656; padding: 12px 20px; border-bottom: 2px solid rgba(196,197,217,0.4); }
+        .table-row { display: grid; align-items: center; padding: 16px 20px; border-bottom: 1px solid rgba(196,197,217,0.3); transition: background 0.2s; }
+        .table-row:hover { background: rgba(176,240,214,0.15); }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #064e3b; box-shadow: 0 0 0 3px rgba(6,78,59,0.1); }
+        .pagination-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: all 0.2s; border: 1px solid transparent; cursor: pointer; background: transparent; color: #434656; }
+        .pagination-btn:hover { background: #b0f0d6; color: #064e3b; }
+        .pagination-btn.active { background: #064e3b; color: #fff; border-color: #064e3b; }
+        .pagination-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    </style>
+</head>
+<body class="bg-surface font-sans text-on-surface min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm h-20">
+        <div class="flex justify-between items-center w-full px-4 md:px-16 max-w-[1440px] mx-auto h-full">
+            <a href="管理员仪表板.html" class="font-bold text-3xl tracking-tight text-primary">智聘星图</a>
+            <div class="hidden md:flex items-center gap-6 text-sm">
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="管理员仪表板.html">仪表板</a>
+                <a class="text-primary border-b-2 border-primary pb-1 font-semibold" href="用户管理.html">用户管理</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="审核管理.html">审核管理</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="系统日志.html">系统日志</a>
+            </div>
+            <div class="flex items-center gap-3">
+                <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-all p-2">notifications</button>
+                <div class="w-9 h-9 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center text-xs font-bold cursor-pointer">管</div>
+                <button class="md:hidden p-1.5 hover:bg-surface-container rounded-lg transition-colors" onclick="openMobileNav()">
+                    <span class="material-symbols-outlined text-on-surface text-xl">menu</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 移动端导航抽屉 -->
+    <div id="mobileNavDrawer" class="mobile-nav-drawer">
+        <div class="mobile-nav-overlay" onclick="closeMobileNav()"></div>
+        <div class="mobile-nav-panel">
+            <div class="flex items-center justify-between mb-8">
+                <span class="font-bold text-lg text-primary">智聘星图</span>
+                <button onclick="closeMobileNav()" class="p-1 hover:bg-surface-container rounded-lg">
+                    <span class="material-symbols-outlined text-on-surface-variant">close</span>
+                </button>
+            </div>
+            <div class="flex flex-col gap-1">
+                <a href="管理员仪表板.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">dashboard</span>
+                    <span class="text-sm font-medium">仪表板</span>
+                </a>
+                <a href="用户管理.html" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary font-semibold transition-colors">
+                    <span class="material-symbols-outlined text-xl">group</span>
+                    <span class="text-sm font-medium">用户管理</span>
+                </a>
+                <a href="审核管理.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">verified</span>
+                    <span class="text-sm font-medium">审核管理</span>
+                </a>
+                <a href="系统日志.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">description</span>
+                    <span class="text-sm font-medium">系统日志</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Background orbs -->
+    <div class="ambient-orb w-[500px] h-[500px] bg-primary top-20 -left-60" style="position:fixed;"></div>
+    <div class="ambient-orb w-[400px] h-[400px] bg-tertiary bottom-20 -right-40" style="position:fixed;"></div>
+
+    <!-- Page Content -->
+    <main class="pt-24 pb-16 px-4 md:px-16 max-w-[1440px] mx-auto">
+
+        <!-- Page Header -->
+        <div class="mb-10 animate-fade-in-up">
+            <h1 class="text-[40px] leading-[48px] font-bold tracking-tight text-on-surface mb-2" style="letter-spacing:-0.03em;">用户管理</h1>
+            <p class="text-on-surface-variant text-lg">平台用户信息管理与状态控制</p>
+        </div>
+
+        <!-- Stats Cards Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10 animate-fade-in-up" style="animation-delay:0.1s;">
+            <!-- Total Users -->
+            <div class="stat-card">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-xl">group</span>
+                    </div>
+                    <div class="flex items-center gap-1 text-xs font-semibold" style="color:#155724;">
+                        <span class="material-symbols-outlined text-[14px]">trending_up</span>
+                        +12.5%
+                    </div>
+                </div>
+                <div class="text-[32px] font-bold text-on-surface leading-none mb-1">3,842</div>
+                <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant" style="letter-spacing:0.1em;">总用户数</div>
+            </div>
+            <!-- Active Today -->
+            <div class="stat-card">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-xl">bolt</span>
+                    </div>
+                    <div class="flex items-center gap-1 text-xs font-semibold" style="color:#155724;">
+                        <span class="material-symbols-outlined text-[14px]">trending_up</span>
+                        +5.2%
+                    </div>
+                </div>
+                <div class="text-[32px] font-bold text-on-surface leading-none mb-1">487</div>
+                <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant" style="letter-spacing:0.1em;">今日活跃</div>
+            </div>
+            <!-- Banned -->
+            <div class="stat-card">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#ffdad6;">
+                        <span class="material-symbols-outlined text-xl" style="color:#93000a;">block</span>
+                    </div>
+                    <div class="flex items-center gap-1 text-xs font-semibold" style="color:#93000a;">
+                        <span class="material-symbols-outlined text-[14px]">trending_down</span>
+                        -2.8%
+                    </div>
+                </div>
+                <div class="text-[32px] font-bold text-on-surface leading-none mb-1">23</div>
+                <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant" style="letter-spacing:0.1em;">已封禁</div>
+            </div>
+            <!-- Pending Review -->
+            <div class="stat-card">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#fff3cd;">
+                        <span class="material-symbols-outlined text-xl" style="color:#856404;">pending_actions</span>
+                    </div>
+                    <div class="flex items-center gap-1 text-xs font-semibold" style="color:#93000a;">
+                        <span class="material-symbols-outlined text-[14px]">trending_down</span>
+                        -3.1%
+                    </div>
+                </div>
+                <div class="text-[32px] font-bold text-on-surface leading-none mb-1">15</div>
+                <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant" style="letter-spacing:0.1em;">待审核</div>
+            </div>
+        </div>
+
+        <!-- User List Section -->
+        <div class="glass-card overflow-hidden mb-10 animate-fade-in-up" style="border-radius:12px; animation-delay:0.2s;">
+            <!-- Table Toolbar -->
+            <div class="px-6 py-4 border-b border-outline-variant/30 flex items-center justify-between">
+                <h3 class="text-base font-semibold text-on-surface flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[20px]">people</span>
+                    用户列表
+                </h3>
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
+                        <input id="userSearch" type="text" placeholder="搜索姓名 / 手机号 / 用户ID..." class="pl-9 pr-4 py-2 rounded-lg border border-outline-variant/60 bg-white/60 text-sm text-on-surface w-72" oninput="filterUsers()">
+                    </div>
+                    <select id="statusFilter" class="px-3 py-2 rounded-lg border border-outline-variant/60 bg-white/60 text-xs text-on-surface" onchange="filterUsers()">
+                        <option value="all">全部状态</option>
+                        <option value="正常">正常</option>
+                        <option value="已封禁">已封禁</option>
+                        <option value="待审核">待审核</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Table Header -->
+            <div class="table-header" style="display:grid; grid-template-columns: 80px 1fr 1fr 1fr 100px 140px;">
+                <div>用户ID</div>
+                <div>姓名</div>
+                <div>手机号</div>
+                <div>注册时间</div>
+                <div>状态</div>
+                <div>操作</div>
+            </div>
+
+            <!-- Table Body (populated by JS) -->
+            <div id="userTableBody"></div>
+        </div>
+
+        <!-- Pagination -->
+        <div id="pagination" class="flex items-center justify-between mb-10 animate-fade-in-up" style="animation-delay:0.25s;">
+            <div id="paginationInfo" class="text-sm text-on-surface-variant"></div>
+            <div id="paginationButtons" class="flex items-center gap-1"></div>
+        </div>
+
+        <!-- 岗位下架 / 数据维护 Section -->
+        <div class="animate-fade-in-up" style="animation-delay:0.3s;">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#fff3cd;">
+                    <span class="material-symbols-outlined text-xl" style="color:#856404;">construction</span>
+                </div>
+                <div>
+                    <h2 class="text-[28px] leading-[36px] font-bold tracking-tight text-on-surface" style="letter-spacing:-0.02em;">数据维护</h2>
+                    <p class="text-on-surface-variant text-sm">岗位信息维护与下架管理</p>
+                </div>
+            </div>
+
+            <div class="glass-card overflow-hidden" style="border-radius:12px;">
+                <!-- Table Toolbar -->
+                <div class="px-6 py-4 border-b border-outline-variant/30 flex items-center justify-between">
+                    <h3 class="text-base font-semibold text-on-surface flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-[20px]">work_off</span>
+                        岗位下架管理
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-on-surface-variant text-[18px]">filter_list</span>
+                        <select id="jobStatusFilter" class="px-3 py-1.5 rounded-lg border border-outline-variant/60 bg-white/60 text-xs text-on-surface" onchange="filterJobs()">
+                            <option value="all">全部状态</option>
+                            <option value="在招">在招</option>
+                            <option value="已暂停">已暂停</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Table Header -->
+                <div class="table-header" style="display:grid; grid-template-columns: 2fr 1.5fr 1fr 100px 120px;">
+                    <div>岗位名称</div>
+                    <div>企业</div>
+                    <div>发布时间</div>
+                    <div>状态</div>
+                    <div>操作</div>
+                </div>
+
+                <!-- Table Body (populated by JS) -->
+                <div id="jobTableBody"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-surface-container-lowest border-t border-outline-variant w-full py-12 mt-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-16 max-w-[1440px] mx-auto">
+            <div>
+                <div class="font-bold text-3xl text-on-surface mb-3">智聘星图</div>
+                <p class="text-on-surface-variant">AI 驱动的智能招聘平台<br>基于银河麒麟 · 人大金仓 · DeepSeek</p>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">平台</h4>
+                <div class="flex flex-col gap-1 text-secondary text-sm">
+                    <a href="#" class="hover:text-primary transition-colors">品牌宣言</a>
+                    <a href="#" class="hover:text-primary transition-colors">精选职位</a>
+                    <a href="#" class="hover:text-primary transition-colors">能力图谱</a>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">支持</h4>
+                <div class="flex flex-col gap-1 text-secondary text-sm">
+                    <a href="#" class="hover:text-primary transition-colors">隐私政策</a>
+                    <a href="#" class="hover:text-primary transition-colors">联系支持</a>
+                    <a href="#" class="hover:text-primary transition-colors">常见问题</a>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-6 text-sm text-on-surface-variant">&copy; 2024 智聘星图. 策就领导力的未来</div>
+    </footer>
+
+    <!-- User Detail Modal -->
+    <div id="userDetailModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] hidden flex items-center justify-center" onclick="closeUserDetail(event)">
+        <div class="bg-white/95 backdrop-blur-xl border border-outline-variant/40 rounded-2xl shadow-2xl max-w-[560px] w-[90%] max-h-[80vh] overflow-y-auto p-8" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-on-surface flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">person</span>
+                    用户详情
+                </h2>
+                <button class="text-on-surface-variant hover:text-on-surface transition-colors" onclick="closeUserDetail()">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="space-y-5">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">用户ID</label>
+                        <div id="detailUserId" class="text-sm font-semibold text-on-surface"></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">姓名</label>
+                        <div id="detailUserName" class="text-sm font-semibold text-on-surface"></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">手机号</label>
+                        <div id="detailPhone" class="text-sm text-on-surface"></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">注册时间</label>
+                        <div id="detailRegTime" class="text-sm text-on-surface"></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">状态</label>
+                        <div id="detailStatus"></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">用户类型</label>
+                        <div id="detailType" class="text-sm text-on-surface"></div>
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button class="btn-ghost px-6 py-2.5 text-sm" onclick="closeUserDetail()">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === 移动端导航 ===
+        function openMobileNav() {
+            document.getElementById('mobileNavDrawer').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeMobileNav() {
+            document.getElementById('mobileNavDrawer').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        // ===== MOCK DATA =====
+        const allUsers = [
+            { id: 'U10001', name: '张三', phone: '138-1234-5678', regTime: '2024-01-10', status: '正常', type: '求职者' },
+            { id: 'U10002', name: '李明', phone: '139-8765-4321', regTime: '2024-01-11', status: '正常', type: '求职者' },
+            { id: 'U10003', name: '王芳', phone: '136-5555-8888', regTime: '2024-01-11', status: '已封禁', type: '求职者' },
+            { id: 'U10004', name: '赵伟', phone: '158-6666-2222', regTime: '2024-01-12', status: '正常', type: '企业HR' },
+            { id: 'U10005', name: '陈静', phone: '137-7777-3333', regTime: '2024-01-12', status: '待审核', type: '企业HR' },
+            { id: 'U10006', name: '刘洋', phone: '159-4444-9999', regTime: '2024-01-13', status: '正常', type: '求职者' },
+            { id: 'U10007', name: '孙磊', phone: '186-3333-1111', regTime: '2024-01-13', status: '已封禁', type: '求职者' },
+            { id: 'U10008', name: '周婷', phone: '135-2222-6666', regTime: '2024-01-14', status: '正常', type: '企业HR' },
+            { id: 'U10009', name: '吴强', phone: '188-1111-5555', regTime: '2024-01-14', status: '待审核', type: '求职者' },
+            { id: 'U10010', name: '郑丽', phone: '133-8888-4444', regTime: '2024-01-14', status: '正常', type: '求职者' },
+            { id: 'U10011', name: '黄涛', phone: '150-6666-7777', regTime: '2024-01-15', status: '正常', type: '企业HR' },
+            { id: 'U10012', name: '朱琳', phone: '181-9999-2222', regTime: '2024-01-15', status: '正常', type: '求职者' },
+            { id: 'U10013', name: '马超', phone: '176-5555-1111', regTime: '2024-01-15', status: '已封禁', type: '求职者' },
+            { id: 'U10014', name: '胡敏', phone: '132-4444-8888', regTime: '2024-01-16', status: '正常', type: '求职者' },
+            { id: 'U10015', name: '林峰', phone: '155-7777-3333', regTime: '2024-01-16', status: '待审核', type: '企业HR' },
+            { id: 'U10016', name: '何雪', phone: '183-2222-9999', regTime: '2024-01-16', status: '正常', type: '求职者' },
+            { id: 'U10017', name: '高鹏', phone: '139-3333-6666', regTime: '2024-01-17', status: '正常', type: '企业HR' },
+            { id: 'U10018', name: '罗佳', phone: '156-8888-5555', regTime: '2024-01-17', status: '已封禁', type: '求职者' },
+            { id: 'U10019', name: '梁宇', phone: '187-1111-7777', regTime: '2024-01-17', status: '正常', type: '求职者' },
+            { id: 'U10020', name: '宋瑶', phone: '138-6666-2222', regTime: '2024-01-18', status: '待审核', type: '求职者' },
+            { id: 'U10021', name: '唐杰', phone: '159-3333-8888', regTime: '2024-01-18', status: '正常', type: '企业HR' },
+            { id: 'U10022', name: '邓辉', phone: '136-9999-4444', regTime: '2024-01-18', status: '正常', type: '求职者' },
+            { id: 'U10023', name: '冯丹', phone: '158-2222-6666', regTime: '2024-01-19', status: '已封禁', type: '求职者' },
+            { id: 'U10024', name: '韩旭', phone: '182-5555-1111', regTime: '2024-01-19', status: '正常', type: '求职者' },
+            { id: 'U10025', name: '曹颖', phone: '137-8888-3333', regTime: '2024-01-19', status: '正常', type: '企业HR' },
+            { id: 'U10026', name: '许宁', phone: '155-4444-9999', regTime: '2024-01-20', status: '待审核', type: '求职者' },
+            { id: 'U10027', name: '魏鹏', phone: '133-6666-5555', regTime: '2024-01-20', status: '正常', type: '求职者' },
+            { id: 'U10028', name: '蒋慧', phone: '186-7777-2222', regTime: '2024-01-20', status: '正常', type: '企业HR' },
+            { id: 'U10029', name: '沈杰', phone: '150-3333-8888', regTime: '2024-01-21', status: '已封禁', type: '求职者' },
+            { id: 'U10030', name: '姚晨', phone: '181-2222-4444', regTime: '2024-01-21', status: '正常', type: '求职者' },
+            { id: 'U10031', name: '潘越', phone: '135-5555-7777', regTime: '2024-01-21', status: '正常', type: '求职者' },
+            { id: 'U10032', name: '杜瑶', phone: '176-8888-1111', regTime: '2024-01-22', status: '待审核', type: '企业HR' },
+        ];
+
+        const allJobs = [
+            { id: 'J1001', name: '高级前端开发工程师', company: '星辰科技', time: '2024-01-15', status: '在招' },
+            { id: 'J1002', name: 'Java后端开发', company: '蓝海数据', time: '2024-01-14', status: '在招' },
+            { id: 'J1003', name: 'UI/UX设计师', company: '金山办公', time: '2024-01-13', status: '已暂停' },
+            { id: 'J1004', name: '产品经理', company: '华为技术', time: '2024-01-12', status: '在招' },
+            { id: 'J1005', name: '数据分析师', company: '银河软件', time: '2024-01-12', status: '在招' },
+            { id: 'J1006', name: '运维工程师', company: '星辰科技', time: '2024-01-11', status: '已暂停' },
+            { id: 'J1007', name: 'AI算法工程师', company: '蓝海数据', time: '2024-01-11', status: '在招' },
+            { id: 'J1008', name: '测试工程师', company: '金山办公', time: '2024-01-10', status: '在招' },
+            { id: 'J1009', name: '项目经理', company: '华为技术', time: '2024-01-10', status: '在招' },
+            { id: 'J1010', name: '市场营销专员', company: '银河软件', time: '2024-01-09', status: '已暂停' },
+            { id: 'J1011', name: 'DevOps工程师', company: '星辰科技', time: '2024-01-09', status: '在招' },
+            { id: 'J1012', name: '全栈开发工程师', company: '蓝海数据', time: '2024-01-08', status: '在招' },
+        ];
+
+        // ===== STATE =====
+        let filteredUsers = [...allUsers];
+        let currentPage = 1;
+        const pageSize = 10;
+
+        // ===== STATUS HELPERS =====
+        function getStatusChip(status) {
+            if (status === '正常') return '<span class="chip chip-success">正常</span>';
+            if (status === '已封禁') return '<span class="chip chip-error">已封禁</span>';
+            if (status === '待审核') return '<span class="chip chip-warning">待审核</span>';
+            return '<span class="chip chip-neutral">' + status + '</span>';
+        }
+
+        function getJobStatusChip(status) {
+            if (status === '在招') return '<span class="chip chip-success">在招</span>';
+            if (status === '已暂停') return '<span class="chip chip-neutral">已暂停</span>';
+            return '<span class="chip chip-neutral">' + status + '</span>';
+        }
+
+        // ===== USER TABLE RENDERING =====
+        function renderUserTable() {
+            const tbody = document.getElementById('userTableBody');
+            const start = (currentPage - 1) * pageSize;
+            const end = start + pageSize;
+            const pageData = filteredUsers.slice(start, end);
+
+            if (pageData.length === 0) {
+                tbody.innerHTML = '<div class="flex items-center justify-center py-16 text-on-surface-variant text-sm"><span class="material-symbols-outlined text-[20px] mr-2">search_off</span>未找到匹配的用户</div>';
+                renderPagination();
+                return;
+            }
+
+            tbody.innerHTML = pageData.map(u => `
+                <div class="table-row" style="display:grid; grid-template-columns: 80px 1fr 1fr 1fr 100px 140px;">
+                    <div class="text-sm font-mono text-on-surface-variant">${u.id}</div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary font-bold text-sm">${u.name.charAt(0)}</div>
+                        <span class="text-sm font-semibold text-on-surface">${u.name}</span>
+                    </div>
+                    <div class="text-sm text-on-surface-variant">${u.phone}</div>
+                    <div class="text-sm text-on-surface-variant">${u.regTime}</div>
+                    <div id="status-${u.id}">${getStatusChip(u.status)}</div>
+                    <div class="flex gap-2">
+                        <button class="btn-sm" style="background:#f3f4f5; color:#434656;" onclick="showUserDetail('${u.id}')">
+                            <span class="material-symbols-outlined text-[14px]">visibility</span>
+                            详情
+                        </button>
+                        <button class="btn-sm" id="banBtn-${u.id}" style="${u.status === '已封禁' ? 'background:#155724; color:#fff;' : 'background:#ffdad6; color:#93000a;'}" onclick="toggleBan('${u.id}')">
+                            ${u.status === '已封禁' ? '解封' : '封禁'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            renderPagination();
+        }
+
+        // ===== PAGINATION =====
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredUsers.length / pageSize);
+            const start = (currentPage - 1) * pageSize + 1;
+            const end = Math.min(currentPage * pageSize, filteredUsers.length);
+
+            document.getElementById('paginationInfo').textContent = filteredUsers.length > 0
+                ? `显示 ${start}-${end} 条，共${filteredUsers.length} 条`
+                : '暂无数据';
+
+            const btns = document.getElementById('paginationButtons');
+            if (totalPages <= 1) {
+                btns.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            html += `<button class="pagination-btn" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}><span class="material-symbols-outlined text-[18px]">chevron_left</span></button>`;
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (totalPages > 7) {
+                    if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                        html += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+                    } else if (i === currentPage - 2 || i === currentPage + 2) {
+                        html += `<span class="px-1 text-on-surface-variant">...</span>`;
+                    }
+                } else {
+                    html += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+                }
+            }
+
+            html += `<button class="pagination-btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}><span class="material-symbols-outlined text-[18px]">chevron_right</span></button>`;
+
+            btns.innerHTML = html;
+        }
+
+        function goToPage(page) {
+            const totalPages = Math.ceil(filteredUsers.length / pageSize);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderUserTable();
+            document.getElementById('userTableBody').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // ===== SEARCH / FILTER =====
+        function filterUsers() {
+            const query = document.getElementById('userSearch').value.trim().toLowerCase();
+            const statusVal = document.getElementById('statusFilter').value;
+
+            filteredUsers = allUsers.filter(u => {
+                const matchSearch = !query || u.id.toLowerCase().includes(query) || u.name.toLowerCase().includes(query) || u.phone.replace(/-/g, '').includes(query.replace(/-/g, ''));
+                const matchStatus = statusVal === 'all' || u.status === statusVal;
+                return matchSearch && matchStatus;
+            });
+
+            currentPage = 1;
+            renderUserTable();
+        }
+
+        // ===== BAN / UNBAN =====
+        function toggleBan(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+
+            if (user.status === '已封禁') {
+                user.status = '正常';
+            } else {
+                user.status = '已封禁';
+            }
+
+            filterUsers();
+        }
+
+        // ===== USER DETAIL MODAL =====
+        function showUserDetail(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+
+            document.getElementById('detailUserId').textContent = user.id;
+            document.getElementById('detailUserName').textContent = user.name;
+            document.getElementById('detailPhone').textContent = user.phone;
+            document.getElementById('detailRegTime').textContent = user.regTime;
+            document.getElementById('detailStatus').innerHTML = getStatusChip(user.status);
+            document.getElementById('detailType').textContent = user.type;
+
+            document.getElementById('userDetailModal').classList.remove('hidden');
+        }
+
+        function closeUserDetail(e) {
+            if (!e || e.target === document.getElementById('userDetailModal')) {
+                document.getElementById('userDetailModal').classList.add('hidden');
+            }
+        }
+
+        // ===== JOB TABLE =====
+        let filteredJobs = [...allJobs];
+
+        function filterJobs() {
+            const statusVal = document.getElementById('jobStatusFilter').value;
+            filteredJobs = allJobs.filter(j => statusVal === 'all' || j.status === statusVal);
+            renderJobTable();
+        }
+
+        function renderJobTable() {
+            const tbody = document.getElementById('jobTableBody');
+
+            if (filteredJobs.length === 0) {
+                tbody.innerHTML = '<div class="flex items-center justify-center py-16 text-on-surface-variant text-sm"><span class="material-symbols-outlined text-[20px] mr-2">search_off</span>暂无匹配的岗位</div>';
+                return;
+            }
+
+            tbody.innerHTML = filteredJobs.map(j => `
+                <div class="table-row" style="display:grid; grid-template-columns: 2fr 1.5fr 1fr 100px 120px;">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary text-[16px]">work</span>
+                        </div>
+                        <span class="text-sm font-semibold text-on-surface">${j.name}</span>
+                    </div>
+                    <div class="text-sm text-on-surface-variant">${j.company}</div>
+                    <div class="text-sm text-on-surface-variant">${j.time}</div>
+                    <div id="jobStatus-${j.id}">${getJobStatusChip(j.status)}</div>
+                    <div>
+                        ${j.status === '在招'
+                            ? `<button class="btn-sm btn-danger" onclick="takedownJob('${j.id}')">
+                                <span class="material-symbols-outlined text-[14px]">remove_circle</span>
+                                下架
+                               </button>`
+                            : `<button class="btn-sm btn-success" onclick="restoreJob('${j.id}')">
+                                <span class="material-symbols-outlined text-[14px]">add_circle</span>
+                                恢复
+                               </button>`
+                        }
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function takedownJob(jobId) {
+            const job = allJobs.find(j => j.id === jobId);
+            if (!job) return;
+            job.status = '已暂停';
+            filterJobs();
+        }
+
+        function restoreJob(jobId) {
+            const job = allJobs.find(j => j.id === jobId);
+            if (!job) return;
+            job.status = '在招';
+            filterJobs();
+        }
+
+        // ===== INIT =====
+        document.addEventListener('DOMContentLoaded', function() {
+            renderUserTable();
+            renderJobTable();
+        });
+    </script>
+</body>
+</html>

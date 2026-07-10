@@ -1,14 +1,19 @@
-﻿"""数据库连接测试脚本。"""
+"""数据库连接测试脚本。"""
 import asyncio
 import sys
 sys.path.insert(0, r"C:\Users\Administrator\Desktop\Zhihire-StarMap\backend")
+
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+from app.db import compat
 
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import text
 
 async def test_connection():
     """测试数据库连接。"""
-    DATABASE_URL = "postgresql+asyncpg://system:123456@localhost:54321/zhihire"
+    DATABASE_URL = "postgresql+psycopg://system:123456@localhost:54321/zhihire"
     print(f"正在连接数据库...")
     print(f"URL: {DATABASE_URL}")
     

@@ -1,0 +1,1049 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>职位搜索 - 智聘星图</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="config.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#003527',
+                        'primary-container': '#064e3b',
+                        'on-primary': '#ffffff',
+                        'on-primary-container': '#b0f0d6',
+                        surface: '#f8f9fa',
+                        'surface-container': '#edeeef',
+                        'surface-container-lowest': '#ffffff',
+                        'on-surface': '#191c1d',
+                        'on-surface-variant': '#434656',
+                        'outline-variant': '#c4c5d9',
+                        secondary: '#434656'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, sans-serif; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+        .dark ::-webkit-scrollbar-thumb { background: #333; }
+
+        /* === 骨架屏流光 === */
+        @keyframes shimmer-flow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .skeleton-shimmer {
+            position: relative; overflow: hidden; background: #E8E6E3; border-radius: 6px;
+        }
+        .dark .skeleton-shimmer { background: #1A1B21; }
+        .skeleton-shimmer::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0,255,102,0.06), transparent);
+            animation: shimmer-flow 2s infinite;
+        }
+
+        /* === 3D tilt === */
+        .tilt-card {
+            transform-style: preserve-3d; transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .tilt-card:hover {
+            box-shadow: 0 12px 40px rgba(6,78,59,0.1);
+        }
+        .dark .tilt-card:hover {
+            box-shadow: 0 12px 40px rgba(0,255,102,0.08);
+        }
+
+        /* === 粒子动画 === */
+        @keyframes particle-fly {
+            0% { opacity: 1; transform: translate(0, 0) scale(1); }
+            100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
+        }
+        .particle {
+            position: absolute; width: 4px; height: 4px; border-radius: 50%; pointer-events: none;
+            animation: particle-fly 0.7s ease-out forwards;
+        }
+
+        /* === 搜索框呼吸 === */
+        @keyframes search-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0,53,39,0); }
+            50% { box-shadow: 0 0 0 3px rgba(6,78,59,0.08); }
+        }
+        .dark .search-glow-dark {
+            animation: search-glow-dark 2s ease-in-out infinite;
+        }
+        @keyframes search-glow-dark {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0,255,102,0); }
+            50% { box-shadow: 0 0 0 3px rgba(0,255,102,0.08); }
+        }
+        .search-active { animation: search-glow 2s ease-in-out infinite; }
+
+        /* === 投递成功钩 === */
+        @keyframes check-draw {
+            0% { stroke-dashoffset: 20; }
+            100% { stroke-dashoffset: 0; }
+        }
+        .check-icon { stroke-dasharray: 20; animation: check-draw 0.4s ease forwards 0.2s; stroke-dashoffset: 20; }
+
+        /* === 淡入 === */
+        @keyframes fadeSlide { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        .fade-slide { animation: fadeSlide 0.35s ease forwards; }
+
+        /* 标签样式 */
+        .tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; letter-spacing: 0.02em; }
+        .tag { background: rgba(0,0,0,0.04); color: #666; }
+        .dark .tag { background: rgba(255,255,255,0.06); color: #888; }
+
+        /* === 筛选标签 === */
+        .filter-tag {
+            padding: 4px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;
+            color: #374151; background: transparent; border: none; cursor: pointer;
+            transition: all 0.2s ease; white-space: nowrap;
+        }
+        .filter-tag:hover { background: #F3F4F6; }
+        .filter-tag.active {
+            background: #E8F5E9; color: #064E3B; font-weight: 600;
+        }
+        .dark .filter-tag { color: #9CA3AF; }
+        .dark .filter-tag:hover { background: #1A1B21; }
+        .dark .filter-tag.active { background: rgba(0,255,102,0.1); color: #00FF66; }
+
+        /* === 导航栏匹配首页着陆页 === */
+        .nav-link {
+            font-size: 13px; font-weight: 500; padding: 6px 0; transition: all 0.2s;
+            text-decoration: none; white-space: nowrap; position: relative;
+        }
+        .nav-link.active-nav {
+            color: #064e3b; font-weight: 700;
+            border-bottom: 2px solid #064e3b;
+        }
+        .dark .nav-link.active-nav {
+            color: #00FF66; border-bottom-color: #00FF66;
+        }
+        .nav-link:not(.active-nav) { color: #404944; }
+        .nav-link:not(.active-nav):hover { color: #064e3b; }
+        .dark .nav-link:not(.active-nav) { color: #888; }
+        .dark .nav-link:not(.active-nav):hover { color: #00FF66; }
+
+        /* === 汉堡菜单 === */
+        .mobile-menu {
+            display: none; position: absolute; top: 100%; left: 0; right: 0;
+            background: #fff; border-top: 1px solid #d9e3f4;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1); z-index: 50;
+        }
+        .dark .mobile-menu { background: #141519; border-top-color: #2A2B33; }
+        .mobile-menu.open { display: block; }
+
+        /* === 其他筛选下拉 === */
+        .filter-dropdown {
+            padding: 5px 28px 5px 12px; border-radius: 8px; font-size: 13px; font-weight: 500;
+            color: #374151; background: #F9FAFB; border: 1px solid #E5E7EB; cursor: pointer;
+            transition: all 0.2s ease; outline: none; min-width: 90px;
+        }
+        .filter-dropdown:hover { border-color: #D1D5DB; background: #F3F4F6; }
+        .filter-dropdown:focus { border-color: #064E3B; box-shadow: 0 0 0 2px rgba(6,78,59,0.08); }
+        .dark .filter-dropdown { background: #1A1B21; border-color: #2A2B33; color: #9CA3AF; }
+        .dark .filter-dropdown:hover { border-color: #3A3B43; }
+
+        /* === 更多按钮 === */
+        .more-btn {
+            font-size: 13px; color: #F59E0B; font-weight: 500; cursor: pointer;
+            transition: color 0.2s ease; white-space: nowrap;
+        }
+        .more-btn:hover { color: #D97706; }
+
+        /* === 列表滚动条 === */
+        #jobList::-webkit-scrollbar { width: 6px; }
+        #jobList::-webkit-scrollbar-track { background: transparent; }
+        #jobList::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+        .dark #jobList::-webkit-scrollbar-thumb { background: #333; }
+            .active-tab { color: #064e3b; border-bottom: 2px solid #064e3b; font-weight: 700; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 dark:bg-neo-bg dark:text-gray-200">
+
+    
+    
+    <nav class="fixed top-0 w-full z-50 bg-white h-14 border-b border-outline-variant/50 transition-all duration-300">
+        <div class="flex justify-between items-center w-full px-4 lg:px-10 max-w-[1440px] mx-auto h-full">
+            <a href="../common/首页着陆页.html" class="font-bold text-[22px] tracking-tight text-primary-container shrink-0">智聘星图</a>
+            <div class="hidden lg:flex items-center gap-6 xl:gap-8">
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="../common/首页着陆页.html">探索</a>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="职位推荐.html">职位推荐</a>
+                <a class="active-tab font-medium text-[13px] hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="职位搜索.html">职位搜索</a>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="简历中心.html">简历中心</a>
+                <div class="relative" id="interviewDD-wrap-desk">
+                    <button onclick="toggleInterviewDD(event, 'desk')" class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap cursor-pointer flex items-center gap-0.5">
+                        面试功能
+                        <span class="material-symbols-outlined text-sm transition-transform" id="interview-arrow-desk">expand_more</span>
+                    </button>
+                    <div id="interviewDD-desk" class="hidden absolute left-0 top-full mt-1 w-36 bg-white rounded-xl shadow-2xl border border-outline-variant/30 z-50 overflow-hidden">
+                        <a href="模拟面试.html" class="block px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors">智能面试</a>
+                        <a href="面试记录.html" class="block px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors">面试记录</a>
+                    </div>
+                </div>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="社交.html">社交</a>
+            </div>
+            <div class="flex items-center gap-2 lg:gap-3">
+                <a href="通知中心.html" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer hidden xl:block" title="通知中心">notifications</a>
+                <div class="hidden xl:flex items-center bg-surface-container rounded-full px-3 py-1.5 border border-outline-variant/60">
+                    <span class="material-symbols-outlined text-outline text-base">search</span>
+                    <input class="bg-transparent border-none focus:ring-0 text-sm w-32 ml-1 text-on-surface placeholder-on-surface-variant/60" placeholder="搜索职位..." type="text"/>
+                </div>
+                <div id="nav-guest" class="flex items-center gap-2">
+                    <a href="../common/登录.html" class="text-primary-container font-medium text-[13px] px-3 py-1.5 hover:bg-surface-container rounded-full transition-all hidden sm:inline-block">登录</a>
+                    <a href="../common/注册.html" class="bg-primary-container text-on-primary font-medium text-[13px] px-4 py-1.5 rounded-full hover:opacity-90 transition-all hidden sm:inline-block">注册</a>
+                </div>
+                <div id="nav-user" class="hidden items-center gap-3">
+                    <div class="relative">
+                        <div id="user-dropdown-trigger" class="flex items-center gap-2 cursor-pointer hover:bg-surface-container rounded-full px-3 py-1.5 transition-all">
+                            <div id="user-avatar" class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-xs font-bold">Q</div>
+                            <span id="user-nickname" class="text-sm font-medium text-on-surface hidden xl:inline-block">求职小能手</span>
+                            <span class="material-symbols-outlined text-sm text-on-surface-variant">expand_more</span>
+                        </div>
+                        <div id="user-dropdown" class="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-outline-variant/30 py-2 z-50 hidden">
+                            <a href="个人中心.html" class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-primary-container/10 hover:text-primary transition-colors"><span class="material-symbols-outlined text-base">person</span><span>个人中心</span></a>
+                            <a href="面试记录.html" class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-primary-container/10 hover:text-primary transition-colors"><span class="material-symbols-outlined text-base">calendar_today</span><span>我的面试</span></a>
+                            <div class="border-t border-outline-variant/20 my-1"></div>
+                            <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"><span class="material-symbols-outlined text-base">logout</span><span>退出登录</span></button>
+                        </div>
+                    </div>
+                </div>
+                <button id="mobile-menu-btn" class="lg:hidden p-1.5 hover:bg-surface-container rounded-lg transition-colors" onclick="toggleMobileMenu()"><span class="material-symbols-outlined text-on-surface text-xl">menu</span></button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-outline-variant/50 shadow-lg">
+            <div class="flex flex-col px-4 py-3 gap-1">
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="../common/首页着陆页.html">探索</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="职位推荐.html">职位推荐</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="职位搜索.html">职位搜索</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="简历中心.html">简历中心</a>
+                <div class="relative" id="interviewDD-wrap-mob">
+                    <button onclick="toggleInterviewDD(event, 'mob')" class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all cursor-pointer flex items-center justify-between w-full">
+                        面试功能
+                        <span class="material-symbols-outlined text-base transition-transform" id="interview-arrow-mob">expand_more</span>
+                    </button>
+                    <div id="interviewDD-mob" class="hidden ml-4 space-y-0.5 mt-0.5">
+                        <a href="模拟面试.html" class="block py-2 px-3 text-sm text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">智能面试</a>
+                        <a href="面试记录.html" class="block py-2 px-3 text-sm text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">面试记录</a>
+                    </div>
+                </div>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="社交.html">社交</a>
+                <div class="border-t border-outline-variant/30 my-2"></div>
+                <div id="mobile-guest" class="flex gap-2">
+                    <a href="../common/登录.html" class="flex-1 text-center text-primary-container font-medium text-sm py-2.5 border border-outline-variant/40 rounded-lg hover:bg-surface-container transition-all">登录</a>
+                    <a href="../common/注册.html" class="flex-1 text-center bg-primary-container text-on-primary font-medium text-sm py-2.5 rounded-lg hover:opacity-90 transition-all">注册</a>
+                </div>
+                <div id="mobile-user" class="hidden items-center gap-3 px-3 py-2">
+                    <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-sm font-bold" id="mobile-avatar">Q</div>
+                    <span class="text-sm font-medium text-on-surface flex-1" id="mobile-nickname">求职小能手</span>
+                    <button onclick="logout()" class="text-on-surface-variant hover:text-red-500 transition-all"><span class="material-symbols-outlined text-lg">logout</span></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+
+    <!-- ===== 搜索 + 筛选区（可滚动内容） ===== -->
+    <main class="pt-20 flex flex-col" style="height: 100vh; overflow-y: auto;" id="mainScroll">
+
+        <!-- AI 语义搜索框 -->
+        <div class="bg-white dark:bg-neo-surface border-b border-gray-200 dark:border-neo-border py-8">
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="relative" id="searchWrap">
+                    <div class="flex items-center bg-white dark:bg-neo-card rounded-2xl border-2 border-gray-200 dark:border-neo-border px-5 h-14 transition-all search-active shadow-sm" id="searchBox">
+                        <span class="material-symbols-outlined text-emerald-600 dark:text-neon-green text-2xl mr-3">auto_awesome</span>
+                        <input id="searchInput" type="text" placeholder="用自然语言描述你想要的工作，如：上海20k以上Vue远程不加班..."
+                            class="flex-1 bg-transparent border-none outline-none text-base dark:text-white text-gray-900 placeholder-gray-400 dark:placeholder-gray-600"
+                            oninput="onSearchInput()" onkeydown="if(event.key==='Enter')doSemanticSearch()">
+                        <button onclick="doSemanticSearch()" class="ml-3 px-6 py-2.5 bg-emerald-600 dark:bg-neon-green text-white dark:text-neo-bg text-sm font-bold rounded-xl hover:brightness-110 transition-all shrink-0">搜索</button>
+                    </div>
+                    <!-- AI解析标签 -->
+                    <div id="parsedTags" class="hidden absolute top-full left-0 right-0 mt-3 flex flex-wrap gap-2 z-50">
+                        <div class="bg-white dark:bg-neo-card rounded-xl border border-gray-200 dark:border-neo-border px-4 py-3 shadow-lg w-full" id="parsedTagsInner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 筛选区域 -->
+        <div class="bg-gradient-to-b from-gray-50/80 to-white dark:from-neo-bg dark:to-neo-surface py-4">
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="bg-white dark:bg-neo-card rounded-2xl shadow-[0_2px_16px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_16px_rgba(0,0,0,0.3)] p-5 pb-4">
+                    <!-- Tab bar -->
+                    <div class="flex items-center gap-8 mb-4">
+                        <button class="relative text-[15px] font-bold text-emerald-800 dark:text-neon-green pb-2 cursor-pointer whitespace-nowrap" id="tabMajor" onclick="switchFilterTab('major')">
+                            按专业筛选
+                            <svg class="absolute -bottom-0.5 left-0 w-full h-2" viewBox="0 0 100 8" preserveAspectRatio="none">
+                                <path d="M0,6 Q12.5,0 25,6 T50,6 T75,6 T100,6" stroke="#F59E0B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                        <button class="text-[15px] font-medium text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 pb-2 cursor-pointer transition-colors whitespace-nowrap" id="tabType" onclick="switchFilterTab('type')">按职类筛选</button>
+                    </div>
+
+                    <!-- Row 1: 专业分类 -->
+                    <div class="flex items-center gap-3 mb-3" id="filterRowMajor">
+                        <span class="text-[14px] font-bold text-gray-800 dark:text-gray-200 shrink-0 w-20">专业分类</span>
+                        <div class="flex flex-wrap items-center gap-1 flex-1">
+                            <button class="filter-tag active" data-filter="major" data-value="不限" onclick="toggleFilterTag(this)">不限</button>
+                            <button class="filter-tag" data-filter="major" data-value="会计学" onclick="toggleFilterTag(this)">会计学</button>
+                            <button class="filter-tag" data-filter="major" data-value="电子商务" onclick="toggleFilterTag(this)">电子商务</button>
+                            <button class="filter-tag" data-filter="major" data-value="计算机科学与技术" onclick="toggleFilterTag(this)">计算机科学与技术</button>
+                            <button class="filter-tag" data-filter="major" data-value="软件工程" onclick="toggleFilterTag(this)">软件工程</button>
+                            <button class="filter-tag" data-filter="major" data-value="工商管理" onclick="toggleFilterTag(this)">工商管理</button>
+                            <button class="filter-tag" data-filter="major" data-value="土木工程" onclick="toggleFilterTag(this)">土木工程</button>
+                            <button class="filter-tag" data-filter="major" data-value="财务管理" onclick="toggleFilterTag(this)">财务管理</button>
+                            <button class="filter-tag" data-filter="major" data-value="学前教育" onclick="toggleFilterTag(this)">学前教育</button>
+                            <button class="filter-tag" data-filter="major" data-value="市场营销" onclick="toggleFilterTag(this)">市场营销</button>
+                            <button class="more-btn ml-auto shrink-0" onclick="openMajorModal()">更多专业 ▸</button>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: 工作地点 -->
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-[14px] font-bold text-gray-800 dark:text-gray-200 shrink-0 w-20">工作地点</span>
+                        <div class="flex flex-wrap items-center gap-1 flex-1">
+                            <button class="filter-tag active" data-filter="city" data-value="全国" onclick="toggleFilterTag(this)">全国</button>
+                            <button class="filter-tag" data-filter="city" data-value="成都" onclick="toggleFilterTag(this)">成都</button>
+                            <button class="filter-tag" data-filter="city" data-value="北京" onclick="toggleFilterTag(this)">北京</button>
+                            <button class="filter-tag" data-filter="city" data-value="上海" onclick="toggleFilterTag(this)">上海</button>
+                            <button class="filter-tag" data-filter="city" data-value="广州" onclick="toggleFilterTag(this)">广州</button>
+                            <button class="filter-tag" data-filter="city" data-value="重庆" onclick="toggleFilterTag(this)">重庆</button>
+                            <button class="filter-tag" data-filter="city" data-value="深圳" onclick="toggleFilterTag(this)">深圳</button>
+                            <button class="filter-tag" data-filter="city" data-value="天津" onclick="toggleFilterTag(this)">天津</button>
+                            <button class="filter-tag" data-filter="city" data-value="武汉" onclick="toggleFilterTag(this)">武汉</button>
+                            <button class="filter-tag" data-filter="city" data-value="西安" onclick="toggleFilterTag(this)">西安</button>
+                            <button class="filter-tag" data-filter="city" data-value="大连" onclick="toggleFilterTag(this)">大连</button>
+                            <button class="filter-tag" data-filter="city" data-value="长春" onclick="toggleFilterTag(this)">长春</button>
+                            <button class="filter-tag" data-filter="city" data-value="沈阳" onclick="toggleFilterTag(this)">沈阳</button>
+                            <button class="filter-tag" data-filter="city" data-value="南京" onclick="toggleFilterTag(this)">南京</button>
+                            <button class="filter-tag" data-filter="city" data-value="济南" onclick="toggleFilterTag(this)">济南</button>
+                            <button class="more-btn ml-auto shrink-0" onclick="openCityModal()">更多城市 ▸</button>
+                        </div>
+                    </div>
+
+                    <!-- Row 3: 职类筛选 (shown when tab=type) -->
+                    <div class="flex items-center gap-3 mb-3" id="filterRowType" style="display:none;">
+                        <span class="text-[14px] font-bold text-gray-800 dark:text-gray-200 shrink-0 w-20">职类分类</span>
+                        <div class="flex flex-wrap items-center gap-1 flex-1">
+                            <button class="filter-tag active" data-filter="jobCat" data-value="不限" onclick="toggleFilterTag(this)">不限</button>
+                            <button class="filter-tag" data-filter="jobCat" data-value="技术" onclick="toggleFilterTag(this)">技术</button>
+                            <button class="filter-tag" data-filter="jobCat" data-value="产品" onclick="toggleFilterTag(this)">产品</button>
+                            <button class="filter-tag" data-filter="jobCat" data-value="设计" onclick="toggleFilterTag(this)">设计</button>
+                            <button class="filter-tag" data-filter="jobCat" data-value="运营" onclick="toggleFilterTag(this)">运营</button>
+                            <button class="filter-tag" data-filter="jobCat" data-value="市场" onclick="toggleFilterTag(this)">市场</button>
+                            <button class="filter-tag" data-filter="jobCat" data-value="人事" onclick="toggleFilterTag(this)">人事</button>
+                            <button class="filter-tag" data-filter="jobCat" data-value="财务" onclick="toggleFilterTag(this)">财务</button>
+                            <button class="filter-tag" data-filter="jobCat" data-value="行政" onclick="toggleFilterTag(this)">行政</button>
+                            <button class="filter-tag" data-filter="jobCat" data-value="销售" onclick="toggleFilterTag(this)">销售</button>
+                        </div>
+                    </div>
+
+                    <!-- Row 4: 职位类型 -->
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-[14px] font-bold text-gray-800 dark:text-gray-200 shrink-0 w-20">职位类型</span>
+                        <div class="flex flex-wrap items-center gap-1 flex-1">
+                            <button class="filter-tag active" data-filter="jobType" data-value="不限" onclick="toggleFilterTag(this)">不限</button>
+                            <button class="filter-tag" data-filter="jobType" data-value="全职" onclick="toggleFilterTag(this)">全职</button>
+                            <button class="filter-tag" data-filter="jobType" data-value="兼职/临时" onclick="toggleFilterTag(this)">兼职/临时</button>
+                            <button class="filter-tag" data-filter="jobType" data-value="实习" onclick="toggleFilterTag(this)">实习</button>
+                        </div>
+                    </div>
+
+                    <!-- Row 4: 其他筛选 -->
+                    <div class="flex items-center gap-3">
+                        <span class="text-[14px] font-bold text-gray-800 dark:text-gray-200 shrink-0 w-20">其他筛选</span>
+                        <div class="flex flex-wrap items-center gap-2.5 flex-1">
+                            <div class="relative">
+                                <select id="fEdu" onchange="applyAllFilters()" class="filter-dropdown appearance-none pr-7">
+                                    <option value="">学历</option>
+                                    <option value="大专">大专</option><option value="本科">本科</option><option value="硕士">硕士</option><option value="博士">博士</option>
+                                </select>
+                                <span class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[10px]">▾</span>
+                            </div>
+                            <div class="relative">
+                                <select id="fSource" onchange="applyAllFilters()" class="filter-dropdown appearance-none pr-7">
+                                    <option value="">职位来源</option>
+                                    <option value="校招">校招</option><option value="社招">社招</option><option value="实习">实习</option>
+                                </select>
+                                <span class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[10px]">▾</span>
+                            </div>
+                            <div class="relative">
+                                <select id="fIndustry" onchange="applyAllFilters()" class="filter-dropdown appearance-none pr-7">
+                                    <option value="">公司行业</option>
+                                    <option value="互联网">互联网</option><option value="金融">金融</option><option value="硬件">硬件</option><option value="数据库">数据库</option><option value="教育">教育</option>
+                                </select>
+                                <span class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[10px]">▾</span>
+                            </div>
+                            <div class="relative">
+                                <select id="fCompanyType" onchange="applyAllFilters()" class="filter-dropdown appearance-none pr-7">
+                                    <option value="">公司性质</option>
+                                    <option value="国企">国企</option><option value="民企">民企</option><option value="外企">外企</option><option value="合资">合资</option><option value="事业单位">事业单位</option>
+                                </select>
+                                <span class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[10px]">▾</span>
+                            </div>
+                            <div class="relative">
+                                <select id="fCompanySize" onchange="applyAllFilters()" class="filter-dropdown appearance-none pr-7">
+                                    <option value="">公司规模</option>
+                                    <option value="0-99">0-99人</option><option value="100-499">100-499人</option><option value="500-999">500-999人</option><option value="1000-9999">1000-9999人</option><option value="10000+">10000人以上</option>
+                                </select>
+                                <span class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[10px]">▾</span>
+                            </div>
+                            <button onclick="resetFilters()" class="text-[13px] text-gray-400 hover:text-emerald-600 dark:hover:text-neon-green transition-colors ml-1 font-medium">重置全部</button>
+                        </div>
+                    </div>
+
+                    <!-- 已选标签 -->
+                    <div id="activeTags" class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-100 dark:border-neo-border/50"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 主体：左右分栏 ===== -->
+        <div class="flex-1" id="contentArea">
+
+            <!-- 左栏：职位列表 -->
+            <div class="flex-1 bg-white dark:bg-neo-surface flex flex-col" id="leftPanel">
+                <div class="max-w-6xl mx-auto w-full flex-1 flex flex-col">
+                <div class="px-6 py-2 flex items-center justify-between">
+                    <span class="text-xs text-gray-400 dark:text-gray-500 font-medium" id="resultCount">找到 0 个职位</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[11px] text-gray-400 dark:text-gray-600">排序：</span>
+                        <select id="fSort" onchange="applyAllFilters()" class="filter-select bg-transparent text-[11px] text-gray-500 dark:text-gray-400 border-none outline-none cursor-pointer">
+                            <option value="match">匹配度</option><option value="salary">薪资</option><option value="recent">最新</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="px-4 pb-6" id="jobList"></div>
+                </div>
+            </div>
+
+
+        </div>
+
+    <!-- ===== 更多专业弹框 ===== -->
+    <div class="fixed inset-0 z-[200] hidden" id="majorModal">
+        <div class="absolute inset-0 bg-black/30" onclick="closeMajorModal()"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl w-[720px] max-h-[520px] flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <h3 class="text-lg font-bold text-gray-900">请选择专业</h3>
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-300 text-[18px]">search</span>
+                        <input id="majorSearch" type="text" placeholder="搜索专业" class="pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-56 outline-none focus:border-emerald-500 transition-colors" oninput="filterMajorSearch(this.value)">
+                    </div>
+                    <button onclick="closeMajorModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600">
+                        <span class="material-symbols-outlined text-xl">close</span>
+                    </button>
+                </div>
+            </div>
+            <div class="flex flex-1 min-h-0">
+                <!-- 列1: 门类 -->
+                <div class="w-[140px] border-r border-gray-100 overflow-y-auto py-1" id="majorCol1"></div>
+                <!-- 列2: 专业类 -->
+                <div class="w-[180px] border-r border-gray-100 overflow-y-auto py-1" id="majorCol2"></div>
+                <!-- 列3: 具体专业 -->
+                <div class="flex-1 overflow-y-auto p-4" id="majorCol3">
+                    <div class="text-sm text-gray-300 text-center mt-20">请先选择专业类</div>
+                </div>
+            </div>
+            <div class="flex items-center justify-between px-6 py-3 border-t border-gray-100 bg-gray-50/50">
+                <span class="text-sm text-gray-400" id="majorSelectedInfo">已选：0 个专业</span>
+                <div class="flex items-center gap-3">
+                    <button onclick="closeMajorModal()" class="px-5 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-white transition-all">取消</button>
+                    <button onclick="confirmMajor()" class="px-5 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-all">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 更多城市弹框 ===== -->
+    <div class="fixed inset-0 z-[200] hidden" id="cityModal">
+        <div class="absolute inset-0 bg-black/30" onclick="closeCityModal()"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl w-[720px] max-h-[520px] flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <h3 class="text-lg font-bold text-gray-900">请选择行政区</h3>
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-300 text-[18px]">search</span>
+                        <input id="citySearch" type="text" placeholder="搜索城市名/区县" class="pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-56 outline-none focus:border-emerald-500 transition-colors" oninput="filterCitySearch(this.value)">
+                    </div>
+                    <button onclick="closeCityModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600">
+                        <span class="material-symbols-outlined text-xl">close</span>
+                    </button>
+                </div>
+            </div>
+            <div class="flex flex-1 min-h-0">
+                <!-- 省份列表 -->
+                <div class="w-[140px] border-r border-gray-100 overflow-y-auto py-1" id="cityProvinceList"></div>
+                <!-- 城市网格 -->
+                <div class="flex-1 overflow-y-auto p-4" id="cityGrid"></div>
+            </div>
+            <div class="flex items-center justify-between px-6 py-3 border-t border-gray-100 bg-gray-50/50">
+                <span class="text-sm text-gray-400" id="citySelectedInfo">已选：0 / 5</span>
+                <div class="flex items-center gap-3">
+                    <button onclick="closeCityModal()" class="px-5 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-white transition-all">取消</button>
+                    <button onclick="confirmCity()" class="px-5 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </main>
+
+<script>
+// ===== 移动端菜单 =====
+function toggleMobileMenu() {
+    var menu = document.getElementById('mobile-menu');
+    menu.classList.toggle('hidden');
+}
+function toggleUserDropdown(e) {
+    e.stopPropagation();
+    var dd = document.getElementById('user-dropdown');
+    dd.classList.toggle('hidden');
+}
+function closeUserDropdown() {
+    var dd = document.getElementById('user-dropdown');
+    if (dd) dd.classList.add('hidden');
+}
+function syncLoginState() {
+    var isLoggedIn = localStorage.getItem('loggedIn') === 'true';
+    var userNickname = localStorage.getItem('userNickname') || '用户';
+    var userAvatar = localStorage.getItem('userAvatar') || 'U';
+    if (isLoggedIn) {
+        var ng = document.getElementById('nav-guest');
+        var nu = document.getElementById('nav-user');
+        if (ng) ng.classList.add('hidden');
+        if (nu) { nu.classList.remove('hidden'); nu.classList.add('flex'); }
+        var ua = document.getElementById('user-avatar');
+        var un = document.getElementById('user-nickname');
+        if (ua) ua.textContent = userAvatar;
+        if (un) un.textContent = userNickname;
+        var mg = document.getElementById('mobile-guest');
+        var mu = document.getElementById('mobile-user');
+        if (mg) mg.classList.add('hidden');
+        if (mu) { mu.classList.remove('hidden'); mu.classList.add('flex'); }
+        var ma = document.getElementById('mobile-avatar');
+        var mn = document.getElementById('mobile-nickname');
+        if (ma) ma.textContent = userAvatar;
+        if (mn) mn.textContent = userNickname;
+    }
+}
+function logout() {
+    localStorage.removeItem('loggedIn');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userNickname');
+    localStorage.removeItem('userAvatar');
+    localStorage.removeItem('zhihire_resume');
+    window.location.href = '../common/首页着陆页.html';
+}
+
+// ===== 暗黑模式 =====
+function toggleTheme() {
+    document.documentElement.classList.toggle('dark');
+    document.getElementById('themeIcon').textContent = document.documentElement.classList.contains('dark') ? 'light_mode' : 'dark_mode';
+}
+
+// ===== 筛选标签状态 =====
+const filterState = { major: '不限', city: '全国', jobType: '不限' };
+
+function toggleFilterTag(btn) {
+    const group = btn.dataset.filter;
+    const value = btn.dataset.value;
+
+    // 如果是"不限"/"全国"，清除同组其他选中
+    if (value === '不限' || value === '全国') {
+        document.querySelectorAll(`.filter-tag[data-filter="${group}"]`).forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filterState[group] = value;
+    } else {
+        // 取消"不限"/"全国"
+        const defaultVal = group === 'city' ? '全国' : '不限';
+        document.querySelector(`.filter-tag[data-filter="${group}"][data-value="${defaultVal}"]`)?.classList.remove('active');
+        // 切换当前
+        btn.classList.toggle('active');
+        // 收集所有选中
+        const selected = [...document.querySelectorAll(`.filter-tag[data-filter="${group}"].active`)].map(b => b.dataset.value);
+        if (selected.length === 0) {
+            // 没有选中，恢复"不限"/"全国"
+            document.querySelector(`.filter-tag[data-filter="${group}"][data-value="${defaultVal}"]`)?.classList.add('active');
+            filterState[group] = defaultVal;
+        } else {
+            filterState[group] = selected.join(',');
+        }
+    }
+    applyAllFilters();
+}
+
+const waveSvg = '<svg class="absolute -bottom-0.5 left-0 w-full h-2" viewBox="0 0 100 8" preserveAspectRatio="none"><path d="M0,6 Q12.5,0 25,6 T50,6 T75,6 T100,6" stroke="#F59E0B" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>';
+
+function switchFilterTab(tab) {
+    const major = document.getElementById('tabMajor');
+    const type = document.getElementById('tabType');
+    const rowMajor = document.getElementById('filterRowMajor');
+    const rowType = document.getElementById('filterRowType');
+    if (tab === 'type') {
+        major.className = 'text-[15px] font-medium text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 pb-2 cursor-pointer transition-colors whitespace-nowrap';
+        major.querySelector('svg')?.remove();
+        type.className = 'relative text-[15px] font-bold text-emerald-800 dark:text-neon-green pb-2 cursor-default whitespace-nowrap';
+        if (!type.querySelector('svg')) type.insertAdjacentHTML('beforeend', waveSvg);
+        rowMajor.style.display = 'none';
+        rowType.style.display = 'flex';
+    } else {
+        type.className = 'text-[15px] font-medium text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 pb-2 cursor-pointer transition-colors whitespace-nowrap';
+        type.querySelector('svg')?.remove();
+        major.className = 'relative text-[15px] font-bold text-emerald-800 dark:text-neon-green pb-2 cursor-default whitespace-nowrap';
+        if (!major.querySelector('svg')) major.insertAdjacentHTML('beforeend', waveSvg);
+        rowMajor.style.display = '';
+        rowType.style.display = 'none';
+    }
+}
+
+// ===== 职位数据 =====
+const jobs = [
+    { id:1, title:'高级前端工程师', company:'字节跳动', companyFull:'字节跳动-北京字节跳动科技有限公司', companyType:'民营企业', logo:'字', logoCls:'bg-blue-500/10 text-blue-500', city:'北京', exp:'3-5年', edu:'本科', salary:'25K-40K', minSalary:25, type:'全职', size:'10000人以上', industry:'互联网', aiReason:'该岗位85%匹配你简历中的React和TypeScript经验，且团队技术栈高度吻合', match:92, tags:['React','Vue','TypeScript','Webpack'] },
+    { id:2, title:'产品经理', company:'腾讯', companyFull:'腾讯-深圳市腾讯计算机系统有限公司', companyType:'民营企业', logo:'腾', logoCls:'bg-emerald-500/10 text-emerald-500', city:'深圳', exp:'3-5年', edu:'本科', salary:'30K-50K', minSalary:30, type:'全职', size:'10000人以上', industry:'互联网', aiReason:'你的B端产品经验与该岗位需求高度匹配，团队正在扩展企业服务方向', match:87, tags:['B端产品','数据分析','Axure'] },
+    { id:3, title:'数据分析师', company:'阿里巴巴', companyFull:'阿里巴巴-杭州阿里巴巴网络技术有限公司', companyType:'民营企业', logo:'阿', logoCls:'bg-orange-500/10 text-orange-500', city:'杭州', exp:'2-4年', edu:'硕士', salary:'25K-45K', minSalary:25, type:'全职', size:'10000人以上', industry:'互联网', aiReason:'SQL和Python技能完全匹配，电商数据分析经验是加分项', match:85, tags:['Python','SQL','Tableau','Spark'] },
+    { id:4, title:'UI/UX设计师', company:'网易', companyFull:'网易-杭州网易智企科技有限公司', companyType:'上市公司', logo:'网', logoCls:'bg-pink-500/10 text-pink-500', city:'广州', exp:'2-4年', edu:'本科', salary:'18K-30K', minSalary:18, type:'全职', size:'10000人以上', industry:'互联网', aiReason:'Figma技能栈匹配度90%，你过往的移动端设计经验正是团队所需', match:81, tags:['Figma','Sketch','用户研究','交互设计'] },
+    { id:5, title:'投资分析师', company:'中信证券', companyFull:'中信证券-中信证券股份有限公司', companyType:'国有企业', logo:'中', logoCls:'bg-yellow-500/10 text-yellow-500', city:'上海', exp:'1-3年', edu:'硕士', salary:'20K-35K', minSalary:20, type:'全职', size:'500-999人', industry:'金融', aiReason:'金融学背景高度匹配，CPA持证是核心优势', match:78, tags:['财务建模','行业研究','Wind'] },
+    { id:6, title:'Java高级工程师', company:'美团', companyFull:'美团-北京三快科技有限公司', companyType:'上市公司', logo:'美', logoCls:'bg-purple-500/10 text-purple-500', city:'北京', exp:'3-5年', edu:'本科', salary:'30K-50K', minSalary:30, type:'全职', size:'10000人以上', industry:'互联网', aiReason:'Java微服务经验匹配，分布式系统设计能力是关键加分项', match:74, tags:['Java','Spring','微服务','Redis'] },
+    { id:7, title:'市场运营经理', company:'小米', companyFull:'小米-小米科技有限责任公司', companyType:'上市公司', logo:'米', logoCls:'bg-amber-500/10 text-amber-500', city:'北京', exp:'3-5年', edu:'本科', salary:'20K-35K', minSalary:20, type:'全职', size:'10000人以上', industry:'硬件', aiReason:'品牌营销经验与IoT产品方向契合，数据驱动运营是核心要求', match:72, tags:['品牌营销','内容运营','增长黑客'] },
+    { id:8, title:'AI算法工程师', company:'百度', companyFull:'百度-北京百度网讯科技有限公司', companyType:'上市公司', logo:'百', logoCls:'bg-cyan-500/10 text-cyan-500', city:'北京', exp:'3-5年', edu:'硕士', salary:'35K-60K', minSalary:35, type:'全职', size:'10000人以上', industry:'互联网', aiReason:'深度学习和NLP经验高度匹配，大模型应用方向是团队重点', match:70, tags:['深度学习','NLP','PyTorch','LLM'] },
+    { id:9, title:'Go后端工程师', company:'PingCAP', companyFull:'PingCAP-北京PingCAP科技有限公司', companyType:'民营企业', logo:'P', logoCls:'bg-teal-500/10 text-teal-500', city:'北京', exp:'2-4年', edu:'本科', salary:'25K-45K', minSalary:25, type:'全职', size:'500-999人', industry:'数据库', aiReason:'Go语言经验匹配，分布式数据库是前沿方向', match:68, tags:['Go','分布式','TiDB','K8s'] },
+    { id:10, title:'Flutter开发', company:'携程', companyFull:'携程-携程计算机技术有限公司', companyType:'上市公司', logo:'携', logoCls:'bg-indigo-500/10 text-indigo-500', city:'上海', exp:'1-3年', edu:'本科', salary:'20K-35K', minSalary:20, type:'全职', size:'10000人以上', industry:'互联网', aiReason:'跨端开发经验与Flutter技术栈匹配，旅行产品体验要求高', match:66, tags:['Flutter','Dart','跨端','移动开发'] }
+];
+
+// ===== AI语义解析搜索 =====
+function doSemanticSearch() {
+    const input = document.getElementById('searchInput').value.trim();
+    if (!input) { applyAllFilters(); return; }
+
+    // 模拟LLM解析
+    const parsed = { city: '', salaryMin: 0, salaryMax: 999, keywords: [] };
+    if (/上海|北京|深圳|杭州|广州|成都|重庆|武汉|西安/.test(input)) {
+        parsed.city = input.match(/(上海|北京|深圳|杭州|广州|成都|重庆|武汉|西安)/)[1];
+    }
+    const salaryMatch = input.match(/(\d+)k|(\d+)万/i);
+    if (salaryMatch) parsed.salaryMin = parseInt(salaryMatch[1] || salaryMatch[2]);
+    const techMatch = input.match(/vue|react|java|python|go|flutter|typescript|算法/i);
+    if (techMatch) parsed.keywords.push(techMatch[0].toLowerCase());
+    const remoteMatch = /远程/.test(input);
+    const noOvertime = /不加班|不.*加班/.test(input);
+
+    // 显示解析标签
+    const tagsEl = document.getElementById('parsedTags');
+    const tagsInner = document.getElementById('parsedTagsInner');
+    let tagsHtml = '';
+    if (parsed.city) tagsHtml += `<span class="tag bg-emerald-50 dark:bg-neon-green/10 text-emerald-600 dark:text-neon-green">${parsed.city}</span>`;
+    if (parsed.salaryMin) tagsHtml += `<span class="tag bg-blue-50 dark:bg-neon-blue/10 text-blue-600 dark:text-neon-blue">${parsed.salaryMin}K+</span>`;
+    if (parsed.keywords.length) tagsHtml += parsed.keywords.map(k => `<span class="tag bg-purple-50 dark:bg-neon-purple/10 text-purple-600 dark:text-neon-purple">${k}</span>`).join('');
+    if (remoteMatch) tagsHtml += `<span class="tag bg-cyan-50 dark:bg-neon-cyan/10 text-cyan-600 dark:text-neon-cyan">远程</span>`;
+    if (noOvertime) tagsHtml += `<span class="tag bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400">不加班</span>`;
+
+    if (tagsHtml) {
+        tagsInner.innerHTML = tagsHtml;
+        tagsEl.classList.remove('hidden');
+        setTimeout(() => tagsEl.classList.add('hidden'), 4000);
+    }
+
+    // 更新筛选
+    if (parsed.city) {
+        filterState.city = parsed.city;
+        document.querySelectorAll('.filter-tag[data-filter="city"]').forEach(b => b.classList.remove('active'));
+        const cityBtn = document.querySelector(`.filter-tag[data-filter="city"][data-value="${parsed.city}"]`);
+        if (cityBtn) cityBtn.classList.add('active');
+    }
+    if (parsed.salaryMin >= 10 && parsed.salaryMin < 20) document.getElementById('fEdu') && 0; // salary handled via keywords
+    else if (parsed.salaryMin >= 20 && parsed.salaryMin < 30) 0;
+    else if (parsed.salaryMin >= 30 && parsed.salaryMin < 50) 0;
+    else if (parsed.salaryMin >= 50) 0;
+
+    applyAllFilters(parsed.keywords);
+}
+
+function onSearchInput() {
+    const input = document.getElementById('searchInput').value.trim();
+    const searchBox = document.getElementById('searchBox');
+    if (input) {
+        searchBox.classList.add('search-active');
+    }
+}
+
+// ===== 筛选逻辑 =====
+function applyAllFilters(extraKeywords) {
+    const cityFilter = filterState.city === '全国' ? '' : filterState.city;
+    const majorFilter = filterState.major === '不限' ? '' : filterState.major;
+    const jobTypeFilter = filterState.jobType === '不限' ? '' : filterState.jobType;
+    const edu = document.getElementById('fEdu').value;
+    const industry = document.getElementById('fIndustry').value;
+    const companyType = document.getElementById('fCompanyType').value;
+    const companySize = document.getElementById('fCompanySize').value;
+
+    let filtered = jobs.filter(j => {
+        if (cityFilter && j.city !== cityFilter) return false;
+        if (edu && j.edu !== edu) return false;
+        if (jobTypeFilter && j.type !== jobTypeFilter) return false;
+        if (industry && j.industry !== industry) return false;
+        if (companySize) {
+            const sizeMap = { '10000+': '10000人以上' };
+            if (j.size !== (sizeMap[companySize] || companySize)) return false;
+        }
+        if (majorFilter) {
+            // 简单匹配：专业与行业/标签关联
+            const majorIndustry = {
+                '会计学': ['金融'], '财务管理': ['金融'], '电子商务': ['互联网'], '计算机科学与技术': ['互联网','数据库','硬件'],
+                '软件工程': ['互联网','数据库'], '工商管理': ['互联网','金融','硬件'], '土木工程': [],
+                '学前教育': ['教育'], '市场营销': ['互联网','硬件']
+            };
+            const related = majorIndustry[majorFilter] || [];
+            if (related.length && !related.includes(j.industry)) return false;
+        }
+        if (extraKeywords && extraKeywords.length) {
+            const jTagsLower = j.tags.map(t => t.toLowerCase()).join(' ');
+            const match = extraKeywords.some(k => jTagsLower.includes(k) || j.title.toLowerCase().includes(k));
+            if (!match) return false;
+        }
+        return true;
+    });
+
+    // 默认按匹配度排序
+    filtered.sort((a, b) => b.match - a.match);
+
+    renderList(filtered);
+    updateTags();
+}
+
+function resetFilters() {
+    filterState.major = '不限';
+    filterState.city = '全国';
+    filterState.jobType = '不限';
+    document.getElementById('fEdu').value = '';
+    document.getElementById('fIndustry').value = '';
+    document.getElementById('fCompanyType').value = '';
+    document.getElementById('fCompanySize').value = '';
+    document.getElementById('searchInput').value = '';
+    document.getElementById('parsedTags').classList.add('hidden');
+    // 重置标签按钮
+    document.querySelectorAll('.filter-tag').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.filter-tag[data-value="不限"], .filter-tag[data-value="全国"]').forEach(b => b.classList.add('active'));
+    applyAllFilters();
+}
+
+function updateTags() {
+    const tags = [];
+    if (filterState.city !== '全国') tags.push({ key: 'city', label: filterState.city });
+    if (filterState.major !== '不限') tags.push({ key: 'major', label: filterState.major });
+    if (filterState.jobType !== '不限') tags.push({ key: 'jobType', label: filterState.jobType });
+    const edu = document.getElementById('fEdu').value;
+    if (edu) tags.push({ key: 'edu', label: edu });
+    const industry = document.getElementById('fIndustry').value;
+    if (industry) tags.push({ key: 'industry', label: industry });
+    const companyType = document.getElementById('fCompanyType').value;
+    if (companyType) tags.push({ key: 'companyType', label: companyType });
+    const companySize = document.getElementById('fCompanySize').value;
+    if (companySize) tags.push({ key: 'companySize', label: companySize });
+
+    document.getElementById('activeTags').innerHTML = tags.map(t =>
+        `<span class="tag bg-emerald-50 dark:bg-neon-green/10 text-emerald-600 dark:text-neon-green cursor-pointer hover:opacity-70 transition-opacity" onclick="clearTag('${t.key}')">${t.label} ×</span>`
+    ).join('');
+}
+
+function clearTag(key) {
+    if (key === 'city') { filterState.city = '全国'; document.querySelectorAll('.filter-tag[data-filter="city"]').forEach(b => b.classList.remove('active')); document.querySelector('.filter-tag[data-filter="city"][data-value="全国"]').classList.add('active'); }
+    else if (key === 'major') { filterState.major = '不限'; document.querySelectorAll('.filter-tag[data-filter="major"]').forEach(b => b.classList.remove('active')); document.querySelector('.filter-tag[data-filter="major"][data-value="不限"]').classList.add('active'); }
+    else if (key === 'jobType') { filterState.jobType = '不限'; document.querySelectorAll('.filter-tag[data-filter="jobType"]').forEach(b => b.classList.remove('active')); document.querySelector('.filter-tag[data-filter="jobType"][data-value="不限"]').classList.add('active'); }
+    else if (key === 'edu') document.getElementById('fEdu').value = '';
+    else if (key === 'industry') document.getElementById('fIndustry').value = '';
+    else if (key === 'companyType') document.getElementById('fCompanyType').value = '';
+    else if (key === 'companySize') document.getElementById('fCompanySize').value = '';
+    applyAllFilters();
+}
+
+// ===== 渲染左栏列表 =====
+function renderList(list) {
+    const el = document.getElementById('jobList');
+    document.getElementById('resultCount').textContent = `找到 ${list.length} 个职位`;
+
+    if (!list.length) {
+        el.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-600">
+            <span class="material-symbols-outlined text-5xl mb-3">search_off</span>
+            <p class="text-sm">暂无匹配职位</p>
+        </div>`;
+        return;
+    }
+
+    el.innerHTML = list.map((j, i) => `
+        <div class="tilt-card px-6 py-4 border-b border-gray-50 dark:border-neo-border/50 cursor-pointer transition-all hover:bg-gray-50/80 dark:hover:bg-neo-hover group"
+             onmousemove="tiltCard(event, this)" onmouseleave="resetTilt(this)"
+             style="animation: fadeSlide 0.3s ease ${i * 0.04}s both;">
+            <div class="flex items-center justify-between gap-5">
+                <!-- Left: Title + Tags + Company -->
+                <div class="flex-1 min-w-0">
+                    <!-- Row 1: Title -->
+                    <div class="flex items-center gap-2 mb-1.5">
+                        <h3 class="text-[15px] font-bold text-gray-900 dark:text-white">${j.title}（${j.company}）</h3>
+                        <span class="text-[13px] text-gray-400 dark:text-gray-500">「${j.city}」</span>
+                        <span class="px-1.5 py-0.5 bg-orange-50 dark:bg-orange-500/10 text-orange-500 dark:text-orange-400 text-[10px] font-semibold rounded">校招网申</span>
+                    </div>
+                    <!-- Row 2: Tags -->
+                    <div class="flex flex-wrap gap-1.5 mb-2">
+                        <span class="tag">校园</span>
+                        <span class="tag">${j.edu}</span>
+                        <span class="tag">在校/应届</span>
+                    </div>
+                    <!-- Row 3: Company -->
+                    <div class="flex items-center gap-2">
+                        <div class="w-5 h-5 rounded ${j.logoCls} flex items-center justify-center text-[9px] font-bold shrink-0">${j.logo}</div>
+                        <span class="text-[12px] text-gray-400 dark:text-gray-500 truncate">${j.companyFull}  <span class="text-gray-200 dark:text-gray-700">|</span>  ${j.industry}  <span class="text-gray-200 dark:text-gray-700">|</span>  ${j.size}  <span class="text-gray-200 dark:text-gray-700">|</span>  ${j.companyType}</span>
+                    </div>
+                </div>
+                <!-- Right: Salary + Buttons -->
+                <div class="flex flex-col items-end gap-2 shrink-0">
+                    <span class="text-base font-bold text-emerald-600 dark:text-neon-green">${j.salary}</span>
+                    <div class="flex gap-2">
+                        <a href="模拟面试.html?jobId=${j.id}" onclick="event.stopPropagation()" class="px-4 py-2 bg-emerald-100 dark:bg-neon-green/20 text-emerald-700 dark:text-neon-green text-xs font-semibold rounded-lg hover:brightness-95 transition-all whitespace-nowrap flex items-center gap-1" title="针对该岗位发起 AI 模拟面试">
+                            <span class="material-symbols-outlined text-sm">psychology</span>模拟面试
+                        </a>
+                        <button onclick="event.stopPropagation(); applyJob(this)" class="px-5 py-2 bg-emerald-600 dark:bg-neon-green text-white dark:text-neo-bg text-xs font-semibold rounded-lg hover:brightness-110 transition-all whitespace-nowrap relative overflow-hidden">立即投递</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ===== 3D倾斜 =====
+function tiltCard(e, el) {
+    const rect = el.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    el.style.transform = `perspective(600px) rotateY(${x * 5}deg) rotateX(${-y * 5}deg) translateZ(2px)`;
+}
+function resetTilt(el) {
+    el.style.transform = 'perspective(600px) rotateY(0) rotateX(0) translateZ(0)';
+}
+
+// ===== 投递 + 粒子 =====
+function applyJob(btn) {
+    if (btn.dataset.applied) return;
+    btn.dataset.applied = '1';
+
+    // 粒子爆发
+    const rect = btn.getBoundingClientRect();
+    for (let i = 0; i < 12; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        const angle = (Math.PI * 2 * i) / 12;
+        const dist = 30 + Math.random() * 40;
+        p.style.cssText = `
+            left: ${rect.width / 2}px; top: ${rect.height / 2}px;
+            --tx: ${Math.cos(angle) * dist}px; --ty: ${Math.sin(angle) * dist}px;
+            background: ${['#00FF66','#0066FF','#8B5CF6','#06B6D4'][i % 4]};
+        `;
+        btn.appendChild(p);
+    }
+
+    // 按钮状态变化
+    btn.innerHTML = `<svg class="w-4 h-4 inline-block mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" class="check-icon"/></svg> 已投递`;
+    btn.className = 'px-5 py-2 bg-emerald-100 dark:bg-neon-green/20 text-emerald-600 dark:text-neon-green text-sm font-semibold rounded-lg cursor-default';
+}
+
+// ===== 初始化 =====
+applyAllFilters();
+// ===== 更多专业弹框 =====
+const majorData = {
+    '工学': { '安全科学与工程类': ['安全工程','安全生产监管'], '兵器类': ['武器系统与工程','武器发射工程'], '材料类': ['材料科学与工程','材料化学','高分子材料'], '航空航天类': ['航空航天工程','飞行器设计','飞行器制造'], '测绘类': ['测绘工程','遥感科学与技术'], '大气科学类': ['大气科学','应用气象学'], '地理科学类': ['地理信息科学','自然地理'], '地质类': ['地质工程','勘查技术'], '地质学类': ['地质学','地球化学'], '电气类': ['电气工程','智能电网'], '电子信息类': ['电子信息工程','通信工程','微电子'], '纺织类': ['纺织工程','服装设计'], '工商管理类': ['工商管理','市场营销','会计学'], '公安技术类': ['刑事科学技术','消防工程'], '管理科学与工程类': ['信息管理','工程管理'], '环境科学与工程类': ['环境工程','环境科学'], '机械类': ['机械工程','机械设计','机器人工程'], '计算机类': ['计算机科学','软件工程','人工智能','数据科学','网络工程'], '建筑类': ['建筑学','城乡规划','风景园林'], '交通运输类': ['交通运输','交通工程','物流工程'], '矿业类': ['采矿工程','矿物加工'], '能源动力类': ['能源与动力','新能源科学'], '水利类': ['水利水电工程','水文水资源'], '土木类': ['土木工程','建筑环境'], '医学类': ['临床医学','口腔医学','基础医学','药学','护理学','公共卫生'] },
+    '理学': { '数学类': ['数学与应用数学','信息与计算科学'], '物理学类': ['物理学','应用物理'], '化学类': ['化学','应用化学'], '生物科学类': ['生物科学','生物技术'], '统计学类': ['统计学','应用统计'], '地理科学类': ['自然地理','人文地理'] },
+    '医学': { '临床医学类': ['临床医学','麻醉学','医学影像'], '口腔医学类': ['口腔医学'], '公共卫生类': ['预防医学','卫生检验'], '中医学类': ['中医学','针灸推拿'], '药学类': ['药学','药物制剂','中药学'], '护理学类': ['护理学','助产学'], '基础医学类': ['基础医学','法医学'] },
+    '农学': { '植物生产类': ['农学','园艺','植物保护'], '自然保护类': ['生态学','野生动物保护'], '动物生产类': ['动物科学','动物医学'], '林学类': ['林学','园林','森林保护'], '水产类': ['水产养殖','海洋渔业'], '草学类': ['草业科学'] },
+    '管理学': { '管理科学与工程类': ['信息管理','工程管理','电子商务'], '工商管理类': ['工商管理','市场营销','会计学','财务管理','人力资源'], '公共管理类': ['行政管理','公共事业管理','土地资源管理'], '物流管理类': ['物流管理','供应链管理'], '旅游管理类': ['旅游管理','酒店管理'], '农业经济管理类': ['农林经济管理'] },
+    '文学': { '中国语言文学类': ['汉语言文学','汉语国际教育','秘书学'], '外国语言文学类': ['英语','日语','韩语','法语','德语','西班牙语','翻译'], '新闻传播类': ['新闻学','广播电视学','广告学','网络与新媒体'], '戏剧与影视类': ['戏剧影视文学','动画'] },
+    '法学': { '法学类': ['法学','知识产权'], '政治学类': ['政治学','国际政治'], '社会学类': ['社会学','社会工作'], '马克思主义理论类': ['思想政治教育'], '公安学类': ['治安学','侦查学'] },
+    '艺术学': { '艺术学理论类': ['艺术史论','艺术管理'], '音乐与舞蹈类': ['音乐学','舞蹈编导'], '戏剧与影视类': ['表演','播音主持','动画'], '美术学类': ['美术学','绘画','雕塑'], '设计学类': ['视觉传达','环境设计','产品设计','数字媒体艺术'] },
+    '经济学': { '经济学类': ['经济学','经济统计学'], '财政学类': ['财政学','税收学'], '金融学类': ['金融学','金融工程','保险学','投资学'], '经济与贸易类': ['国际经济与贸易','贸易经济'] },
+    '教育学': { '教育学类': ['教育学','学前教育','小学教育','特殊教育'], '体育学类': ['体育教育','运动训练','社会体育'] },
+    '历史学': { '历史学类': ['历史学','世界史','考古学','文博学'] },
+    '哲学': { '哲学类': ['哲学','逻辑学','宗教学'] }
+};
+let majorSelected = [];
+let currentMajorCat = null, currentMajorSub = null;
+
+function openMajorModal() {
+    document.getElementById('majorModal').classList.remove('hidden');
+    majorSelected = [];
+    currentMajorCat = null; currentMajorSub = null;
+    renderMajorCol1();
+    document.getElementById('majorCol2').innerHTML = '<div class="text-sm text-gray-300 text-center mt-20">请先选择门类</div>';
+    document.getElementById('majorCol3').innerHTML = '<div class="text-sm text-gray-300 text-center mt-20">请先选择专业类</div>';
+    document.getElementById('majorSelectedInfo').textContent = '已选：0 个专业';
+}
+function closeMajorModal() { document.getElementById('majorModal').classList.add('hidden'); }
+
+function renderMajorCol1() {
+    const col = document.getElementById('majorCol1');
+    col.innerHTML = Object.keys(majorData).map(cat =>
+        `<div class="major-cat px-4 py-2.5 text-sm cursor-pointer hover:bg-gray-50 transition-colors ${currentMajorCat===cat?'text-emerald-600 font-semibold bg-emerald-50/50':'text-gray-600'}" onclick="selectMajorCat('${cat}')">${cat}<span class="float-right text-gray-300 text-xs">›</span></div>`
+    ).join('');
+}
+function selectMajorCat(cat) {
+    currentMajorCat = cat; currentMajorSub = null;
+    renderMajorCol1();
+    const subs = majorData[cat];
+    document.getElementById('majorCol2').innerHTML = Object.keys(subs).map(s =>
+        `<div class="major-sub px-4 py-2.5 text-sm cursor-pointer hover:bg-gray-50 transition-colors text-gray-600" onclick="selectMajorSub('${s}')">${s.length>10?s.slice(0,10)+'...':s}<span class="float-right text-gray-300 text-xs">›</span></div>`
+    ).join('');
+    document.getElementById('majorCol3').innerHTML = '<div class="text-sm text-gray-300 text-center mt-20">请选择专业类</div>';
+}
+function selectMajorSub(sub) {
+    currentMajorSub = sub;
+    const items = majorData[currentMajorCat][sub] || [];
+    document.getElementById('majorCol3').innerHTML = items.length ? items.map(m =>
+        `<span class="inline-block px-3 py-1.5 text-sm rounded-lg cursor-pointer transition-all mr-2 mb-2 ${majorSelected.includes(m)?'bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200':'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-transparent'}" onclick="toggleMajorItem('${m}')">${m}</span>`
+    ).join('') : '<div class="text-sm text-gray-300 text-center mt-20">暂无专业</div>';
+}
+function toggleMajorItem(m) {
+    const idx = majorSelected.indexOf(m);
+    if (idx > -1) majorSelected.splice(idx, 1); else majorSelected.push(m);
+    if (currentMajorSub) selectMajorSub(currentMajorSub);
+    document.getElementById('majorSelectedInfo').textContent = `已选：${majorSelected.length} 个专业`;
+}
+function confirmMajor() {
+    if (majorSelected.length > 0) {
+        filterState.major = majorSelected[0];
+        document.querySelectorAll('[data-filter="major"]').forEach(b => {
+            b.classList.toggle('active', b.dataset.value === majorSelected[0]);
+        });
+    }
+    closeMajorModal();
+    applyAllFilters();
+}
+function filterMajorSearch(q) {
+    if (!q.trim()) return;
+    q = q.toLowerCase();
+    for (const [cat, subs] of Object.entries(majorData)) {
+        for (const [sub, items] of Object.entries(subs)) {
+            if (items.some(i => i.toLowerCase().includes(q))) {
+                selectMajorCat(cat); selectMajorSub(sub); return;
+            }
+        }
+    }
+}
+
+// ===== 更多城市弹框 =====
+const cityProvinceData = {
+    '热门': ['北京','上海','广州','重庆','深圳','天津','武汉','西安','成都','大连','长春','沈阳','南京','济南','青岛','杭州','苏州','无锡','宁波','郑州','长沙','福州','厦门','哈尔滨','石家庄','合肥','惠州','太原','昆明','烟台','佛山','南昌','贵阳','香港','澳门'],
+    '广东': ['广州','深圳','东莞','佛山','珠海','惠州','中山','汕头','江门','湛江','肇庆','茂名','揭阳','梅州','清远','韶关','河源','云浮','阳江','潮州','汕尾'],
+    '湖北': ['武汉','宜昌','襄阳','荆州','黄冈','十堰','孝感','荆门','鄂州','黄石','咸宁','随州','恩施','仙桃','潜江','天门'],
+    '陕西': ['西安','咸阳','宝鸡','渭南','汉中','安康','商洛','延安','榆林','铜川'],
+    '四川': ['成都','绵阳','德阳','宜宾','南充','泸州','达州','乐山','遂宁','内江','自贡','攀枝花','广元','广安','眉山','资阳','巴中','凉山','甘孜','阿坝'],
+    '辽宁': ['沈阳','大连','鞍山','抚顺','本溪','丹东','锦州','营口','阜新','辽阳','盘锦','铁岭','朝阳','葫芦岛'],
+    '吉林': ['长春','吉林','四平','通化','松原','延边','白城','辽源','白山'],
+    '江苏': ['南京','苏州','无锡','常州','南通','徐州','盐城','淮安','连云港','扬州','镇江','泰州','宿迁'],
+    '山东': ['济南','青岛','烟台','潍坊','临沂','济宁','淄博','威海','德州','聊城','泰安','菏泽','枣庄','日照','东营','滨州','枣庄'],
+    '浙江': ['杭州','宁波','温州','嘉兴','湖州','绍兴','金华','台州','衢州','丽水','舟山']
+};
+let citySelected = [];
+let currentProvince = '热门';
+
+function openCityModal() {
+    document.getElementById('cityModal').classList.remove('hidden');
+    citySelected = [...(filterState.city !== '全国' ? filterState.city.split(',') : [])];
+    currentProvince = '热门';
+    renderCityProvinces();
+    renderCityGrid();
+    updateCityInfo();
+}
+function closeCityModal() { document.getElementById('cityModal').classList.add('hidden'); }
+
+function renderCityProvinces() {
+    const el = document.getElementById('cityProvinceList');
+    el.innerHTML = Object.keys(cityProvinceData).map(p =>
+        `<div class="px-4 py-2.5 text-sm cursor-pointer hover:bg-gray-50 transition-colors ${currentProvince===p?'text-emerald-600 font-semibold bg-emerald-50/50':'text-gray-600'}" onclick="selectProvince('${p}')">${p}<span class="float-right text-gray-300 text-xs">›</span></div>`
+    ).join('');
+}
+function selectProvince(p) { currentProvince = p; renderCityProvinces(); renderCityGrid(); }
+
+function renderCityGrid() {
+    const cities = cityProvinceData[currentProvince] || [];
+    document.getElementById('cityGrid').innerHTML = `<div class="flex flex-wrap gap-2">${cities.map(c =>
+        `<button class="px-4 py-2 text-sm rounded-lg border transition-all ${citySelected.includes(c)?'bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold':'bg-gray-50 text-gray-600 border-gray-100 hover:bg-gray-100 hover:border-gray-200'}" onclick="toggleCity('${c}')">${c}</button>`
+    ).join('')}</div>`;
+}
+function toggleCity(c) {
+    const idx = citySelected.indexOf(c);
+    if (idx > -1) citySelected.splice(idx, 1);
+    else if (citySelected.length < 5) citySelected.push(c);
+    renderCityGrid();
+    updateCityInfo();
+}
+function updateCityInfo() {
+    document.getElementById('citySelectedInfo').textContent = `已选：${citySelected.length} / 5`;
+}
+function confirmCity() {
+    if (citySelected.length > 0) {
+        filterState.city = citySelected.join(',');
+        document.querySelectorAll('[data-filter="city"]').forEach(b => {
+            b.classList.toggle('active', b.dataset.value === '全国' && citySelected.length === 0);
+        });
+    }
+    closeCityModal();
+    applyAllFilters();
+}
+function filterCitySearch(q) {
+    if (!q.trim()) { currentProvince = '热门'; renderCityProvinces(); renderCityGrid(); return; }
+    q = q.toLowerCase();
+    const results = [];
+    for (const [p, cities] of Object.entries(cityProvinceData)) {
+        cities.forEach(c => { if (c.toLowerCase().includes(q) && !results.includes(c)) results.push(c); });
+    }
+    if (results.length) {
+        document.getElementById('cityGrid').innerHTML = `<div class="flex flex-wrap gap-2">${results.map(c =>
+            `<button class="px-4 py-2 text-sm rounded-lg border transition-all ${citySelected.includes(c)?'bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold':'bg-gray-50 text-gray-600 border-gray-100 hover:bg-gray-100 hover:border-gray-200'}" onclick="toggleCity('${c}')">${c}</button>`
+        ).join('')}</div>`;
+        document.getElementById('cityProvinceList').innerHTML = '<div class="text-sm text-gray-300 text-center mt-10">搜索结果</div>';
+    }
+}
+</script>
+    <script>
+        function toggleInterviewDD(e, suffix) {
+            e.stopPropagation();
+            var dd = document.getElementById('interviewDD-' + suffix);
+            var arrow = document.getElementById('interview-arrow-' + suffix);
+            if (dd) dd.classList.toggle('hidden');
+            if (arrow) arrow.style.transform = dd && dd.classList.contains('hidden') ? '' : 'rotate(180deg)';
+        }
+        function closeInterviewDD(suffix) {
+            var dd = document.getElementById('interviewDD-' + suffix);
+            var arrow = document.getElementById('interview-arrow-' + suffix);
+            if (dd) dd.classList.add('hidden');
+            if (arrow) arrow.style.transform = '';
+        }
+        document.addEventListener('click', function(e) {
+            ['desk', 'mob'].forEach(function(s) {
+                var wrap = document.getElementById('interviewDD-wrap-' + s);
+                if (wrap && !wrap.contains(e.target)) closeInterviewDD(s);
+            });
+        });
+        function toggleMobileMenu() {
+            var menu = document.getElementById('mobile-menu');
+            if (menu) menu.classList.toggle('hidden');
+        }
+        function logout() {
+            localStorage.removeItem('loggedIn');
+            window.location.href = '../common/登录.html';
+        }
+    </script>
+    
+
+</body>
+</html>

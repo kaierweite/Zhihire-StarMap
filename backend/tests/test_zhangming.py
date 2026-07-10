@@ -8,7 +8,7 @@ from app.main import app
 
 PORT = 8101
 BASE = f"http://127.0.0.1:{PORT}/api"
-DOCX = os.path.join(os.path.dirname(os.path.dirname(__file__)), "??.docx")
+DOCX = r"C:\\Users\\Administrator\\Desktop\\Zhihire-StarMap\\??.docx"
 
 def start():
     uvicorn.run(app, host="127.0.0.1", port=PORT, log_level="error")
@@ -18,6 +18,8 @@ t.start()
 time.sleep(4)
 
 import httpx
+import sys
+sys.stdout.reconfigure(encoding="utf-8")
 cli = httpx.Client(timeout=30)
 
 print('=== Test ??.docx ===')

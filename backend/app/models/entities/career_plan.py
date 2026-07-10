@@ -6,7 +6,8 @@
 """
 from datetime import datetime
 
-from sqlalchemy import BigInteger, DateTime, String, Text, func
+from sqlalchemy import BigInteger, DateTime, String, func
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.entities.base import Base
@@ -35,7 +36,7 @@ class CareerPlan(Base):
     )
     target_role: Mapped[str] = mapped_column(String(100), nullable=False)
     target_role_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    plan_content: Mapped[str] = mapped_column(Text, nullable=True)
+    plan_content: Mapped[dict] = mapped_column(JSONB, nullable=True)
     source: Mapped[str] = mapped_column(String(20), nullable=False, default="PROACTIVE")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=False), nullable=False, server_default=func.now(),

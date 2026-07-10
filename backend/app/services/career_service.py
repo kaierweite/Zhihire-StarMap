@@ -3,7 +3,6 @@
 编排核心算法（缺口分析 + 学习路径规划 + 图谱提示），
 调用仓储层持久化规划结果，末句经 LLM 润色。
 """
-import json
 import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -113,13 +112,12 @@ async def generate_plan(
         source=source,
     )
 
-    # 11. 持久化
-    plan_content = json.dumps(response.model_dump(), ensure_ascii=False)
+    # 11. 持久化（plan_content 为 JSONB，直接存 dict）
     plan = CareerPlan(
         user_id=user_id,
         target_role=role.name,
         target_role_id=target_role_id,
-        plan_content=plan_content,
+        plan_content=response.model_dump(),
         source=source,
     )
     await career_repository.upsert(db, plan)

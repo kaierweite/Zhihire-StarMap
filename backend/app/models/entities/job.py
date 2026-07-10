@@ -6,7 +6,7 @@
 """
 from datetime import datetime
 
-from sqlalchemy import BigInteger, DateTime, Float, ForeignKey, Integer, Numeric, String, Text, func
+from sqlalchemy import BigInteger, Boolean, DateTime, Float, ForeignKey, Integer, Numeric, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -30,18 +30,23 @@ class Job(Base):
         BigInteger, ForeignKey("occupation_role.id", ondelete="SET NULL"), nullable=True, index=True,
     )
     title: Mapped[str] = mapped_column(String(200), nullable=False)
-    city: Mapped[str] = mapped_column(String(100), nullable=False)
-    education_requirement: Mapped[str] = mapped_column(String(50), nullable=False)
-    experience_min: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    salary_min: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
-    salary_max: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
+    city: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    education_requirement: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    experience_min: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    salary_min: Mapped[float | None] = mapped_column(Numeric(12, 2), nullable=True)
+    salary_max: Mapped[float | None] = mapped_column(Numeric(12, 2), nullable=True)
     job_type: Mapped[str] = mapped_column(String(20), nullable=False, default="FULL_TIME")
-    description: Mapped[str] = mapped_column(Text, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
     requirements: Mapped[str | None] = mapped_column(Text, nullable=True)
     source: Mapped[str] = mapped_column(String(20), nullable=False, default="MANUAL")
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="OPEN")
     embedding_cache: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     views: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    is_campus: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # 专业（用于按专业筛选）
+    major: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    # 岗位分类（用于按职类筛选）
+    job_category: Mapped[str | None] = mapped_column(String(100), nullable=True)
     benefits: Mapped[list | None] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=False), nullable=False, server_default=func.now(),

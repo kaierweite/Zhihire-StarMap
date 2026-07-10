@@ -4,7 +4,6 @@
 - POST /api/career/plan/generate — 生成职业规划
 - GET  /api/career/plan — 获取已生成的规划
 """
-import json
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -49,12 +48,8 @@ async def get_plan(
     if plan is None:
         return Result.success(data=None, message="尚未生成职业规划")
 
-    plan_data = {}
-    if plan.plan_content:
-        try:
-            plan_data = json.loads(plan.plan_content)
-        except (json.JSONDecodeError, TypeError):
-            pass
+    # plan_content 是 JSONB，已直接解析为 dict
+    plan_data = plan.plan_content or {}
     plan_data["id"] = plan.id
     plan_data["target_role"] = plan.target_role
     plan_data["target_role_id"] = plan.target_role_id

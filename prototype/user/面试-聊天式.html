@@ -1,0 +1,596 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天式面试 - 智聘星图</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="config.js"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                colors: {
+                    primary: '#003527', 'primary-dark': '#00251a', 'primary-container': '#064e3b',
+                    'on-primary': '#ffffff', 'on-primary-container': '#b0f0d6',
+                    surface: '#f8f9fa', 'surface-container': '#edeeef', 'surface-container-lowest': '#ffffff',
+                    'on-surface': '#191c1d', 'on-surface-variant': '#6b6f76',
+                    'outline-variant': '#c4c5d9', secondary: '#434656'
+                }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Inter', system-ui, sans-serif; }
+        .glass-card {
+            background: rgba(255,255,255,0.7); backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(196,197,217,0.4);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04); transition: all 0.3s; border-radius: 12px;
+        }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .animate-fade-in-up { animation:fadeInUp 0.6s ease forwards; }
+        @keyframes typing {
+            0%,60%,100% { opacity: 0.3; transform: translateY(0); }
+            30% { opacity: 1; transform: translateY(-4px); }
+        }
+        .typing-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #94a3b8;
+            display: inline-block;
+        }
+        .typing-dot:nth-child(1) { animation: typing 1.4s infinite 0s; }
+        .typing-dot:nth-child(2) { animation: typing 1.4s infinite 0.2s; }
+        .typing-dot:nth-child(3) { animation: typing 1.4s infinite 0.4s; }
+        .chat-bubble-ai {
+            background: #ffffff; border: 1px solid rgba(196,197,217,0.5);
+            border-radius: 16px 16px 16px 4px; padding: 16px 20px; max-width: 80%;
+        }
+        .chat-bubble-user {
+            background: #064e3b; color: #ffffff;
+            border-radius: 16px 16px 4px 16px; padding: 16px 20px; max-width: 80%; margin-left: auto;
+        }
+        .btn-primary {
+            background: #064e3b; color: #fff; padding: 10px 24px; border-radius: 9999px;
+            font-weight: 600; font-size: 14px; transition: all 0.3s;
+        }
+        .btn-primary:hover { background: #003527; }
+        .btn-danger {
+            background: #dc2626; color: #fff; padding: 10px 24px; border-radius: 9999px;
+            font-weight: 600; font-size: 14px; transition: all 0.3s;
+        }
+        .btn-danger:hover { background: #b91c1c; }
+        #chat-container {
+            height: calc(100vh - 280px);
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        #chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        #chat-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #chat-container::-webkit-scrollbar-thumb {
+            background: #c4c5d9;
+            border-radius: 3px;
+        }
+            .active-tab { color: #064e3b; border-bottom: 2px solid #064e3b; font-weight: 700; }
+    </style>
+</head>
+<body class="bg-surface min-h-screen">
+
+<!-- 顶部导航栏 -->
+
+    
+    <nav class="fixed top-0 w-full z-50 bg-white h-14 border-b border-outline-variant/50 transition-all duration-300">
+        <div class="flex justify-between items-center w-full px-4 lg:px-10 max-w-[1440px] mx-auto h-full">
+            <a href="../common/首页着陆页.html" class="font-bold text-[22px] tracking-tight text-primary-container shrink-0">智聘星图</a>
+            <div class="hidden lg:flex items-center gap-6 xl:gap-8">
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="../common/首页着陆页.html">探索</a>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="职位推荐.html">职位推荐</a>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="职位搜索.html">职位搜索</a>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="简历中心.html">简历中心</a>
+                <div class="relative" id="interviewDD-wrap-desk">
+                    <button onclick="toggleInterviewDD(event, 'desk')" class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap cursor-pointer flex items-center gap-0.5">
+                        面试功能
+                        <span class="material-symbols-outlined text-sm transition-transform" id="interview-arrow-desk">expand_more</span>
+                    </button>
+                    <div id="interviewDD-desk" class="hidden absolute left-0 top-full mt-1 w-36 bg-white rounded-xl shadow-2xl border border-outline-variant/30 z-50 overflow-hidden">
+                        <a href="模拟面试.html" class="block px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors">智能面试</a>
+                        <a href="面试记录.html" class="block px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors">面试记录</a>
+                    </div>
+                </div>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="社交.html">社交</a>
+            </div>
+            <div class="flex items-center gap-2 lg:gap-3">
+                <a href="通知中心.html" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer hidden xl:block" title="通知中心">notifications</a>
+                <div class="hidden xl:flex items-center bg-surface-container rounded-full px-3 py-1.5 border border-outline-variant/60">
+                    <span class="material-symbols-outlined text-outline text-base">search</span>
+                    <input class="bg-transparent border-none focus:ring-0 text-sm w-32 ml-1 text-on-surface placeholder-on-surface-variant/60" placeholder="搜索职位..." type="text"/>
+                </div>
+                <div id="nav-guest" class="flex items-center gap-2">
+                    <a href="../common/登录.html" class="text-primary-container font-medium text-[13px] px-3 py-1.5 hover:bg-surface-container rounded-full transition-all hidden sm:inline-block">登录</a>
+                    <a href="../common/注册.html" class="bg-primary-container text-on-primary font-medium text-[13px] px-4 py-1.5 rounded-full hover:opacity-90 transition-all hidden sm:inline-block">注册</a>
+                </div>
+                <div id="nav-user" class="hidden items-center gap-3">
+                    <div class="relative">
+                        <div id="user-dropdown-trigger" class="flex items-center gap-2 cursor-pointer hover:bg-surface-container rounded-full px-3 py-1.5 transition-all">
+                            <div id="user-avatar" class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-xs font-bold">Q</div>
+                            <span id="user-nickname" class="text-sm font-medium text-on-surface hidden xl:inline-block">求职小能手</span>
+                            <span class="material-symbols-outlined text-sm text-on-surface-variant">expand_more</span>
+                        </div>
+                        <div id="user-dropdown" class="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-outline-variant/30 py-2 z-50 hidden">
+                            <a href="个人中心.html" class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-primary-container/10 hover:text-primary transition-colors"><span class="material-symbols-outlined text-base">person</span><span>个人中心</span></a>
+                            <a href="面试记录.html" class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-primary-container/10 hover:text-primary transition-colors"><span class="material-symbols-outlined text-base">calendar_today</span><span>我的面试</span></a>
+                            <div class="border-t border-outline-variant/20 my-1"></div>
+                            <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"><span class="material-symbols-outlined text-base">logout</span><span>退出登录</span></button>
+                        </div>
+                    </div>
+                </div>
+                <button id="mobile-menu-btn" class="lg:hidden p-1.5 hover:bg-surface-container rounded-lg transition-colors" onclick="toggleMobileMenu()"><span class="material-symbols-outlined text-on-surface text-xl">menu</span></button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-outline-variant/50 shadow-lg">
+            <div class="flex flex-col px-4 py-3 gap-1">
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="../common/首页着陆页.html">探索</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="职位推荐.html">职位推荐</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="职位搜索.html">职位搜索</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="简历中心.html">简历中心</a>
+                <div class="relative" id="interviewDD-wrap-mob">
+                    <button onclick="toggleInterviewDD(event, 'mob')" class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all cursor-pointer flex items-center justify-between w-full">
+                        面试功能
+                        <span class="material-symbols-outlined text-base transition-transform" id="interview-arrow-mob">expand_more</span>
+                    </button>
+                    <div id="interviewDD-mob" class="hidden ml-4 space-y-0.5 mt-0.5">
+                        <a href="模拟面试.html" class="block py-2 px-3 text-sm text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">智能面试</a>
+                        <a href="面试记录.html" class="block py-2 px-3 text-sm text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">面试记录</a>
+                    </div>
+                </div>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="社交.html">社交</a>
+                <div class="border-t border-outline-variant/30 my-2"></div>
+                <div id="mobile-guest" class="flex gap-2">
+                    <a href="../common/登录.html" class="flex-1 text-center text-primary-container font-medium text-sm py-2.5 border border-outline-variant/40 rounded-lg hover:bg-surface-container transition-all">登录</a>
+                    <a href="../common/注册.html" class="flex-1 text-center bg-primary-container text-on-primary font-medium text-sm py-2.5 rounded-lg hover:opacity-90 transition-all">注册</a>
+                </div>
+                <div id="mobile-user" class="hidden items-center gap-3 px-3 py-2">
+                    <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-sm font-bold" id="mobile-avatar">Q</div>
+                    <span class="text-sm font-medium text-on-surface flex-1" id="mobile-nickname">求职小能手</span>
+                    <button onclick="logout()" class="text-on-surface-variant hover:text-red-500 transition-all"><span class="material-symbols-outlined text-lg">logout</span></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+
+<main class="pt-20 h-screen flex">
+    <!-- 左侧：聊天区域 -->
+    <div class="flex-1 flex flex-col">
+        <!-- 面试信息栏 -->
+        <div class="bg-white border-b border-outline-variant/50 px-6 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-container to-primary flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="50" cy="32" r="18" fill="currentColor" opacity="0.9"/>
+                                <path d="M25 75C25 60 35 50 50 50C65 50 75 60 75 75" stroke="currentColor" stroke-width="4" fill="none" opacity="0.9"/>
+                            </svg>
+                            <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center border border-white">
+                                <span class="material-symbols-outlined text-white text-[8px]">smart_toy</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-sm font-semibold text-on-surface">AI 面试官</div>
+                        <div class="text-xs text-green-500 flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                            在线 · 资深技术面试官
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 text-xs text-on-surface-variant">
+                    <span>岗位：<span class="text-on-surface font-medium" id="job-info">高级前端工程师</span></span>
+                    <span>阶段：<span class="text-on-surface font-medium" id="stage-info">初面</span></span>
+                    <span>压力：<span class="text-on-surface font-medium" id="pressure-info">标准</span></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 聊天消息区域 -->
+        <div class="flex-1 overflow-y-auto px-6 py-4" id="chat-container">
+            <!-- 欢迎消息 -->
+            <div class="flex gap-3 mb-4 animate-fade-in-up">
+                <div class="w-8 h-8 rounded-full bg-primary-container/10 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-sm text-primary-container">smart_toy</span>
+                </div>
+                <div class="chat-bubble-ai">
+                    <div class="text-sm text-on-surface leading-relaxed">
+                        你好！我是今天的 AI 面试官。今天我们将针对<span class="font-semibold text-primary" id="welcome-job">高级前端工程师</span>岗位进行模拟面试。面试共 5 题，请准备好后开始回答。
+                    </div>
+                    <div class="text-xs text-on-surface-variant mt-2" id="welcome-time">10:00</div>
+                </div>
+            </div>
+            
+            <!-- 第一个问题 -->
+            <div class="flex gap-3 mb-4 animate-fade-in-up" style="animation-delay:0.1s; opacity:0;">
+                <div class="w-8 h-8 rounded-full bg-primary-container/10 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-sm text-primary-container">smart_toy</span>
+                </div>
+                <div class="chat-bubble-ai">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded">第 1 题 · 技术题</span>
+                    </div>
+                    <div class="text-sm text-on-surface leading-relaxed" id="first-question">
+                        请解释 React 中 useEffect 的依赖数组机制，以及空数组、无依赖、特定依赖三种场景下副作用的执行时机。
+                    </div>
+                    <div class="text-xs text-on-surface-variant mt-2">10:01</div>
+                </div>
+            </div>
+            
+            <!-- 打字指示器 -->
+            <div class="flex gap-3 mb-4 hidden" id="typing-indicator">
+                <div class="w-8 h-8 rounded-full bg-primary-container/10 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-sm text-primary-container">smart_toy</span>
+                </div>
+                <div class="chat-bubble-ai flex items-center gap-2 px-4 py-3">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 输入区域 -->
+        <div class="bg-white border-t border-outline-variant/50 px-6 py-4">
+            <div class="flex items-center gap-3">
+                <button class="p-2 hover:bg-surface-container rounded-lg transition-colors">
+                    <span class="material-symbols-outlined text-on-surface-variant text-xl">attach_file</span>
+                </button>
+                <div class="flex-1 relative">
+                    <textarea id="user-input" 
+                        class="w-full resize-none border border-outline-variant/50 rounded-xl px-4 py-3 text-sm text-on-surface placeholder-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary-container/30 focus:border-primary-container transition-all" 
+                        placeholder="输入您的回答..." 
+                        rows="1"
+                        onkeydown="handleKeyDown(event)"></textarea>
+                </div>
+                <button onclick="sendMessage()" class="p-3 bg-primary-container text-white rounded-xl hover:bg-primary transition-all">
+                    <span class="material-symbols-outlined text-xl">send</span>
+                </button>
+            </div>
+            <div class="flex items-center justify-between mt-2">
+                <div class="text-xs text-on-surface-variant">
+                    <span class="material-symbols-outlined text-sm align-middle">info</span>
+                    按 Enter 发送，Shift + Enter 换行
+                </div>
+                <button onclick="nextQuestion()" class="text-xs text-primary-container hover:underline">跳过此题</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 右侧：评分和提示面板 -->
+    <aside class="w-80 bg-white border-l border-outline-variant/50 flex flex-col">
+        <!-- 评分面板 -->
+        <div class="p-5 border-b border-outline-variant/50">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="material-symbols-outlined text-yellow-500 text-lg">emoji_events</span>
+                <span class="text-sm font-semibold text-on-surface">当前评分</span>
+            </div>
+            <div class="text-center py-3">
+                <div class="text-4xl font-bold text-primary mb-1" id="current-score">82</div>
+                <div class="text-xs text-on-surface-variant">平均分</div>
+            </div>
+            <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-on-surface-variant">回答质量</span>
+                    <span class="text-on-surface">85/100</span>
+                </div>
+                <div class="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="h-full bg-green-500 rounded-full" style="width:85%"></div>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-on-surface-variant">表达清晰</span>
+                    <span class="text-on-surface">78/100</span>
+                </div>
+                <div class="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="h-full bg-yellow-500 rounded-full" style="width:78%"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 实时提示 -->
+        <div class="p-5 border-b border-outline-variant/50">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="material-symbols-outlined text-blue-500 text-lg">lightbulb</span>
+                <span class="text-sm font-semibold text-on-surface">答题提示</span>
+            </div>
+            <div class="bg-blue-50 rounded-lg p-3">
+                <p class="text-xs text-on-surface leading-relaxed" id="ai-hint">
+                    建议从以下几个方面回答：<br>
+                    1. 依赖数组的基本机制<br>
+                    2. 空数组 vs 无依赖的区别<br>
+                    3. 竞态条件处理<br>
+                    4. 清理函数的作用
+                </p>
+            </div>
+        </div>
+        
+        <!-- 历史得分 -->
+        <div class="p-5 border-b border-outline-variant/50">
+            <div class="text-xs text-on-surface-variant mb-2">历史得分</div>
+            <div class="flex gap-2" id="score-history">
+                <div class="flex-1 text-center py-1.5 bg-green-100 rounded text-xs text-green-700 font-medium">88</div>
+                <div class="flex-1 text-center py-1.5 bg-yellow-100 rounded text-xs text-yellow-700 font-medium">76</div>
+                <div class="flex-1 text-center py-1.5 bg-gray-100 rounded text-xs text-on-surface-variant/50">-</div>
+                <div class="flex-1 text-center py-1.5 bg-gray-100 rounded text-xs text-on-surface-variant/50">-</div>
+                <div class="flex-1 text-center py-1.5 bg-gray-100 rounded text-xs text-on-surface-variant/50">-</div>
+            </div>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="p-5 mt-auto">
+            <button onclick="endInterview()" class="btn-danger w-full flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-lg">call_end</span>
+                结束面试
+            </button>
+        </div>
+    </aside>
+</main>
+
+<script>
+    // 面试配置
+    var interviewConfig = {
+        jobId: null,
+        stage: '初面',
+        pressure: '标准',
+        scene: '聊天',
+        currentQuestion: 1,
+        totalQuestions: 5,
+        scores: []
+    };
+
+    // 问题列表
+    var questions = [
+        '请解释 React 中 useEffect 的依赖数组机制，以及空数组、无依赖、特定依赖三种场景下副作用的执行时机。',
+        '请描述一次你在团队中推动技术方案落地的经历，重点讲你如何处理分歧。',
+        '线上首屏渲染突然从 1.2s 升到 3.8s，你会从哪些维度排查？',
+        '请设计一个支持千万级用户的实时消息推送系统。',
+        '如果让你重构一个遗留项目，你会如何制定计划和优先级？'
+    ];
+
+    // 计时器
+    var timerInterval = null;
+    var seconds = 0;
+
+    // 初始化
+    function init() {
+        var config = localStorage.getItem('interviewConfig');
+        if (config) {
+            var parsed = JSON.parse(config);
+            interviewConfig.jobId = parsed.jobId;
+            interviewConfig.stage = parsed.stage || '初面';
+            interviewConfig.pressure = parsed.pressure || '标准';
+            interviewConfig.scene = parsed.scene || '聊天';
+        }
+        
+        document.getElementById('stage-info').textContent = interviewConfig.stage;
+        document.getElementById('pressure-info').textContent = interviewConfig.pressure;
+        document.getElementById('welcome-job').textContent = '高级前端工程师';
+        
+        startTimer();
+        
+        // 自动聚焦输入框
+        document.getElementById('user-input').focus();
+    }
+
+    // 启动计时器
+    function startTimer() {
+        timerInterval = setInterval(function() {
+            seconds++;
+            var hours = Math.floor(seconds / 3600);
+            var mins = Math.floor((seconds % 3600) / 60);
+            var secs = seconds % 60;
+            document.getElementById('timer').textContent = 
+                String(hours).padStart(2, '0') + ':' + 
+                String(mins).padStart(2, '0') + ':' + 
+                String(secs).padStart(2, '0');
+        }, 1000);
+    }
+
+    // 获取当前时间
+    function getCurrentTime() {
+        var now = new Date();
+        return String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    }
+
+    // 发送消息
+    function sendMessage() {
+        var input = document.getElementById('user-input');
+        var message = input.value.trim();
+        
+        if (!message) return;
+        
+        // 添加用户消息
+        addMessage(message, 'user');
+        input.value = '';
+        
+        // 显示AI思考中
+        showTypingIndicator();
+        
+        // 模拟AI回复
+        setTimeout(function() {
+            hideTypingIndicator();
+            addAIResponse();
+        }, 1500);
+    }
+
+    // 添加消息
+    function addMessage(text, type) {
+        var container = document.getElementById('chat-container');
+        var typingIndicator = document.getElementById('typing-indicator');
+        
+        var messageHtml = '';
+        if (type === 'user') {
+            messageHtml = `
+                <div class="flex gap-3 mb-4 justify-end animate-fade-in-up">
+                    <div class="chat-bubble-user">
+                        <div class="text-sm leading-relaxed">${text}</div>
+                        <div class="text-xs text-white/70 mt-2 text-right">${getCurrentTime()}</div>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center shrink-0">
+                        <span class="text-sm font-semibold">Q</span>
+                    </div>
+                </div>
+            `;
+        } else {
+            messageHtml = `
+                <div class="flex gap-3 mb-4 animate-fade-in-up">
+                    <div class="w-8 h-8 rounded-full bg-primary-container/10 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-sm text-primary-container">smart_toy</span>
+                    </div>
+                    <div class="chat-bubble-ai">
+                        <div class="text-sm text-on-surface leading-relaxed">${text}</div>
+                        <div class="text-xs text-on-surface-variant mt-2">${getCurrentTime()}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        container.insertAdjacentHTML('beforeend', messageHtml);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    // AI回复
+    function addAIResponse() {
+        var responses = [
+            '感谢您的回答！您对 useEffect 的理解很到位，特别是提到了清理函数的重要性。接下来我们进入下一题。',
+            '很好的回答！您提到了跨部门协作的例子，展示了良好的沟通能力。让我们继续下一个问题。',
+            '您的排查思路很清晰，从网络、缓存、代码等多个维度考虑。接下来我们聊一下系统设计。',
+            '这是一个复杂的系统设计题，您提到了消息队列和负载均衡，思路不错。最后一个开放式问题。',
+            '很好的总结！您的规划思路体现了工程化思维。面试到此结束，稍后会为您生成详细的面试报告。'
+        ];
+        
+        var response = responses[interviewConfig.currentQuestion - 1];
+        addMessage(response, 'ai');
+        
+        // 更新评分
+        updateScore();
+    }
+
+    // 更新评分
+    function updateScore() {
+        var scores = [88, 82, 79, 85, 81];
+        var score = scores[interviewConfig.currentQuestion - 1];
+        document.getElementById('current-score').textContent = score;
+    }
+
+    // 显示打字指示器
+    function showTypingIndicator() {
+        document.getElementById('typing-indicator').classList.remove('hidden');
+        var container = document.getElementById('chat-container');
+        container.scrollTop = container.scrollHeight;
+    }
+
+    // 隐藏打字指示器
+    function hideTypingIndicator() {
+        document.getElementById('typing-indicator').classList.add('hidden');
+    }
+
+    // 处理键盘事件
+    function handleKeyDown(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendMessage();
+        }
+    }
+
+    // 下一题
+    function nextQuestion() {
+        if (interviewConfig.currentQuestion < interviewConfig.totalQuestions) {
+            interviewConfig.currentQuestion++;
+            document.getElementById('question-progress').textContent = 
+                '第 ' + interviewConfig.currentQuestion + '/' + interviewConfig.totalQuestions + ' 题';
+            
+            // 发送下一个问题
+            setTimeout(function() {
+                showTypingIndicator();
+                setTimeout(function() {
+                    hideTypingIndicator();
+                    var questionText = `<div class="flex items-center gap-2 mb-2"><span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded">第 ${interviewConfig.currentQuestion} 题 · 技术题</span></div>${questions[interviewConfig.currentQuestion - 1]}`;
+                    addMessage(questionText, 'ai');
+                }, 1000);
+            }, 500);
+        }
+    }
+
+    // 结束面试
+    function endInterview() {
+        if (confirm('确定要结束面试吗？')) {
+            // 保存面试记录
+            saveInterviewRecord();
+            
+            clearInterval(timerInterval);
+            window.location.href = '面试记录.html';
+        }
+    }
+
+    // 保存面试记录
+    function saveInterviewRecord() {
+        var records = JSON.parse(localStorage.getItem('interviewRecords') || '[]');
+        
+        var record = {
+            id: Date.now(),
+            jobTitle: '高级前端工程师',
+            company: '字节跳动',
+            stage: interviewConfig.stage,
+            pressure: interviewConfig.pressure,
+            scene: '聊天',
+            score: Math.floor(Math.random() * 20) + 75,
+            date: new Date().toLocaleString('zh-CN'),
+            duration: document.getElementById('timer').textContent,
+            status: 'completed',
+            dimensions: {
+                technical: Math.floor(Math.random() * 20) + 75,
+                communication: Math.floor(Math.random() * 20) + 75,
+                logic: Math.floor(Math.random() * 20) + 75
+            }
+        };
+        
+        records.unshift(record);
+        localStorage.setItem('interviewRecords', JSON.stringify(records));
+    }
+
+    // 页面加载
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+    <script>
+        function toggleInterviewDD(e, suffix) {
+            e.stopPropagation();
+            var dd = document.getElementById('interviewDD-' + suffix);
+            var arrow = document.getElementById('interview-arrow-' + suffix);
+            if (dd) dd.classList.toggle('hidden');
+            if (arrow) arrow.style.transform = dd && dd.classList.contains('hidden') ? '' : 'rotate(180deg)';
+        }
+        function closeInterviewDD(suffix) {
+            var dd = document.getElementById('interviewDD-' + suffix);
+            var arrow = document.getElementById('interview-arrow-' + suffix);
+            if (dd) dd.classList.add('hidden');
+            if (arrow) arrow.style.transform = '';
+        }
+        document.addEventListener('click', function(e) {
+            ['desk', 'mob'].forEach(function(s) {
+                var wrap = document.getElementById('interviewDD-wrap-' + s);
+                if (wrap && !wrap.contains(e.target)) closeInterviewDD(s);
+            });
+        });
+        function toggleMobileMenu() {
+            var menu = document.getElementById('mobile-menu');
+            if (menu) menu.classList.toggle('hidden');
+        }
+        function logout() {
+            localStorage.removeItem('loggedIn');
+            window.location.href = '../common/登录.html';
+        }
+    </script>
+        
+</body>
+</html>

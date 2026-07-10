@@ -36,8 +36,8 @@ class JobSkill(Base):
     skill_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("skill.id", ondelete="CASCADE"), nullable=False, index=True,
     )
-    importance: Mapped[float] = mapped_column(Float, nullable=False, default=0.5)
-    required_level: Mapped[str] = mapped_column(String(10), nullable=False, default="MUST")
+    importance: Mapped[float] = mapped_column(Float, nullable=False, default=3)
+    required_level: Mapped[str] = mapped_column(String(20), nullable=False, default="NICE")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=False), nullable=False, server_default=func.now(),
     )

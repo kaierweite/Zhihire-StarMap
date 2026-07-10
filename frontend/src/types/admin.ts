@@ -64,3 +64,41 @@ export interface JobAdminItem {
   created_at: string | null
   updated_at: string | null
 }
+
+
+export interface AiProviderItem {
+  id: number
+  provider_name: string
+  display_name: string
+  api_key: string | null
+  base_url: string | null
+  models: string[] | null
+  order_no: number
+  status: string
+  created_at: string | null
+  updated_at: string | null
+}
+
+export interface AiProviderCreateRequest {
+  provider_name: string
+  display_name: string
+  api_key?: string
+  base_url?: string
+  models?: string[]
+  order_no?: number
+}
+
+export interface AiProviderUpdateRequest {
+  display_name?: string
+  api_key?: string
+  base_url?: string
+  models?: string[]
+  order_no?: number
+  status?: string
+}
+
+export interface AiProviderTestResult {
+  success: boolean
+  latency_ms: number | null
+  message: string
+}

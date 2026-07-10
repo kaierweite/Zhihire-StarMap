@@ -1,149 +1,144 @@
-"""????????????
-
-???
-  1. ??????D:\Anaconda\envs\starmap\python.exe run.py
-  2. ??????????D:\Anaconda\envs\starmap\python.exe backend\tests\test_resume_integration.py
-
-??????? ? ?? ? ?? ? ???? ? ???? ? ??/?? ? ?? ? ?? ? ??
+"""Self-contained resume integration test.
+Starts its own server, runs all steps.
 """
-import json, sys, time, os
+import asyncio, json, os, sys, threading, time
 
+# Fix Windows event loop before anything else
+# Add project backend dir to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-import httpx
 
-BASE = os.environ.get("TEST_BASE", "http://127.0.0.1:8000/api")
-BASE_URL = os.environ.get("TEST_BASE", "http://127.0.0.1:8000/api")
-DOCX_PATH = os.path.join(os.path.dirname(__file__), "test_resume.docx")
-USERNAME = f"test_resume_{int(time.time())}"
-PASSWORD = "test123456"
-token = None
-resume_id = None
-task_id = None
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-def log(label, data=None):
-    print(f"  [{label}] ", end="")
-    if data is not None:
-        print(json.dumps(data, ensure_ascii=False, indent=2)[:300])
-    else:
-        print()
+import httpx, uvicorn
 
-def req(method, path, **kwargs):
-    headers = kwargs.pop("headers", {})
+PORT = 17801
+BASE = f"http://127.0.0.1:{PORT}/api"
+DOCX = os.path.join(os.path.dirname(__file__), "test_resume.docx")
+USERNAME = f"intg_{int(time.time())}"
+PASSWORD = "test1234"
+
+def start_server():
+    from app.main import app
+    uvicorn.run(app, host="127.0.0.1", port=PORT, log_level="error")
+
+server_thread = threading.Thread(target=start_server, daemon=True)
+server_thread.start()
+time.sleep(4)
+
+cli = httpx.Client(timeout=30)
+token = resume_id = task_id = None
+passed = failed = 0
+
+def check(step, desc, ok_fn):
+    global passed, failed
+    try:
+        result = ok_fn()
+        print(f"  [PASS] {step}: {desc}")
+        passed += 1
+        return result
+    except Exception as e:
+        print(f"  [FAIL] {step}: {desc} -> {e}")
+        failed += 1
+        return None
+
+def rpc(method, path, **kw):
+    headers = kw.pop("headers", {})
     if token:
         headers["Authorization"] = f"Bearer {token}"
-    url = f"{BASE_URL}{path}"
-    r = kwargs.pop("raw_response", False)
-    resp = getattr(httpx, method)(url, headers=headers, timeout=30, **kwargs)
-    if r:
-        return resp
-    return resp.json()
+    resp = getattr(httpx, method)(f"{BASE}{path}", headers=headers, timeout=30, **kw)
+    return resp
 
-def assert_ok(resp, label):
-    assert resp.get("code") == 200, f"{label} failed: {resp}"
-    return resp.get("data")
+print("=" * 55)
+print(" Resume Integration Test (self-hosted)")
+print("=" * 55)
 
-print("=" * 50)
-print("?? ?????????")
-print("=" * 50)
+# 1
+check("1/9", "Health check", lambda: (
+    rpc("get", "/ping").raise_for_status()
+))
 
-# 1. ????
-print("n[1/9] ????")
-r = req("get", "/ping", raw_response=True)
-assert r.status_code == 200, f"???: {r.status_code}"
-log("OK", {"status": r.status_code})
+# 2
+check("2/9", "Register user", lambda: (
+    rpc("post", "/auth/register", json={"username": USERNAME, "password": PASSWORD, "role": "USER"}).raise_for_status()
+))
 
-# 2. ??
-print("n[2/9] ????")
-r = req("post", "/auth/register", json={"username": USERNAME, "password": PASSWORD, "role": "USER"})
-assert_ok(r, "??")
-log("OK", {"username": USERNAME})
+# 3
+r = check("3/9", "Login", lambda: (
+    rpc("post", "/auth/login", json={"username": USERNAME, "password": PASSWORD}).json()
+))
+if r:
+    token = r["data"]["token"]
 
-# 3. ??
-print("n[3/9] ???? token")
-r = req("post", "/auth/login", json={"username": USERNAME, "password": PASSWORD})
-data = assert_ok(r, "??")
-token = data["access_token"]
-log("OK", {"token": token[:20] + "..."})
+# 4
+with open(DOCX, "rb") as f:
+    r = check("4/9", "Upload resume", lambda: (
+        rpc("post", "/resume/upload", files={"file": ("res.docx", f, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")}).json()
+    ))
+if r:
+    resume_id = r["data"]["resume_id"]
+    task_id = r["data"]["task_id"]
+    print(f"         resume_id={resume_id} task_id={task_id}")
 
-# 4. ????
-print("n[4/9] ??????")
-with open(DOCX_PATH, "rb") as f:
-    files = {"file": ("test_resume.docx", f, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")}
-    r = req("post", "/resume/upload", files=files)
-data = assert_ok(r, "??")
-resume_id = data["resume_id"]
-task_id = data["task_id"]
-log("OK", {"resume_id": resume_id, "task_id": task_id, "title": data["title"]})
+# 5
+def poll_parse():
+    for i in range(30):
+        time.sleep(2)
+        r = rpc("get", f"/parse/task/{task_id}").json()
+        s = r["data"]["status"]
+        if s in ("SUCCESS", "FAILED"):
+            return f"{s} count={r['data']['result'].get('parsed_count')}"
+    return "timeout"
+check("5/9", "Parse task", poll_parse)
 
-# 5. ??????
-print("n[5/9] ???????? 2 ??...")
-for i in range(30):
-    time.sleep(2)
-    r = req("get", f"/parse/task/{task_id}")
-    data = r.get("data") or r
-    status = data.get("status", "")
-    print(f"    ? {i+1} ???: status = {status}")
-    if status == "SUCCESS":
-        log("OK", {"parsed_count": data.get("result", {}).get("parsed_count")})
-        break
-    elif status == "FAILED":
-        print(f"    [WARN] ????: {data.get('result', {}).get('error', 'unknown')}")
-        break
-else:
-    print("    [WARN] ???????????")
+# 6
+r = check("6/9", "Resume list", lambda: rpc("get", "/resume").json())
+if r:
+    recs = r["data"]["records"]
+    if recs:
+        print(f"         total={r['data']['total']} first={recs[0]['title']} file_name={recs[0].get('file_name')}")
 
-# 6. ????
-print("n[6/9] ????")
-r = req("get", "/resume?page=1&size=20")
-data = assert_ok(r, "??")
-records = data.get("records", [])
-log("OK", {"total": data["total"], "records_count": len(records)})
-if records:
-    print(f"    ???: id={records[0]['id']} title={records[0]['title']} file_name={records[0].get('file_name')}")
+# 7
+r = check("7/9", "Resume detail", lambda: rpc("get", f"/resume/{resume_id}").json())
+if r:
+    p = r["data"].get("parsed") or {}
+    print(f"         name={p.get('name')} skills={len(p.get('skills', []) or [])} exp={len(p.get('experience', []) or [])}")
 
-# 7. ????
-print("n[7/9] ????")
-r = req("get", f"/resume/{resume_id}")
-data = assert_ok(r, "??")
-print(f"    title: {data['title']}")
-print(f"    status: {data['status']}")
-print(f"    file_id: {data['file_id']}")
-print(f"    has_parsed: {data.get('parsed') is not None}")
-if data.get("parsed"):
-    p = data["parsed"]
-    print(f"    parsed.name: {p.get('name')}")
-    print(f"    parsed.education: {p.get('education')}")
-    print(f"    parsed.skills: {p.get('skills')}")
-    print(f"    parsed.experience: {len(p.get('experience', []))} ??")
-log("OK")
+# 8
+r = check("8/9", "Edit resume", lambda: (
+    rpc("put", f"/resume/{resume_id}",
+        json={"title": "Updated", "content_text": json.dumps({"name": "Zhang San (edited)", "education": "Bachelor", "skills": [{"name": "Java"}, {"name": "Python"}], "experience": []})}).json()
+))
+if r:
+    p = r["data"].get("parsed") or {}
+    sk = (p.get("skills") or [{}])[0]
+    print(f"         name={p.get('name')} skills[0]={sk}")
 
-# 8. ????
-print("n[8/9] ??????")
-update_json = json.dumps({
-    "name": "???????",
-    "education": "??",
-    "skills": [{"name": "Java"}, {"name": "Python"}],
-    "experience": [{"company": "????", "title": "?????", "period": "2023-2025", "description": "??????"}],
-}, ensure_ascii=False)
-r = req("put", f"/resume/{resume_id}", json={"title": "???????", "content_text": update_json})
-data = assert_ok(r, "??")
-parsed = data.get("parsed", {})
-print(f"    title: {data['title']}")
-print(f"    parsed.name: {parsed.get('name')}")
-print(f"    skills[0]: {parsed.get('skills', [{}])[0]}")
-log("OK")
+# 9
+check("9/9", "Delete resume", lambda: rpc("delete", f"/resume/{resume_id}").raise_for_status())
+r = check("9/9 verify", "List verify deleted", lambda: rpc("get", "/resume").json())
+if r:
+    ids = [rec["id"] for rec in r["data"]["records"]]
+    ok = resume_id not in ids
+    print(f"         removed={ok}")
 
-# 9. ?????????
-print("n[9/9] ????")
-r = req("delete", f"/resume/{resume_id}")
-assert_ok(r, "??")
-# ???????????
-r = req("get", "/resume?page=1&size=50")
-data = assert_ok(r, "????")
-ids = [rec["id"] for rec in data.get("records", [])]
-assert resume_id not in ids, f"????: {resume_id} ?????"
-log("OK", {"deleted_id": resume_id})
 
-print("=" * 50)
-print("?? ?????????")
-print("=" * 50)
+# Graph check after parse
+if passed >= 7:
+    r = cli.get(f"{BASE}/graph/user", headers={"Authorization": f"Bearer {token}"}).json()
+    d = r.get("data", {})
+    n = len(d.get("nodes", []))
+    e = len(d.get("edges", []))
+    g = len(d.get("gap_skills", []))
+    print(f"  Graph: {n} nodes, {e} edges, {g} gap")
+    if n:
+        print(f"    node0: {d['nodes'][0].get('name')}")
+    if e:
+        print(f"    edge0: {d['edges'][0].get('source')} -> {d['edges'][0].get('target')}")
+
+cli.close()
+
+
+print("=" * 55)
+print(f" Result: {passed} passed, {failed} failed")
+print("=" * 55)

@@ -49,7 +49,6 @@ def upgrade() -> None:
         sa.Column("deleted_at", sa.String(1), nullable=False, server_default=sa.text("'0'::character varying")),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_user_work_experience_user_id"), "user_work_experience", ["user_id"])
 
     op.create_table(
         "user_project_experience",
@@ -63,7 +62,6 @@ def upgrade() -> None:
         sa.Column("deleted_at", sa.String(1), nullable=False, server_default=sa.text("'0'::character varying")),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_user_project_experience_user_id"), "user_project_experience", ["user_id"])
 
     op.create_table(
         "user_language",
@@ -77,7 +75,6 @@ def upgrade() -> None:
         sa.Column("deleted_at", sa.String(1), nullable=False, server_default=sa.text("'0'::character varying")),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_user_language_user_id"), "user_language", ["user_id"])
 
     op.create_table(
         "user_certificate",
@@ -90,7 +87,6 @@ def upgrade() -> None:
         sa.Column("deleted_at", sa.String(1), nullable=False, server_default=sa.text("'0'::character varying")),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_user_certificate_user_id"), "user_certificate", ["user_id"])
 
     # ===== 3. user_profile 补充求职意向列 =====
     op.add_column("user_profile", sa.Column("expected_position", sa.String(200), nullable=True))
@@ -105,13 +101,9 @@ def downgrade() -> None:
     op.drop_column("user_profile", "expected_position")
 
     # 子表
-    op.drop_index(op.f("ix_user_certificate_user_id"), table_name="user_certificate")
     op.drop_table("user_certificate")
-    op.drop_index(op.f("ix_user_language_user_id"), table_name="user_language")
     op.drop_table("user_language")
-    op.drop_index(op.f("ix_user_project_experience_user_id"), table_name="user_project_experience")
     op.drop_table("user_project_experience")
-    op.drop_index(op.f("ix_user_work_experience_user_id"), table_name="user_work_experience")
     op.drop_table("user_work_experience")
 
     # 恢复 JSONB 列

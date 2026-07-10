@@ -11,7 +11,7 @@ class InterviewAnswer(Base):
     question_id: Mapped[int] = mapped_column(BigInteger, nullable=False, index=True)
     content: Mapped[str | None] = mapped_column(Text, nullable=True)
     ai_score: Mapped[float | None] = mapped_column(Float, nullable=True)
-    ai_feedback: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    ai_feedback: Mapped[str | None] = mapped_column(Text, nullable=True)
     matched_points: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     missed_points: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     answered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=False), nullable=True)

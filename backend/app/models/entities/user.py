@@ -1,56 +1,56 @@
 """用户实体 ORM 模块。
 
-定义 `users` 表结构与 `User` ORM 类，承载账号、凭据、角色与状态等核心字段。
-所有状态、角色字段统一使用 VARCHAR 语义化大写枚举，遵循项目统一约定。
+映射 KingbaseES `zhihire` 库中已有的 `user` 表。库表使用单数名，
+密码列名为 `password`（ORM 属性名保持 `password_hash`，通过 `mapped_column`
+显式映射），软删除标记为 VARCHAR `'0'/'1'`。
 """
 from datetime import datetime  # 时间类型注解
 
-from sqlalchemy import BigInteger, DateTime, String, func  # 列类型与 now 表达式
+from sqlalchemy import BigInteger, DateTime, String, Text, func  # 列类型与 now
 from sqlalchemy.orm import Mapped, mapped_column  # 2.0 声明式注解
 
 from app.models.entities.base import Base  # 声明式基类
-from app.models.enums.role import RoleEnum  # 角色枚举（默认值来源）
-from app.models.enums.status import UserStatusEnum  # 用户状态枚举（默认值来源）
 
 
 class User(Base):
-    """用户实体，对应 `users` 表。
+    """用户实体，映射 `user` 表（库中原有表名）。
 
-    采用软删除策略：删除时写入 `deleted_at`，查询时过滤已删除记录。
+    沿用库中的软删除设计：`deleted_at='0'` 表示未删除，`'1'` 表示已删除，
+      `deleted_at='0'` 表示未删除，`'1'` 表示已删除，
+    查询时统一过滤 `.deleted_at == '0'`。
 
     Attributes:
-        id: 用户主键，自增。
-        username: 用户名，唯一索引。
-        password_hash: 密码哈希（bcrypt），不存明文。
-        role: 角色，VARCHAR 大写枚举（ADMIN/USER/COMPANY）。
+        id: 用户主键，自增 BIGINT。
+        username: 用户名（VARCHAR 50）。
+        password_hash: ORM 属性名，实际映射到 DB 列 `password`（VARCHAR 255）。
         email: 邮箱，可空。
         phone: 手机号，可空。
-        status: 账号状态，VARCHAR 大写枚举（NORMAL/DISABLED/BANNED）。
-        created_at: 创建时间。
-        updated_at: 更新时间。
-        deleted_at: 软删除标记，未删除时为 NULL。
+        role: 角色（VARCHAR 20），默认 USER。
+        status: 账号状态（VARCHAR 20），默认 NORMAL。
+        avatar_url: 头像链接，可空。
+        created_at: 创建时间戳。
+        updated_at: 更新时间戳。
+        deleted_at: 软删除标记（VARCHAR 1），`'0'` 未删 / `'1'` 已删。
     """
 
-    __tablename__ = "users"  # 表名复数，遵循统一约定
+    __tablename__ = "user"  # 对齐库中已有表名（单数）
 
-    # 主键：自增大整数，预留海量用户空间
+    # 主键：BIGINT 自增，匹配序列 user_id_seq
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
-    # 用户名：唯一索引，长度 64
-    username: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
-    # 密码哈希：bcrypt 输出固定长度，容纳 128 以防扩展
-    password_hash: Mapped[str] = mapped_column(String(128), nullable=False)
-    # 角色：VARCHAR 语义化枚举，默认求职者
-    role: Mapped[str] = mapped_column(String(16), nullable=False, default=RoleEnum.USER.value)
+    # 用户名：VARCHAR 50 唯一
+    username: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
+    # 密码：ORM 属性名 password_hash，实际映射到 DB 列 password
+    password_hash: Mapped[str] = mapped_column("password", String(255), nullable=False)
     # 邮箱：可空
     email: Mapped[str | None] = mapped_column(String(128), nullable=True)
     # 手机号：可空
     phone: Mapped[str | None] = mapped_column(String(32), nullable=True)
-    # 账号状态：VARCHAR 语义化枚举，默认正常
-    status: Mapped[str] = mapped_column(
-        String(16),
-        nullable=False,
-        default=UserStatusEnum.NORMAL.value,
-    )
+    # 角色：VARCHAR 语义化枚举，默认 USER
+    role: Mapped[str] = mapped_column(String(20), nullable=False, default="USER")
+    # 账号状态：VARCHAR，默认 NORMAL
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="NORMAL")
+    # 头像链接：可空
+    avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     # 创建时间：数据库 server 端写入
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=False),
@@ -64,10 +64,9 @@ class User(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
-    # 软删除时间：NULL 表示未删除
-    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=False), nullable=True)
+    # 软删除标记：VARCHAR(1)，'0' 未删 / '1' 已删（对齐库中原有设计）
+    deleted_at: Mapped[str] = mapped_column(String(1), nullable=False, server_default=func.text("'0'::character varying"))
 
     def __repr__(self) -> str:
         """可读的调试表示。"""
-        # 简洁展示主键与用户名
         return f"<User id={self.id} username={self.username!r} role={self.role!r}>"

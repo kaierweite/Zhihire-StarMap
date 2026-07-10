@@ -24,7 +24,7 @@ async def start_interview(db, user_id, occupation_role_id, job_id=None):
     except Exception:
         logger.warning("LLM q fail, using fallback")
         qdata = {"question": "\u8bf7\u7b80\u8981\u4ecb\u7ecd\u4e00\u4e0b\u4f60\u81ea\u5df1\u4ee5\u53ca\u4e0e\u76ee\u6807\u5c97\u4f4d\u76f8\u5173\u7684\u7ecf\u9a8c\u3002", "type": "BEHAVIORAL"}
-    question = InterviewQuestion(session_id=session.id, question_type=qdata.get("type", "BEHAVIORAL"), content=qdata.get("question", ""), order_no=1, is_bank_visible="0")
+    question = InterviewQuestion(session_id=session.id, question_type=qdata.get("type", "BEHAVIORAL"), content=qdata.get("question", ""), order_no=1, is_bank_visible=False)
     question = await interview_repository.create_question(db, question)
     await db.commit()
     return InterviewStartResponse(session_id=session.id, status="IN_PROGRESS", first_question=InterviewQuestionItem(question_id=question.id, content=question.content, question_type=question.question_type, order_no=1))
@@ -58,7 +58,7 @@ async def submit_answer(db, user_id, session_id, question_id, answer_text):
     except Exception:
         logger.warning("LLM next q fail")
         nq = {"question": "\u8bf7\u5206\u4eab\u4e00\u6b21\u4f60\u89e3\u51b3\u590d\u6742\u95ee\u9898\u7684\u7ecf\u5386\u3002", "type": "SITUATIONAL"}
-    nq_entity = InterviewQuestion(session_id=session_id, question_type=nq.get("type", "TECHNICAL"), content=nq.get("question", ""), order_no=answered_count + 1, is_bank_visible="0")
+    nq_entity = InterviewQuestion(session_id=session_id, question_type=nq.get("type", "TECHNICAL"), content=nq.get("question", ""), order_no=answered_count + 1, is_bank_visible=False)
     nq_entity = await interview_repository.create_question(db, nq_entity)
     await db.commit()
     return InterviewMessageResponse(next_question=InterviewQuestionItem(question_id=nq_entity.id, content=nq_entity.content, question_type=nq_entity.question_type, order_no=answered_count + 1), overall_score=None, is_finished=False)

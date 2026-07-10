@@ -27,7 +27,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/user/UserLayout.vue'),
     meta: { requiresAuth: true, role: 'USER' },
     children: [
-      { path: '', name: 'UserDashboard', component: () => import('@/views/user/UserDashboard.vue') },
+      { path: '', redirect: '/user/profile' },
       { path: 'profile', name: 'UserProfile', component: () => import('@/views/user/UserProfile.vue') },
       { path: 'resume', name: 'ResumeCenter', component: () => import('@/views/user/ResumeCenter.vue') },
       { path: 'ability-map', name: 'AbilityMap', component: () => import('@/views/user/AbilityMap.vue') },
@@ -54,8 +54,11 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, role: 'COMPANY' },
     children: [
       { path: '', name: 'CompanyDashboard', component: () => import('@/views/company/CompanyDashboard.vue') },
+      { path: 'profile', name: 'CompanyProfileEdit', component: () => import('@/views/company/CompanyProfile.vue') },
       { path: 'jobs', name: 'JobManage', component: () => import('@/views/company/JobManage.vue') },
       { path: 'jobs/publish', name: 'JobPublish', component: () => import('@/views/company/JobPublish.vue') },
+      { path: 'jobs/detail/:id', name: 'CompanyJobDetail', component: () => import('@/views/company/JobDetail.vue') },
+      { path: 'jobs/ability-map/:id', name: 'JobAbilityMap', component: () => import('@/views/company/JobAbilityMap.vue') },
       { path: 'screening', name: 'SmartScreening', component: () => import('@/views/company/SmartScreening.vue') },
       { path: 'candidates', name: 'CandidateRecommend', component: () => import('@/views/company/CandidateRecommend.vue') },
       { path: 'notifications', name: 'CompanyNotifications', component: () => import('@/views/company/CompanyNotifications.vue') },
@@ -70,8 +73,10 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: '', name: 'AdminDashboard', component: () => import('@/views/admin/AdminDashboard.vue') },
       { path: 'users', name: 'UserManage', component: () => import('@/views/admin/UserManage.vue') },
+      { path: 'companies', name: 'CompanyManage', component: () => import('@/views/admin/CompanyManage.vue') },
       { path: 'audit', name: 'AuditManage', component: () => import('@/views/admin/AuditManage.vue') },
       { path: 'logs', name: 'SystemLogs', component: () => import('@/views/admin/SystemLogs.vue') },
+      { path: 'ai-model', name: 'AIModelConfig', component: () => import('@/views/admin/AIModelConfig.vue') },
     ],
   },
 

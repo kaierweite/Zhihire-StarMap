@@ -1,8 +1,8 @@
- """企业业务服务模块。
+﻿"""企业业务服务模块。
 
- 编排企业信息查询、编辑、Dashboard 首页统计等业务流程。
- 调用公司仓储层进行数据操作。
- """
+编排企业信息查询、编辑、Dashboard 首页统计等业务流程。
+调用公司存储层进行数据操作。
+"""
 from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,7 +17,9 @@ from app.models.schemas.company import (
     DashboardStats,
 )
 from app.repositories import company_repository as repo
+from app.repositories import user_repository
 from app.services.errors import BusinessError
+from app.services.notification_service import send_notification
 
 
 async def get_company_info(db: AsyncSession, user_id: int) -> CompanyInfoResponse:
@@ -38,12 +40,30 @@ async def update_company_info(
 
     # 提取非 None 字段进行更新
     values = req.model_dump(exclude_none=True)
+    # 重置审核状态为 PENDING
+    values["audit_status"] = "PENDING"
     if not values:
         raise BusinessError(400, "没有需要更新的字段")
 
     updated = await repo.update(db, company.id, **values)
     if updated is None:
         raise BusinessError(500, "更新企业信息失败")
+    await db.commit()
+
+    # 通知所有管理员有企业待审核
+    try:
+        admins = await user_repository.list_by_role(db, "ADMIN")
+        for admin in admins:
+            await send_notification(
+                db,
+                user_id=admin.id,
+                title="企业信息变更待审核",
+                type_="SYSTEM",
+                content=f"企业「{company.company_name}」更新了企业信息，当前状态为待审核，请及时处理。",
+            )
+    except Exception:
+        pass  # 通知失败不应阻塞主流程
+
     return CompanyInfoResponse.model_validate(updated)
 
 

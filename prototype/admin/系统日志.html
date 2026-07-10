@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统日志 - 智聘星图</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="../config.js"></script>
+    <style>
+        .glass-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(196,197,217,0.4); box-shadow: 0 4px 20px rgba(0,0,0,0.04); transition: all 0.3s; border-radius: 12px; }
+        .glass-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+        .btn-primary { position: relative; overflow: hidden; background: #064e3b; color: #fff; padding: 12px 32px; border-radius: 9999px; font-weight: 600; font-size: 14px; letter-spacing: 0.02em; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; }
+        .btn-primary:hover { background: #003527; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(6,78,59,0.25); }
+        .btn-primary::after { content:""; position:absolute; top:0; left:-150%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent); transform:skewX(-20deg); animation:shimmer 4s infinite; }
+        @keyframes shimmer { 0%{left:-150%} 30%{left:150%} 100%{left:150%} }
+        .btn-ghost { border: 1px solid #191c1d; color: #191c1d; padding: 12px 32px; border-radius: 9999px; font-weight: 600; font-size: 14px; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; background: transparent; cursor: pointer; }
+        .btn-ghost:hover { background: #191c1d; color: #fff; }
+        .btn-danger { background: #ba1a1a; color: #fff; padding: 8px 20px; border-radius: 9999px; font-weight: 600; font-size: 13px; transition: all 0.3s; border: none; cursor: pointer; }
+        .btn-danger:hover { background: #93000a; }
+        .chip { display:inline-flex; align-items:center; gap:4px; padding:4px 12px; border-radius:4px; font-size:12px; font-weight:600; letter-spacing:0.05em; }
+        .chip-primary { background: #b0f0d6; color: #003527; }
+        .chip-success { background: #d4edda; color: #155724; }
+        .chip-warning { background: #fff3cd; color: #856404; }
+        .chip-error { background: #ffdad6; color: #93000a; }
+        .chip-neutral { background: #f3f4f5; color: #434656; }
+        .ambient-orb { position:absolute; border-radius:50%; filter:blur(100px); opacity:0.12; pointer-events:none; z-index:-1; }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .animate-fade-in-up { animation:fadeInUp 0.6s ease forwards; }
+        ::selection { background: #b0f0d6; color: #002117; }
+        .mobile-nav-drawer { display:none; position:fixed; inset:0; z-index:100; }
+        .mobile-nav-drawer.open { display:flex; }
+        .mobile-nav-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.4); }
+        .mobile-nav-panel { position:absolute; right:0; top:0; bottom:0; width:280px; background:#fff; box-shadow:-4px 0 24px rgba(0,0,0,0.15); padding:24px; overflow-y:auto; }
+        .stat-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(16px); border: 1px solid rgba(196,197,217,0.3); border-radius: 12px; padding: 24px; transition: all 0.3s; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.06); }
+        .table-container { overflow-x: auto; }
+        .table-row:hover { background: rgba(176,240,214,0.15); }
+        .filter-btn { padding: 6px 16px; border-radius: 9999px; font-size: 13px; font-weight: 600; border: 1px solid rgba(196,197,217,0.4); background: transparent; color: #434656; cursor: pointer; transition: all 0.2s; }
+        .filter-btn:hover { border-color: #064e3b; color: #064e3b; }
+        .filter-btn.active { background: #064e3b; color: #fff; border-color: #064e3b; }
+        .search-input { padding: 10px 16px 10px 40px; border-radius: 10px; border: 1px solid rgba(196,197,217,0.4); background: rgba(255,255,255,0.8); font-size: 14px; outline: none; transition: all 0.2s; width: 100%; }
+        .search-input:focus { border-color: #064e3b; box-shadow: 0 0 0 3px rgba(6,78,59,0.1); }
+        .date-input { padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(196,197,217,0.4); background: rgba(255,255,255,0.8); font-size: 13px; outline: none; transition: all 0.2s; color: #434656; }
+        .date-input:focus { border-color: #064e3b; box-shadow: 0 0 0 3px rgba(6,78,59,0.1); }
+        .page-btn { width: 36px; height: 36px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; border: 1px solid rgba(196,197,217,0.4); background: transparent; color: #434656; cursor: pointer; transition: all 0.2s; }
+        .page-btn:hover { border-color: #064e3b; color: #064e3b; }
+        .page-btn.active { background: #064e3b; color: #fff; border-color: #064e3b; }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .log-detail { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+    </style>
+</head>
+<body class="bg-surface font-sans text-on-surface min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm h-20">
+        <div class="flex justify-between items-center w-full px-4 md:px-16 max-w-[1440px] mx-auto h-full">
+            <a href="管理员仪表板.html" class="font-bold text-3xl tracking-tight text-primary">智聘星图</a>
+            <div class="hidden md:flex items-center gap-6 text-sm">
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="管理员仪表板.html">仪表板</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="用户管理.html">用户管理</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="审核管理.html">审核管理</a>
+                <a class="text-primary border-b-2 border-primary pb-1 font-semibold" href="系统日志.html">系统日志</a>
+            </div>
+            <div class="flex items-center gap-3">
+                <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-all p-2">notifications</button>
+                <div class="w-9 h-9 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center text-xs font-bold cursor-pointer">管</div>
+                <button class="md:hidden p-1.5 hover:bg-surface-container rounded-lg transition-colors" onclick="openMobileNav()">
+                    <span class="material-symbols-outlined text-on-surface text-xl">menu</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 移动端导航抽屉 -->
+    <div id="mobileNavDrawer" class="mobile-nav-drawer">
+        <div class="mobile-nav-overlay" onclick="closeMobileNav()"></div>
+        <div class="mobile-nav-panel">
+            <div class="flex items-center justify-between mb-8">
+                <span class="font-bold text-lg text-primary">智聘星图</span>
+                <button onclick="closeMobileNav()" class="p-1 hover:bg-surface-container rounded-lg">
+                    <span class="material-symbols-outlined text-on-surface-variant">close</span>
+                </button>
+            </div>
+            <div class="flex flex-col gap-1">
+                <a href="管理员仪表板.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">dashboard</span>
+                    <span class="text-sm font-medium">仪表板</span>
+                </a>
+                <a href="用户管理.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">group</span>
+                    <span class="text-sm font-medium">用户管理</span>
+                </a>
+                <a href="审核管理.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">verified</span>
+                    <span class="text-sm font-medium">审核管理</span>
+                </a>
+                <a href="系统日志.html" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary font-semibold transition-colors">
+                    <span class="material-symbols-outlined text-xl">description</span>
+                    <span class="text-sm font-medium">系统日志</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Background orbs -->
+    <div class="ambient-orb w-[500px] h-[500px] bg-primary top-20 -left-60" style="position:fixed;"></div>
+    <div class="ambient-orb w-[400px] h-[400px] bg-tertiary bottom-20 -right-40" style="position:fixed;"></div>
+
+    <!-- Page Content -->
+    <main class="pt-24 pb-16 px-4 md:px-16 max-w-[1440px] mx-auto">
+
+        <!-- Page Header -->
+        <div class="mb-10 animate-fade-in-up">
+            <h1 class="text-[40px] leading-[48px] font-bold tracking-tight text-on-surface mb-2" style="letter-spacing:-0.03em;">系统日志</h1>
+            <p class="text-on-surface-variant text-lg">全平台操作审计与系统事件追踪</p>
+        </div>
+
+        <!-- Stats Cards Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10 animate-fade-in-up" style="animation-delay:0.1s;">
+            <!-- Total Logs -->
+            <div class="stat-card">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-xl">description</span>
+                    </div>
+                    <div class="flex items-center gap-1 text-xs font-semibold" style="color:#155724;">
+                        <span class="material-symbols-outlined text-[14px]">trending_up</span>
+                        +18.7%
+                    </div>
+                </div>
+                <div class="text-[32px] font-bold text-on-surface leading-none mb-1">12,586</div>
+                <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant" style="letter-spacing:0.1em;">总日志数</div>
+            </div>
+            <!-- Today's Logs -->
+            <div class="stat-card">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-xl">today</span>
+                    </div>
+                    <div class="flex items-center gap-1 text-xs font-semibold" style="color:#155724;">
+                        <span class="material-symbols-outlined text-[14px]">trending_up</span>
+                        +6.3%
+                    </div>
+                </div>
+                <div class="text-[32px] font-bold text-on-surface leading-none mb-1">342</div>
+                <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant" style="letter-spacing:0.1em;">今日日志</div>
+            </div>
+            <!-- Error Count -->
+            <div class="stat-card">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-xl">error</span>
+                    </div>
+                    <div class="flex items-center gap-1 text-xs font-semibold" style="color:#93000a;">
+                        <span class="material-symbols-outlined text-[14px]">trending_up</span>
+                        +2.1%
+                    </div>
+                </div>
+                <div class="text-[32px] font-bold text-on-surface leading-none mb-1">18</div>
+                <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant" style="letter-spacing:0.1em;">错误数</div>
+            </div>
+            <!-- Warning Count -->
+            <div class="stat-card">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-xl">warning</span>
+                    </div>
+                    <div class="flex items-center gap-1 text-xs font-semibold" style="color:#856404;">
+                        <span class="material-symbols-outlined text-[14px]">trending_down</span>
+                        -4.5%
+                    </div>
+                </div>
+                <div class="text-[32px] font-bold text-on-surface leading-none mb-1">67</div>
+                <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant" style="letter-spacing:0.1em;">警告数</div>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="glass-card p-5 mb-6 animate-fade-in-up" style="border-radius:12px; animation-delay:0.15s;">
+            <div class="flex flex-col gap-4">
+                <!-- Type Filters -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="text-sm font-semibold text-on-surface-variant mr-1">日志类型：</span>
+                    <button class="filter-btn active" data-type="全部" onclick="filterByType('全部', this)">全部</button>
+                    <button class="filter-btn" data-type="INFO" onclick="filterByType('INFO', this)">INFO</button>
+                    <button class="filter-btn" data-type="WARN" onclick="filterByType('WARN', this)">WARN</button>
+                    <button class="filter-btn" data-type="ERROR" onclick="filterByType('ERROR', this)">ERROR</button>
+                    <button class="filter-btn" data-type="DEBUG" onclick="filterByType('DEBUG', this)">DEBUG</button>
+                </div>
+                <!-- Date & Search Row -->
+                <div class="flex flex-wrap items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-semibold text-on-surface-variant">日期：</span>
+                        <input type="date" class="date-input" id="dateStart" onchange="applyFilters()">
+                        <span class="text-on-surface-variant text-sm">至</span>
+                        <input type="date" class="date-input" id="dateEnd" onchange="applyFilters()">
+                    </div>
+                    <div class="flex-1 min-w-[240px] relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">search</span>
+                        <input type="text" class="search-input" id="searchInput" placeholder="搜索模块、操作人或详情..." oninput="applyFilters()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log Table -->
+        <div class="glass-card animate-fade-in-up" style="border-radius:12px; animation-delay:0.2s;">
+            <div class="table-container">
+            <!-- Table Header -->
+            <div class="table-header" style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 2.5fr 1fr 0.8fr;font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#434656;padding:12px 20px;border-bottom:2px solid rgba(196,197,217,0.4);min-width:800px;">
+                <div>时间</div>
+                <div>模块</div>
+                <div>操作类型</div>
+                <div>操作人</div>
+                <div>详情</div>
+                <div>IP地址</div>
+                <div>状态</div>
+            </div>
+            <!-- Table Body -->
+            <div id="logTableBody">
+                <!-- Rows rendered by JS -->
+            </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex items-center justify-between mt-6 animate-fade-in-up" style="animation-delay:0.25s;">
+            <div class="text-sm text-on-surface-variant">
+                共 <span id="totalRecords" class="font-semibold text-on-surface">0</span> 条记录，
+                第 <span id="currentPage" class="font-semibold text-on-surface">1</span> / <span id="totalPages" class="font-semibold text-on-surface">1</span> 页
+            </div>
+            <div class="flex items-center gap-2" id="paginationControls">
+                <!-- Pagination buttons rendered by JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-8 px-4 md:px-16 border-t border-outline-variant/30 mt-8">
+        <div class="max-w-[1440px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-sm text-on-surface-variant">© 2024 智聘星图. All rights reserved.</div>
+            <div class="flex items-center gap-4 text-sm text-on-surface-variant">
+                <span>系统版本 v3.2.1</span>
+                <span>•</span>
+                <span>最后更新: 2024-12-20</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/40" onclick="closeDetailModal()"></div>
+        <div class="relative glass-card p-8 max-w-[560px] w-full max-h-[80vh] overflow-y-auto animate-fade-in-up" style="border-radius:16px;">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-on-surface">日志详情</h3>
+                <button onclick="closeDetailModal()" class="p-1 hover:bg-surface-container rounded-lg transition-colors">
+                    <span class="material-symbols-outlined text-on-surface-variant">close</span>
+                </button>
+            </div>
+            <div id="detailContent" class="space-y-4">
+                <!-- Content rendered by JS -->
+            </div>
+            <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-outline-variant/30">
+                <button onclick="closeDetailModal()" class="btn-ghost text-sm">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 模拟日志数据 ====================
+        const allLogs = [
+            { time: '2024-12-20 15:32:18', module: '用户认证', type: 'INFO', user: '张管理', detail: '管理员登录成功，验证双因素认证', ip: '192.168.1.105', status: 'success' },
+            { time: '2024-12-20 15:28:45', module: '简历解析', type: 'INFO', user: '系统', detail: '自动解析求职者简历 #RES-28934，提取技能标签 12 个', ip: '10.0.0.1', status: 'success' },
+            { time: '2024-12-20 15:15:03', module: '企业审核', type: 'WARN', user: '李管理', detail: '企业「星辰科技」营业执照图片清晰度不足，建议重新上传', ip: '192.168.1.112', status: 'warning' },
+            { time: '2024-12-20 14:58:22', module: '消息推送', type: 'ERROR', user: '系统', detail: '邮件推送服务连接超时（SMTP 服务器 10.0.0.50:465），已重试 3 次', ip: '10.0.0.1', status: 'error' },
+            { time: '2024-12-20 14:42:10', module: '用户管理', type: 'INFO', user: '张管理', detail: '封禁用户「王大力」(UID-00892)，原因：发布虚假招聘信息', ip: '192.168.1.105', status: 'success' },
+            { time: '2024-12-20 14:30:55', module: 'AI匹配', type: 'INFO', user: '系统', detail: '批量匹配任务完成：处理 1,245 份简历，生成 3,780 条匹配结果', ip: '10.0.0.1', status: 'success' },
+            { time: '2024-12-20 14:18:33', module: '技能字典', type: 'INFO', user: '李管理', detail: '新增技能标签「Rust」，分类：编程语言', ip: '192.168.1.112', status: 'success' },
+            { time: '2024-12-20 13:55:12', module: '数据库', type: 'WARN', user: '系统', detail: '数据库连接池使用率达到 82%，建议关注', ip: '10.0.0.2', status: 'warning' },
+            { time: '2024-12-20 13:40:08', module: '用户认证', type: 'INFO', user: '王运维', detail: '修改管理员「张管理」的角色权限为超级管理员', ip: '192.168.1.120', status: 'success' },
+            { time: '2024-12-20 13:25:44', module: '企业审核', type: 'INFO', user: '李管理', detail: '审核通过企业「蓝海数据」的资质认证申请', ip: '192.168.1.112', status: 'success' },
+            { time: '2024-12-20 12:58:17', module: '文件存储', type: 'ERROR', user: '系统', detail: 'OSS 文件上传失败：bucket 配额已满 (500GB/500GB)', ip: '10.0.0.1', status: 'error' },
+            { time: '2024-12-20 12:30:02', module: '用户管理', type: 'INFO', user: '张管理', detail: '批量导出用户数据：共 3,456 条记录，格式 CSV', ip: '192.168.1.105', status: 'success' },
+            { time: '2024-12-20 11:45:38', module: '简历解析', type: 'INFO', user: '系统', detail: '批量简历解析完成：成功 892 份，失败 3 份（格式不支持）', ip: '10.0.0.1', status: 'success' },
+            { time: '2024-12-20 11:20:15', module: 'AI匹配', type: 'WARN', user: '系统', detail: 'AI 模型响应延迟升高，平均响应时间 2.3s（阈值 2.0s）', ip: '10.0.0.1', status: 'warning' },
+            { time: '2024-12-20 10:55:42', module: '消息推送', type: 'INFO', user: '系统', detail: '发送面试提醒通知：候选人「刘小明」，企业「云途科技」', ip: '10.0.0.1', status: 'success' },
+            { time: '2024-12-20 10:30:08', module: '企业审核', type: 'INFO', user: '李管理', detail: '驳回企业「华信网络」资质申请：营业执照已过期', ip: '192.168.1.112', status: 'error' },
+            { time: '2024-12-20 10:12:56', module: '系统配置', type: 'INFO', user: '王运维', detail: '更新系统配置：邮件模板「面试邀请」已修改', ip: '192.168.1.120', status: 'success' },
+            { time: '2024-12-20 09:48:33', module: '数据库', type: 'INFO', user: '系统', detail: '定时备份完成：数据库快照 db_backup_20241220 已保存', ip: '10.0.0.2', status: 'success' },
+            { time: '2024-12-20 09:30:15', module: '用户认证', type: 'WARN', user: '系统', detail: '检测到异常登录：用户「赵经理」在 5 分钟内从 3 个 IP 登录', ip: '10.0.0.1', status: 'warning' },
+            { time: '2024-12-20 09:15:42', module: '用户管理', type: 'INFO', user: '张管理', detail: '解封用户「陈思远」(UID-01234)，审核确认无违规', ip: '192.168.1.105', status: 'success' },
+            { time: '2024-12-20 08:50:28', module: '简历解析', type: 'ERROR', user: '系统', detail: '简历解析引擎异常：PDF 解析器内存溢出 (OutOfMemoryError)', ip: '10.0.0.1', status: 'error' },
+            { time: '2024-12-20 08:30:05', module: '系统配置', type: 'INFO', user: '王运维', detail: '重启简历解析微服务，版本升级至 v2.8.3', ip: '192.168.1.120', status: 'success' },
+            { time: '2024-12-20 08:00:01', module: '系统', type: 'INFO', user: '系统', detail: '每日定时任务启动：日志清理、数据归档、健康检查', ip: '10.0.0.1', status: 'success' },
+            { time: '2024-12-19 23:45:18', module: 'AI匹配', type: 'INFO', user: '系统', detail: '夜间批量匹配完成：新增匹配对 5,672 条', ip: '10.0.0.1', status: 'success' },
+            { time: '2024-12-19 23:10:33', module: '数据库', type: 'ERROR', user: '系统', detail: '主从同步延迟超过阈值：延迟 45s（阈值 30s），已自动切换', ip: '10.0.0.2', status: 'error' },
+        ];
+
+        // ==================== 状态变量 ====================
+        let currentType = '全部';
+        let currentDateStart = '';
+        let currentDateEnd = '';
+        let currentSearch = '';
+        let currentPage = 1;
+        const pageSize = 8;
+
+        // ==================== 筛选函数 ====================
+        function filterByType(type, btn) {
+            currentType = type;
+            currentPage = 1;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderTable();
+        }
+
+        function applyFilters() {
+            currentDateStart = document.getElementById('dateStart').value;
+            currentDateEnd = document.getElementById('dateEnd').value;
+            currentSearch = document.getElementById('searchInput').value.trim().toLowerCase();
+            currentPage = 1;
+            renderTable();
+        }
+
+        function getFilteredLogs() {
+            return allLogs.filter(log => {
+                if (currentType !== '全部' && log.type !== currentType) return false;
+                if (currentDateStart && log.time < currentDateStart) return false;
+                if (currentDateEnd && log.time > currentDateEnd + ' 23:59:59') return false;
+                if (currentSearch) {
+                    const searchStr = (log.module + log.user + log.detail).toLowerCase();
+                    if (!searchStr.includes(currentSearch)) return false;
+                }
+                return true;
+            });
+        }
+
+        // ==================== 渲染函数 ====================
+        function getStatusChip(status) {
+            const map = {
+                success: '<span class="chip chip-success">成功</span>',
+                warning: '<span class="chip chip-warning">警告</span>',
+                error: '<span class="chip chip-error">错误</span>',
+            };
+            return map[status] || '<span class="chip chip-neutral">未知</span>';
+        }
+
+        function getTypeChip(type) {
+            const map = {
+                INFO: '<span class="chip chip-primary">INFO</span>',
+                WARN: '<span class="chip chip-warning">WARN</span>',
+                ERROR: '<span class="chip chip-error">ERROR</span>',
+                DEBUG: '<span class="chip chip-neutral">DEBUG</span>',
+            };
+            return map[type] || type;
+        }
+
+        function renderTable() {
+            const filtered = getFilteredLogs();
+            const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const start = (currentPage - 1) * pageSize;
+            const pageData = filtered.slice(start, start + pageSize);
+
+            const tbody = document.getElementById('logTableBody');
+            if (pageData.length === 0) {
+                tbody.innerHTML = '<div class="text-center py-16 text-on-surface-variant text-sm">暂无匹配的日志记录</div>';
+            } else {
+                tbody.innerHTML = pageData.map((log, i) => `
+                    <div class="table-row" style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 2.5fr 1fr 0.8fr;align-items:center;padding:14px 20px;border-bottom:1px solid rgba(196,197,217,0.3);min-width:800px;animation-delay:${i * 0.03}s;cursor:pointer;" onclick="showDetail(${allLogs.indexOf(log)})">
+                        <div class="text-sm text-on-surface-variant">${log.time}</div>
+                        <div class="text-sm font-semibold text-on-surface">${log.module}</div>
+                        <div>${getTypeChip(log.type)}</div>
+                        <div class="text-sm text-on-surface">${log.user}</div>
+                        <div class="text-sm text-on-surface-variant log-detail" title="${log.detail}">${log.detail}</div>
+                        <div class="text-sm text-on-surface-variant font-mono">${log.ip}</div>
+                        <div>${getStatusChip(log.status)}</div>
+                    </div>
+                `).join('');
+            }
+
+            // 更新分页信息
+            document.getElementById('totalRecords').textContent = filtered.length;
+            document.getElementById('currentPage').textContent = currentPage;
+            document.getElementById('totalPages').textContent = totalPages;
+
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            const controls = document.getElementById('paginationControls');
+            let html = '';
+
+            html += `<button class="page-btn" onclick="goToPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>
+                <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+            </button>`;
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    html += `<span class="text-on-surface-variant text-sm px-1">...</span>`;
+                }
+            }
+
+            html += `<button class="page-btn" onclick="goToPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>
+                <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+            </button>`;
+
+            controls.innerHTML = html;
+        }
+
+        function goToPage(page) {
+            const filtered = getFilteredLogs();
+            const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderTable();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ==================== 详情弹窗 ====================
+        function showDetail(index) {
+            const log = allLogs[index];
+            const modal = document.getElementById('detailModal');
+            const content = document.getElementById('detailContent');
+
+            content.innerHTML = `
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <div class="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">时间</div>
+                        <div class="text-sm text-on-surface font-medium">${log.time}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">模块</div>
+                        <div class="text-sm text-on-surface font-medium">${log.module}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">类型</div>
+                        <div>${getTypeChip(log.type)}</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <div class="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">操作人</div>
+                        <div class="text-sm text-on-surface font-medium">${log.user}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">IP 地址</div>
+                        <div class="text-sm text-on-surface font-medium font-mono">${log.ip}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">状态</div>
+                        <div>${getStatusChip(log.status)}</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">详细信息</div>
+                    <div class="text-sm text-on-surface p-4 bg-surface-container/50 rounded-lg leading-relaxed">${log.detail}</div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeDetailModal() {
+            const modal = document.getElementById('detailModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // ==================== 移动端导航 ====================
+        function openMobileNav() {
+            document.getElementById('mobileNavDrawer').classList.add('open');
+        }
+        function closeMobileNav() {
+            document.getElementById('mobileNavDrawer').classList.remove('open');
+        }
+
+        // ==================== 初始化 ====================
+        renderTable();
+    </script>
+
+</body>
+</html>

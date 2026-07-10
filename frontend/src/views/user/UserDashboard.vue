@@ -1,17 +1,12 @@
-﻿<script setup lang="ts">
-// TODO: 个人中心
+<script setup lang="ts">
+import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+onMounted(() => { router.replace('/user/profile') })
 </script>
 
 <template>
-  <div class="page-container">
-    <h2>个人中心</h2>
-    <p class="placeholder-hint">页面开发中...</p>
-  </div>
+  <div></div>
 </template>
 
-<style scoped>
-.placeholder-hint {
-  color: #909399;
-  margin-top: 8px;
-}
-</style>

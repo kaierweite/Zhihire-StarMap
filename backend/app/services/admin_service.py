@@ -9,7 +9,7 @@
 """
 from datetime import datetime
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.entities.company import Company
@@ -43,17 +43,17 @@ async def get_stat(db: AsyncSession) -> AdminStatResponse:
         AdminStatResponse: 统计结果。
     """
     # 注册用户总数
-    user_count = await _count(db, User, User.deleted_at == "0")
+    user_count = await _count(db, User, User.deleted_at == text("'0'"))
     # 注册企业总数
-    company_count = await _count(db, Company, Company.deleted_at == "0")
+    company_count = await _count(db, Company, Company.deleted_at == text("'0'"))
     # 在招岗位总数
-    job_count = await _count(db, Job, Job.deleted_at == "0", Job.status == "OPEN")
+    job_count = await _count(db, Job, Job.deleted_at == text("'0'"), Job.status == "OPEN")
     # 匹配记录总数
-    match_count = await _count(db, MatchResult, MatchResult.deleted_at == "0")
+    match_count = await _count(db, MatchResult, MatchResult.deleted_at == text("'0'"))
     # 解析任务总数
-    parse_count = await _count(db, ParseTask, ParseTask.deleted_at == "0")
+    parse_count = await _count(db, ParseTask, ParseTask.deleted_at == text("'0'"))
     # 简历投递总数
-    application_count = await _count(db, JobApplication, JobApplication.deleted_at == "0")
+    application_count = await _count(db, JobApplication, JobApplication.deleted_at == text("'0'"))
 
     return AdminStatResponse(
         user_count=user_count,
@@ -93,7 +93,7 @@ async def list_users(
     Returns:
         PageResult: 分页结果，records 为 UserAdminItem 列表。
     """
-    base_cond = [User.deleted_at == "0"]
+    base_cond = [User.deleted_at == text("'0'")]
 
     if keyword:
         keyword_filter = (
@@ -195,8 +195,8 @@ async def list_companies_pending(
         PageResult: 分页结果，records 为 CompanyAuditItem 列表。
     """
     base_cond = [
-        Company.deleted_at == "0",
-        Company.audit_status == "PENDING",
+        Company.deleted_at == text("'0'"),
+        Company.audit_status.in_(["UNVERIFIED", "PENDING"]),
     ]
 
     count_stmt = select(func.count()).select_from(Company).where(*base_cond)
@@ -419,3 +419,29 @@ async def audit_skill(
         status=skill.status,
         created_at=skill.created_at,
     )
+
+# ==== AI Provider Config ====
+
+async def list_ai_providers(db):
+    from app.services.ai_config_service import list_providers
+    return await list_providers(db)
+
+
+async def create_ai_provider(db, req):
+    from app.services.ai_config_service import create_provider
+    return await create_provider(db, req)
+
+
+async def update_ai_provider(db, provider_id, req):
+    from app.services.ai_config_service import update_provider
+    return await update_provider(db, provider_id, req)
+
+
+async def test_ai_connection(db, provider_id):
+    from app.services.ai_config_service import test_connection
+    return await test_connection(db, provider_id)
+
+
+async def delete_ai_provider(db, provider_id):
+    from app.services.ai_config_service import delete_provider
+    return await delete_provider(db, provider_id)

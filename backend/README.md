@@ -1,46 +1,34 @@
-# 智聘星图后端（Spring Boot 3 主服务）
+# 智聘星图后端（FastAPI 主服务，含 AI 能力）
 
-> 冒烟骨架待启动。详见 `docs/开发流程时序图.md` day1-2。
+> 冒烟骨架待启动。详见 `开发记录文档/后端/day00-基础设施.md`。
+> AI 能力（文档解析 / 知识图谱 / 推荐算法）内置于本主服务，不再独立部署。
 
-## 目录说明
+## 目录结构
 
 ```
 backend/
-├── src/
-│   ├── main/
-│   │   ├── java/com/zhihire/starmap/
-│   │   │   ├── StarMapApplication.java    # 启动类
-│   │   │   ├── config/                    # JWT 过滤器、Spring Security 配置
-│   │   │   └── module/                    # 按业务域 module 切（ADR-0008 D7）
-│   │   │       ├── common/                # Result<T>、全局异常、常量
-│   │   │       ├── auth/                  # 认证
-│   │   │       ├── user/                  # 用户
-│   │   │       ├── job/                   # 岗位
-│   │   │       ├── resume/                # 简历
-│   │   │       ├── match/                 # 匹配
-│   │   │       ├── graph/                 # 图谱
-│   │   │       ├── career/                # 职业规划
-│   │   │       │   ├── controller/
-│   │   │       │   ├── service/
-│   │   │       │   ├── mapper/
-│   │   │       │   ├── entity/
-│   │   │       │   └── dto/
-│   │   │       ├── interview/             # 面试：模拟面试/报告/题库/简历优化（ADR-0011）
-│   │   │       │   ├── controller/
-│   │   │       │   ├── service/
-│   │   │       │   ├── mapper/
-│   │   │       │   ├── entity/
-│   │   │       │   └── dto/
-│   │   │       ├── admin/                 # 后台
-│   │   │       └── system/                # 系统
-│   │   └── resources/
-│   │       ├── application.yml
-│   │       └── mapper/
-│   └── test/
-└── pom.xml
+└── app/
+    ├── main.py                 # FastAPI 入口（CORS + 异常处理 + 路由挂载）
+    ├── config/                 # Pydantic Settings 配置
+    ├── db/                     # async engine + AsyncSessionLocal
+    ├── api/
+    │   ├── deps.py             # JWT 解析 + require_role 角色守卫
+    │   └── v1/                 # 路由层（参数校验 + 响应封装）
+    ├── services/               # 业务服务层（编排 core + infrastructure）
+    ├── core/                   # 核心算法层（parsing / normalize / graph / matching / career）
+    ├── infrastructure/         # 基础设施防腐层（llm / cache / storage）
+    ├── models/
+    │   ├── entities/           # SQLAlchemy ORM
+    │   ├── schemas/            # Pydantic 模型 + Result[T]
+    │   └── enums/              # 角色与状态枚举
+    └── repositories/           # 仓储层（原子数据库操作）
 ```
 
 ## 技术栈
 
-- Spring Boot 3 + MyBatis-Plus + JWT + Redis（可选 Caffeine 兜底）
-- KingbaseES（国产数据库）
+- FastAPI + Uvicorn + SQLAlchemy 2.0（async）+ Alembic
+- JWT：python-jose；密码：passlib（bcrypt）；缓存：aiocache
+- AI：云端 DeepSeek API（chat + vision），客户端封装在 `infrastructure/llm/`
+- 文档解析：pdfplumber + python-docx（纯 Python，适配龙芯）
+- 知识图谱：networkx（常驻内存图）
+- KingbaseES（国产数据库，PostgreSQL 兼容，asyncpg 驱动）

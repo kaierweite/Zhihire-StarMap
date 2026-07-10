@@ -1,11 +1,14 @@
-// ========== Design Tokens ==========
+﻿// ========== Design Tokens ==========
 // Primary: #1A3A5C (dark navy)  — used for header, sidebar, primary buttons
 // Accent:  #0EA5E9 (sky blue)   — used for links, highlights, active states
 
+$color-primary: #1a3a5c;
+$color-accent: #0ea5e9;
+
 :root {
-  --color-primary: #1a3a5c;
+  --color-primary: #{$color-primary};
   --color-primary-light: #2a5a8c;
-  --color-accent: #0ea5e9;
+  --color-accent: #{$color-accent};
   --color-accent-light: #38bdf8;
   --color-success: #67c23a;
   --color-warning: #e6a23c;
@@ -26,21 +29,16 @@
   --sidebar-collapsed-width: 64px;
   --border-radius: 8px;
   --border-radius-sm: 4px;
-}
 
-// Override Element Plus theme to match our palette
-// These CSS vars are what Element Plus reads
-:root {
+  // Element Plus theme override
   --el-color-primary: #{$color-primary};
-  --el-color-primary-light-3: #{lighten($color-primary, 15%)};
-  --el-color-primary-light-5: #{lighten($color-primary, 25%)};
-  --el-color-primary-light-7: #{lighten($color-primary, 35%)};
-  --el-color-primary-light-8: #{lighten($color-primary, 40%)};
-  --el-color-primary-light-9: #{lighten($color-primary, 45%)};
-  --el-color-primary-dark-2: #{darken($color-primary, 10%)};
+  --el-color-primary-light-3: #2d5f8a;
+  --el-color-primary-light-5: #3d7aab;
+  --el-color-primary-light-7: #5a95c4;
+  --el-color-primary-light-8: #7aafda;
+  --el-color-primary-light-9: #9ac5ea;
+  --el-color-primary-dark-2: #0f2840;
 }
-
-$color-primary: #1a3a5c;
 
 // ========== Global resets ==========
 * {

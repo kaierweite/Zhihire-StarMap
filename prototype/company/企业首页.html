@@ -1,0 +1,735 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业招聘中心 - 智聘星图</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="config.js"></script>
+    <style>
+        .glass-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(196,197,217,0.4); box-shadow: 0 4px 20px rgba(0,0,0,0.04); transition: all 0.3s; border-radius: 12px; }
+        .glass-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+        .btn-primary { position: relative; overflow: hidden; background: #064e3b; color: #fff; padding: 12px 32px; border-radius: 9999px; font-weight: 600; font-size: 14px; letter-spacing: 0.02em; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary:hover { background: #003527; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(6,78,59,0.25); }
+        .btn-primary::after { content:""; position:absolute; top:0; left:-150%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent); transform:skewX(-20deg); animation:shimmer 4s infinite; }
+        @keyframes shimmer { 0%{left:-150%} 30%{left:150%} 100%{left:150%} }
+        .btn-ghost { border: 1px solid #191c1d; color: #191c1d; padding: 12px 32px; border-radius: 9999px; font-weight: 600; font-size: 14px; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-ghost:hover { background: #191c1d; color: #fff; }
+        .chip { display:inline-flex; align-items:center; gap:4px; padding:4px 12px; border-radius:4px; font-size:12px; font-weight:600; letter-spacing:0.05em; }
+        .chip-primary { background: #b0f0d6; color: #003527; }
+        .chip-success { background: #d4edda; color: #155724; }
+        .chip-warning { background: #fff3cd; color: #856404; }
+        .chip-neutral { background: #f3f4f5; color: #434656; }
+        .ambient-orb { position:absolute; border-radius:50%; filter:blur(100px); opacity:0.12; pointer-events:none; z-index:-1; }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .animate-fade-in-up { animation:fadeInUp 0.6s ease forwards; }
+        ::selection { background: #b0f0d6; color: #002117; }
+        .stat-card { position: relative; overflow: hidden; }
+        .stat-card::before { content: ''; position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; border-radius: 50%; background: currentColor; opacity: 0.06; }
+        .welfare-chip { cursor: pointer; transition: all 0.2s; user-select: none; }
+        .welfare-chip:active { transform: scale(0.95); }
+        .mobile-nav-drawer { display:none; position:fixed; inset:0; z-index:100; }
+        .mobile-nav-drawer.open { display:flex; }
+        .mobile-nav-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.4); }
+        .mobile-nav-panel { position:absolute; right:0; top:0; bottom:0; width:280px; background:#fff; box-shadow:-4px 0 24px rgba(0,0,0,0.15); padding:24px; overflow-y:auto; }
+            .active-tab { color: #064e3b; border-bottom: 2px solid #064e3b; font-weight: 700; }
+    </style>
+</head>
+<body class="bg-surface font-inter text-on-surface min-h-screen">
+
+    <!-- Navigation (Company Role) -->
+    <nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm h-14">
+        <div class="flex justify-between items-center w-full px-4 md:px-16 max-w-[1440px] mx-auto h-full">
+            <a href="企业首页.html" class="font-bold text-xl tracking-tight text-primary">智聘星图</a>
+            <div class="hidden md:flex items-center gap-6 text-sm">
+                <a class="text-primary border-b-2 border-primary pb-1 font-semibold" href="企业首页.html">企业首页</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="岗位管理.html">岗位管理</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="岗位发布.html">岗位发布</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="智能筛选.html">智能筛选</a>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="relative" id="notif-bell-wrap">
+                    <button onclick="toggleNotifDropdown(event)" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-all p-2 relative cursor-pointer">
+                        notifications
+                        <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#93000a] text-white text-[9px] font-bold rounded-full flex items-center justify-center">3</span>
+                    </button>
+                    <div id="notif-dropdown" class="hidden absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-2xl border border-outline-variant/30 z-50 overflow-hidden">
+                        <div class="flex items-center justify-between p-3 border-b border-outline-variant/30">
+                            <h3 class="text-sm font-semibold text-on-surface">通知</h3>
+                            <span class="text-xs text-on-surface-variant">3 条未读</span>
+                        </div>
+                        <div class="max-h-64 overflow-y-auto">
+                            <div class="px-3 py-2.5 hover:bg-surface-container cursor-pointer border-b border-outline-variant/10">
+                                <div class="flex items-start gap-2"><span class="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0"></span><div><p class="text-xs text-on-surface font-medium">张伟 投递了「高级前端工程师」</p><p class="text-[11px] text-on-surface-variant mt-0.5">5 分钟前</p></div></div>
+                            </div>
+                            <div class="px-3 py-2.5 hover:bg-surface-container cursor-pointer border-b border-outline-variant/10">
+                                <div class="flex items-start gap-2"><span class="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0"></span><div><p class="text-xs text-on-surface font-medium">岗位「AI算法工程师」已通过审核</p><p class="text-[11px] text-on-surface-variant mt-0.5">1 小时前</p></div></div>
+                            </div>
+                            <div class="px-3 py-2.5 hover:bg-surface-container cursor-pointer">
+                                <div class="flex items-start gap-2"><span class="w-2 h-2 rounded-full bg-transparent mt-1.5 flex-shrink-0"></span><div><p class="text-xs text-on-surface-variant">系统将于今晚 23:00 进行维护</p><p class="text-[11px] text-on-surface-variant mt-0.5">3 小时前</p></div></div>
+                            </div>
+                        </div>
+                        <div class="p-2 border-t border-outline-variant/30 text-center">
+                            <a href="企业通知中心.html" class="text-xs text-primary font-medium hover:underline px-3 py-1.5 inline-block">查看全部通知</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-bold cursor-pointer">企</div>
+                <button class="md:hidden p-1.5 hover:bg-surface-container rounded-lg transition-colors" onclick="openMobileNav()">
+                    <span class="material-symbols-outlined text-on-surface text-xl">menu</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 移动端导航抽屉 -->
+    <div id="mobileNavDrawer" class="mobile-nav-drawer">
+        <div class="mobile-nav-overlay" onclick="closeMobileNav()"></div>
+        <div class="mobile-nav-panel">
+            <div class="flex items-center justify-between mb-8">
+                <span class="font-bold text-lg text-primary">智聘星图</span>
+                <button onclick="closeMobileNav()" class="p-1 hover:bg-surface-container rounded-lg">
+                    <span class="material-symbols-outlined text-on-surface-variant">close</span>
+                </button>
+            </div>
+            <div class="flex flex-col gap-1">
+                <a href="企业首页.html" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary font-semibold transition-colors">
+                    <span class="material-symbols-outlined text-xl">home</span>
+                    <span class="text-sm font-medium">企业首页</span>
+                </a>
+                <a href="岗位管理.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">work</span>
+                    <span class="text-sm font-medium">岗位管理</span>
+                </a>
+                <a href="岗位发布.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">add_circle</span>
+                    <span class="text-sm font-medium">岗位发布</span>
+                </a>
+                <a href="智能筛选.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">auto_awesome</span>
+                    <span class="text-sm font-medium">智能筛选</span>
+                </a>
+                <div class="border-t border-outline-variant/30 my-2"></div>
+                <a href="企业通知中心.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">notifications</span>
+                    <span class="text-sm font-medium">通知中心</span>
+                </a>
+                <a href="候选人推荐.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">groups</span>
+                    <span class="text-sm font-medium">候选人推荐</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="pt-20 pb-8 md:pb-10 px-4 md:px-16 max-w-[1440px] mx-auto relative">
+        <div class="ambient-orb w-[500px] h-[500px] bg-primary top-0 right-0 -z-10" style="position:absolute;"></div>
+        <div class="flex flex-col md:flex-row items-start justify-between gap-4 animate-fade-in-up">
+            <div>
+                <h1 class="text-3xl md:text-5xl font-bold tracking-tight text-on-surface" style="line-height:1.1;letter-spacing:-0.04em;">企业招聘中心</h1>
+                <p class="text-on-surface-variant mt-3 text-base md:text-lg">AI 赋能高效招聘，精准触达顶尖人才</p>
+            </div>
+            <a href="岗位发布.html" class="btn-primary mt-2">
+                <span class="material-symbols-outlined text-lg">add</span>
+                发布新岗位
+            </a>
+        </div>
+    </section>
+
+    <!-- Stats Cards -->
+    <section class="px-4 md:px-16 max-w-[1440px] mx-auto mb-10 md:mb-12 animate-fade-in-up" style="animation-delay:0.15s;">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
+            <div class="glass-card p-4 md:p-6 stat-card text-primary">
+                <div class="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+                    <span class="material-symbols-outlined text-primary text-xl md:text-2xl">work</span>
+                    <span class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-on-surface-variant" style="letter-spacing:0.1em;">发布岗位</span>
+                </div>
+                <div class="text-2xl md:text-4xl font-bold text-on-surface" style="letter-spacing:-0.02em;">12</div>
+                <p class="text-[10px] md:text-xs text-on-surface-variant mt-1">较上月 +2</p>
+            </div>
+            <div class="glass-card p-4 md:p-6 stat-card text-green-600">
+                <div class="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+                    <span class="material-symbols-outlined text-green-600 text-xl md:text-2xl">inbox</span>
+                    <span class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-on-surface-variant" style="letter-spacing:0.1em;">收到投递</span>
+                </div>
+                <div class="text-2xl md:text-4xl font-bold text-on-surface" style="letter-spacing:-0.02em;">156</div>
+                <p class="text-[10px] md:text-xs text-on-surface-variant mt-1">较上月 +23</p>
+            </div>
+            <div class="glass-card p-4 md:p-6 stat-card text-orange-600">
+                <div class="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+                    <span class="material-symbols-outlined text-orange-600 text-xl md:text-2xl">pending_actions</span>
+                    <span class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-on-surface-variant" style="letter-spacing:0.1em;">待处理</span>
+                </div>
+                <div class="text-2xl md:text-4xl font-bold text-on-surface" style="letter-spacing:-0.02em;">28</div>
+                <p class="text-[10px] md:text-xs text-orange-600 mt-1 font-medium">需尽快处理</p>
+            </div>
+            <div class="glass-card p-4 md:p-6 stat-card text-purple-600">
+                <div class="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+                    <span class="material-symbols-outlined text-purple-600 text-xl md:text-2xl">groups</span>
+                    <span class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-on-surface-variant" style="letter-spacing:0.1em;">已面试</span>
+                </div>
+                <div class="text-2xl md:text-4xl font-bold text-on-surface" style="letter-spacing:-0.02em;">45</div>
+                <p class="text-[10px] md:text-xs text-on-surface-variant mt-1">录用率 32%</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content: Two Column Layout -->
+    <section class="px-4 md:px-16 max-w-[1440px] mx-auto mb-12 md:mb-16">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
+
+            <!-- Left Column: Content (8/12) -->
+            <div class="lg:col-span-8 space-y-8 md:space-y-10">
+
+                <!-- Talent Recommendations -->
+                <div class="animate-fade-in-up" style="animation-delay:0.2s;">
+                    <div class="flex items-center justify-between mb-4 md:mb-6">
+                        <h2 class="text-lg md:text-2xl font-semibold text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">recommend</span>
+                            人才推荐
+                        </h2>
+                        <a href="候选人推荐.html" class="text-xs md:text-sm text-primary font-semibold hover:underline flex items-center gap-1">
+                            查看更多 <span class="material-symbols-outlined text-base">arrow_forward</span>
+                        </a>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+                        <div class="glass-card p-5 md:p-6">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg flex-shrink-0">张</div>
+                                <div>
+                                    <h3 class="font-semibold text-on-surface text-sm md:text-base">张明远</h3>
+                                    <p class="text-xs md:text-sm text-on-surface-variant">高级前端工程师</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-xs text-on-surface-variant font-semibold">匹配度</span>
+                                <span class="text-lg font-bold text-primary">95%</span>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5 md:gap-2 mb-4 md:mb-5">
+                                <span class="chip chip-primary text-[10px]">Vue.js</span>
+                                <span class="chip chip-primary text-[10px]">TypeScript</span>
+                                <span class="chip chip-primary text-[10px]">React</span>
+                            </div>
+                            <button class="btn-primary w-full justify-center text-xs md:text-sm py-2 md:py-2.5">
+                                <span class="material-symbols-outlined text-base">person_search</span>
+                                查看详情
+                            </button>
+                        </div>
+                        <div class="glass-card p-5 md:p-6">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-lg flex-shrink-0">李</div>
+                                <div>
+                                    <h3 class="font-semibold text-on-surface text-sm md:text-base">李思涵</h3>
+                                    <p class="text-xs md:text-sm text-on-surface-variant">数据分析师</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-xs text-on-surface-variant font-semibold">匹配度</span>
+                                <span class="text-lg font-bold text-primary">88%</span>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5 md:gap-2 mb-4 md:mb-5">
+                                <span class="chip chip-primary text-[10px]">Python</span>
+                                <span class="chip chip-primary text-[10px]">SQL</span>
+                                <span class="chip chip-primary text-[10px]">Tableau</span>
+                            </div>
+                            <button class="btn-primary w-full justify-center text-xs md:text-sm py-2 md:py-2.5">
+                                <span class="material-symbols-outlined text-base">person_search</span>
+                                查看详情
+                            </button>
+                        </div>
+                        <div class="glass-card p-5 md:p-6">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-lg flex-shrink-0">王</div>
+                                <div>
+                                    <h3 class="font-semibold text-on-surface text-sm md:text-base">王子豪</h3>
+                                    <p class="text-xs md:text-sm text-on-surface-variant">全栈开发工程师</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-xs text-on-surface-variant font-semibold">匹配度</span>
+                                <span class="text-lg font-bold text-primary">82%</span>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5 md:gap-2 mb-4 md:mb-5">
+                                <span class="chip chip-primary text-[10px]">Node.js</span>
+                                <span class="chip chip-primary text-[10px]">Go</span>
+                                <span class="chip chip-primary text-[10px]">Docker</span>
+                            </div>
+                            <button class="btn-primary w-full justify-center text-xs md:text-sm py-2 md:py-2.5">
+                                <span class="material-symbols-outlined text-base">person_search</span>
+                                查看详情
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Applications -->
+                <div class="animate-fade-in-up" style="animation-delay:0.3s;">
+                    <div class="flex items-center justify-between mb-4 md:mb-6">
+                        <h2 class="text-lg md:text-2xl font-semibold text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">history</span>
+                            最近投递
+                        </h2>
+                        <a href="候选人推荐.html" class="text-xs md:text-sm text-primary font-semibold hover:underline flex items-center gap-1">
+                            查看全部 <span class="material-symbols-outlined text-base">arrow_forward</span>
+                        </a>
+                    </div>
+                    <div class="glass-card overflow-hidden">
+                        <!-- Table Header (hidden on mobile) -->
+                        <div class="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-surface-container border-b border-outline-variant/30 text-xs font-bold uppercase tracking-wider text-on-surface-variant" style="letter-spacing:0.1em;">
+                            <div class="col-span-3">候选人</div>
+                            <div class="col-span-3">投递岗位</div>
+                            <div class="col-span-3">投递时间</div>
+                            <div class="col-span-3 text-right">状态</div>
+                        </div>
+                        <!-- Row 1 -->
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 px-4 md:px-6 py-3 md:py-4 border-b border-outline-variant/20 items-center hover:bg-surface-container/50 transition-colors">
+                            <div class="flex items-center gap-3 md:col-span-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">陈</div>
+                                <div>
+                                    <span class="text-sm font-medium text-on-surface">陈雨萱</span>
+                                    <span class="md:hidden text-xs text-on-surface-variant ml-2">投递 高级前端工程师</span>
+                                </div>
+                            </div>
+                            <div class="md:col-span-3 text-sm text-on-surface-variant hidden md:block">高级前端工程师</div>
+                            <div class="md:col-span-3 text-sm text-on-surface-variant hidden md:block">2024-12-15</div>
+                            <div class="md:col-span-3 md:text-right">
+                                <span class="chip chip-success text-[10px]">已查看</span>
+                            </div>
+                        </div>
+                        <!-- Row 2 -->
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 px-4 md:px-6 py-3 md:py-4 border-b border-outline-variant/20 items-center hover:bg-surface-container/50 transition-colors">
+                            <div class="flex items-center gap-3 md:col-span-3">
+                                <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-xs">刘</div>
+                                <div>
+                                    <span class="text-sm font-medium text-on-surface">刘天宇</span>
+                                    <span class="md:hidden text-xs text-on-surface-variant ml-2">投递 产品经理</span>
+                                </div>
+                            </div>
+                            <div class="md:col-span-3 text-sm text-on-surface-variant hidden md:block">产品经理</div>
+                            <div class="md:col-span-3 text-sm text-on-surface-variant hidden md:block">2024-12-14</div>
+                            <div class="md:col-span-3 md:text-right">
+                                <span class="chip chip-warning text-[10px]">待查看</span>
+                            </div>
+                        </div>
+                        <!-- Row 3 -->
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 px-4 md:px-6 py-3 md:py-4 border-b border-outline-variant/20 items-center hover:bg-surface-container/50 transition-colors">
+                            <div class="flex items-center gap-3 md:col-span-3">
+                                <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-xs">赵</div>
+                                <div>
+                                    <span class="text-sm font-medium text-on-surface">赵文博</span>
+                                    <span class="md:hidden text-xs text-on-surface-variant ml-2">投递 Python后端开发</span>
+                                </div>
+                            </div>
+                            <div class="md:col-span-3 text-sm text-on-surface-variant hidden md:block">Python后端开发</div>
+                            <div class="md:col-span-3 text-sm text-on-surface-variant hidden md:block">2024-12-13</div>
+                            <div class="md:col-span-3 md:text-right">
+                                <span class="chip chip-primary text-[10px]">面试中</span>
+                            </div>
+                        </div>
+                        <!-- Row 4 -->
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 px-4 md:px-6 py-3 md:py-4 border-b border-outline-variant/20 items-center hover:bg-surface-container/50 transition-colors">
+                            <div class="flex items-center gap-3 md:col-span-3">
+                                <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-xs">周</div>
+                                <div>
+                                    <span class="text-sm font-medium text-on-surface">周雪琴</span>
+                                    <span class="md:hidden text-xs text-on-surface-variant ml-2">投递 UI设计师</span>
+                                </div>
+                            </div>
+                            <div class="md:col-span-3 text-sm text-on-surface-variant hidden md:block">UI设计师</div>
+                            <div class="md:col-span-3 text-sm text-on-surface-variant hidden md:block">2024-12-12</div>
+                            <div class="md:col-span-3 md:text-right">
+                                <span class="chip chip-success text-[10px]">已查看</span>
+                            </div>
+                        </div>
+                        <!-- Row 5 -->
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 px-4 md:px-6 py-3 md:py-4 items-center hover:bg-surface-container/50 transition-colors">
+                            <div class="flex items-center gap-3 md:col-span-3">
+                                <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold text-xs">孙</div>
+                                <div>
+                                    <span class="text-sm font-medium text-on-surface">孙浩然</span>
+                                    <span class="md:hidden text-xs text-on-surface-variant ml-2">投递 数据分析师</span>
+                                </div>
+                            </div>
+                            <div class="md:col-span-3 text-sm text-on-surface-variant hidden md:block">数据分析师</div>
+                            <div class="md:col-span-3 text-sm text-on-surface-variant hidden md:block">2024-12-11</div>
+                            <div class="md:col-span-3 md:text-right">
+                                <span class="chip chip-warning text-[10px]">待查看</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Company Info Sidebar (4/12) -->
+            <div class="lg:col-span-4">
+                <div class="lg:sticky lg:top-20 space-y-5 md:space-y-6">
+
+                    <!-- Company Info Card -->
+                    <div class="glass-card p-6 md:p-8 animate-fade-in-up" style="animation-delay:0.25s;">
+                        <div class="flex items-center gap-3 mb-5">
+                            <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl flex-shrink-0">星</div>
+                            <div>
+                                <h3 class="font-semibold text-on-surface text-base md:text-lg">星图科技有限公司</h3>
+                                <span class="chip chip-success text-[10px] mt-1">
+                                    <span class="material-symbols-outlined text-xs">verified</span>
+                                    已认证 (VERIFIED)
+                                </span>
+                            </div>
+                        </div>
+                        <div class="mb-5 p-3 rounded-lg bg-surface-container/50">
+                            <div class="text-[10px] font-semibold text-on-surface-variant mb-2 uppercase tracking-widest">资质审核进度</div>
+                            <div class="flex items-center gap-1.5 md:gap-2 text-[10px] md:text-[11px]">
+                                <span class="w-5 h-5 rounded-full bg-[#155724] text-white flex items-center justify-center text-[9px] font-bold flex-shrink-0">✓</span>
+                                <span class="text-on-surface-variant">注册</span>
+                                <span class="flex-1 h-px bg-[#155724]"></span>
+                                <span class="w-5 h-5 rounded-full bg-[#155724] text-white flex items-center justify-center text-[9px] font-bold flex-shrink-0">✓</span>
+                                <span class="text-on-surface-variant hidden md:inline">提交资料</span>
+                                <span class="flex-1 h-px bg-[#155724]"></span>
+                                <span class="w-5 h-5 rounded-full bg-[#155724] text-white flex items-center justify-center text-[9px] font-bold flex-shrink-0">✓</span>
+                                <span class="text-on-surface font-semibold">已通过</span>
+                            </div>
+                        </div>
+                        <div class="space-y-3 md:space-y-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs md:text-sm text-on-surface-variant">所属行业</span>
+                                <span class="text-xs md:text-sm text-on-surface font-medium">人工智能</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs md:text-sm text-on-surface-variant">公司规模</span>
+                                <span class="text-xs md:text-sm text-on-surface font-medium">200-500人</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs md:text-sm text-on-surface-variant">融资阶段</span>
+                                <span class="text-xs md:text-sm text-on-surface font-medium">B轮</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs md:text-sm text-on-surface-variant">所在城市</span>
+                                <span class="text-xs md:text-sm text-on-surface font-medium">北京</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs md:text-sm text-on-surface-variant">入驻时间</span>
+                                <span class="text-xs md:text-sm text-on-surface font-medium">2024-06-15</span>
+                            </div>
+                        </div>
+                        <div class="mt-6 pt-5 border-t border-outline-variant/30">
+                            <button class="btn-ghost w-full justify-center text-sm" onclick="document.getElementById('edit-company-modal').classList.remove('hidden')">
+                                <span class="material-symbols-outlined text-base">edit</span>
+                                编辑企业信息
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions Card -->
+                    <div class="glass-card p-6 md:p-8 animate-fade-in-up" style="animation-delay:0.35s;">
+                        <h3 class="font-semibold text-on-surface mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">bolt</span>
+                            快捷操作
+                        </h3>
+                        <div class="space-y-3">
+                            <a href="岗位发布.html" class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container transition-colors group">
+                                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                    <span class="material-symbols-outlined text-primary text-xl">add_circle</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <span class="text-sm font-medium text-on-surface group-hover:text-primary transition-colors">发布新岗位</span>
+                                    <p class="text-xs text-on-surface-variant">创建并发布招聘岗位</p>
+                                </div>
+                                <span class="material-symbols-outlined text-on-surface-variant text-lg">chevron_right</span>
+                            </a>
+                            <a href="智能筛选.html" class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container transition-colors group">
+                                <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+                                    <span class="material-symbols-outlined text-green-600 text-xl">auto_awesome</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <span class="text-sm font-medium text-on-surface group-hover:text-primary transition-colors">智能筛选</span>
+                                    <p class="text-xs text-on-surface-variant">AI智能筛选候选人</p>
+                                </div>
+                                <span class="material-symbols-outlined text-on-surface-variant text-lg">chevron_right</span>
+                            </a>
+                            <a href="候选人推荐.html" class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container transition-colors group">
+                                <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
+                                    <span class="material-symbols-outlined text-purple-600 text-xl">analytics</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <span class="text-sm font-medium text-on-surface group-hover:text-primary transition-colors">候选人推荐</span>
+                                    <p class="text-xs text-on-surface-variant">查看匹配候选人</p>
+                                </div>
+                                <span class="material-symbols-outlined text-on-surface-variant text-lg">chevron_right</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Platform Info Card -->
+                    <div class="glass-card p-5 md:p-6 animate-fade-in-up" style="animation-delay:0.4s;">
+                        <div class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-primary text-xl mt-0.5">info</span>
+                            <div>
+                                <h4 class="text-sm font-semibold text-on-surface mb-1">AI 淘金寻宝已上线</h4>
+                                <p class="text-xs text-on-surface-variant leading-relaxed">使用 AI 智能筛选功能，根据岗位需求自动匹配最合适的候选人，招聘效率提升 300%。</p>
+                                <a href="智能筛选.html" class="text-xs text-primary font-semibold hover:underline mt-2 inline-block">立即体验 →</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 编辑企业信息弹窗 -->
+    <div id="edit-company-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden" onclick="if(event.target===this)this.classList.add('hidden')">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto animate-fade-in-up mx-4">
+            <div class="sticky top-0 bg-white/90 backdrop-blur-xl z-10 px-4 md:px-6 pt-6 pb-4 border-b border-outline-variant/20">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary text-xl">business</span>
+                        <div>
+                            <h2 class="text-lg font-bold text-on-surface">编辑企业信息</h2>
+                            <p class="text-xs text-on-surface-variant">修改后需重新提交审核</p>
+                        </div>
+                    </div>
+                    <button class="material-symbols-outlined text-on-surface-variant hover:text-on-surface" onclick="document.getElementById('edit-company-modal').classList.add('hidden')">close</button>
+                </div>
+            </div>
+
+            <div class="p-4 md:p-6 space-y-6">
+                <div class="p-3 rounded-lg bg-[#d4edda] text-[#155724] text-xs flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">verified</span>
+                    <span>当前审核状态：<strong>已认证 (VERIFIED)</strong> · 审核通过时间：2024-06-20</span>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-bold text-on-surface mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-base">info</span>
+                        基本信息
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-on-surface-variant mb-1">企业名称 <span class="text-red-500">*</span></label>
+                            <input type="text" value="星图科技有限公司" class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-on-surface-variant mb-1">所属行业 <span class="text-red-500">*</span></label>
+                                <select class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30">
+                                    <option selected>人工智能</option><option>互联网</option><option>金融科技</option><option>企业服务</option><option>硬件芯片</option><option>大数据</option><option>云计算</option><option>物联网</option><option>区块链</option><option>新能源</option><option>生物医药</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-on-surface-variant mb-1">公司规模 <span class="text-red-500">*</span></label>
+                                <select class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30">
+                                    <option>0-20人</option><option>20-50人</option><option>50-100人</option><option>100-200人</option><option selected>200-500人</option><option>500-1000人</option><option>1000-5000人</option><option>5000+人</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-on-surface-variant mb-1">融资阶段</label>
+                                <select class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30">
+                                    <option>未融资</option><option>天使轮</option><option>A轮</option><option selected>B轮</option><option>C轮</option><option>D轮+</option><option>Pre-IPO</option><option>已上市</option><option>不需要融资</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-on-surface-variant mb-1">成立时间</label>
+                                <input type="text" value="2021-03" placeholder="YYYY-MM" class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-on-surface-variant mb-1">企业简介 <span class="text-red-500">*</span></label>
+                            <textarea rows="3" class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30">专注于AI驱动的智能招聘平台，致力于用技术连接顶尖人才与精品机构。</textarea>
+                            <p class="text-[11px] text-on-surface-variant mt-1">建议50-500字，将展示在企业主页</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-bold text-on-surface mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-base">contact_mail</span>
+                        联系方式
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-on-surface-variant mb-1">联系人姓名 <span class="text-red-500">*</span></label>
+                                <input type="text" value="张经理" class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-on-surface-variant mb-1">联系人职位</label>
+                                <input type="text" value="HR负责人" class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-on-surface-variant mb-1">联系电话 <span class="text-red-500">*</span></label>
+                                <input type="text" value="138-0000-1234" class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-on-surface-variant mb-1">联系邮箱 <span class="text-red-500">*</span></label>
+                                <input type="email" value="hr@xingtotech.com" class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-bold text-on-surface mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-base">location_on</span>
+                        公司地址
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-on-surface-variant mb-1">所在城市 <span class="text-red-500">*</span></label>
+                                <input type="text" value="北京" class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-on-surface-variant mb-1">所在区域</label>
+                                <input type="text" value="海淀区" class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-on-surface-variant mb-1">详细地址</label>
+                                <input type="text" value="中关村科技园A座12层" class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-bold text-on-surface mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-base">celebration</span>
+                        福利与文化
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-on-surface-variant mb-2">公司福利（点击选择，最多8项）</label>
+                            <div id="welfare-tags" class="flex flex-wrap gap-2">
+                                <span class="chip chip-primary welfare-chip" onclick="toggleWelfare(this)">五险一金</span>
+                                <span class="chip chip-primary welfare-chip" onclick="toggleWelfare(this)">带薪年假</span>
+                                <span class="chip chip-primary welfare-chip" onclick="toggleWelfare(this)">股票期权</span>
+                                <span class="chip chip-primary welfare-chip" onclick="toggleWelfare(this)">弹性工作</span>
+                                <span class="chip chip-neutral welfare-chip" onclick="toggleWelfare(this)">免费三餐</span>
+                                <span class="chip chip-neutral welfare-chip" onclick="toggleWelfare(this)">健身补贴</span>
+                                <span class="chip chip-neutral welfare-chip" onclick="toggleWelfare(this)">学习基金</span>
+                                <span class="chip chip-neutral welfare-chip" onclick="toggleWelfare(this)">定期团建</span>
+                                <span class="chip chip-neutral welfare-chip" onclick="toggleWelfare(this)">远程办公</span>
+                                <span class="chip chip-neutral welfare-chip" onclick="toggleWelfare(this)">补充医疗</span>
+                                <span class="chip chip-neutral welfare-chip" onclick="toggleWelfare(this)">租房补贴</span>
+                                <span class="chip chip-neutral welfare-chip" onclick="toggleWelfare(this)">节日福利</span>
+                            </div>
+                            <p id="welfare-count" class="text-[11px] text-on-surface-variant mt-2">已选择 4 / 8 项</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-on-surface-variant mb-1">技术栈关键词</label>
+                            <input type="text" value="React, Go, Kubernetes, 大模型, CUDA" placeholder="用逗号分隔" class="w-full px-4 py-2.5 text-sm bg-surface-container rounded-lg border border-outline-variant/30">
+                            <p class="text-[11px] text-on-surface-variant mt-1">用于AI匹配推荐，吸引对口人才</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-lg bg-[#fff3cd] text-[#856404] text-xs flex items-start gap-2">
+                    <span class="material-symbols-outlined text-sm mt-0.5">info</span>
+                    <span>修改企业信息后需重新提交审核，审核通过后方可对外展示。审核周期约1-3个工作日。</span>
+                </div>
+                <div class="flex items-center gap-3 pt-2 pb-2">
+                    <button class="btn-primary" onclick="alert('企业信息已保存，已提交审核');document.getElementById('edit-company-modal').classList.add('hidden')">
+                        <span class="material-symbols-outlined text-sm">save</span>保存并提交审核
+                    </button>
+                    <button class="btn-ghost" onclick="document.getElementById('edit-company-modal').classList.add('hidden')">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-surface-container-lowest border-t border-outline-variant w-full py-10 md:py-12 mt-12 md:mt-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 md:px-16 max-w-[1440px] mx-auto">
+            <div>
+                <div class="font-bold text-3xl text-on-surface mb-3">智聘星图</div>
+                <p class="text-on-surface-variant text-sm">AI 驱动的智能招聘平台<br>基于银河麒麟 · 人大金仓 · DeepSeek</p>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">企业端</h4>
+                <div class="flex flex-col gap-1 text-secondary text-sm">
+                    <a href="企业首页.html" class="hover:text-primary transition-colors">企业首页</a>
+                    <a href="岗位管理.html" class="hover:text-primary transition-colors">岗位管理</a>
+                    <a href="岗位发布.html" class="hover:text-primary transition-colors">岗位发布</a>
+                    <a href="智能筛选.html" class="hover:text-primary transition-colors">智能筛选</a>
+                    <a href="候选人推荐.html" class="hover:text-primary transition-colors">候选人推荐</a>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">支持</h4>
+                <div class="flex flex-col gap-1 text-secondary text-sm">
+                    <a href="企业通知中心.html" class="hover:text-primary transition-colors">通知中心</a>
+                    <a href="javascript:void(0)" class="hover:text-primary transition-colors">隐私政策</a>
+                    <a href="javascript:void(0)" class="hover:text-primary transition-colors">联系支持</a>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-6 text-sm text-on-surface-variant">&copy; 2024 智聘星图. 策就领导力的未来。</div>
+    </footer>
+
+    <script>
+        // === 通知下拉 ===
+        function toggleNotifDropdown(e) {
+            e.stopPropagation();
+            var dd = document.getElementById('notif-dropdown');
+            dd.classList.toggle('hidden');
+        }
+        function closeNotifDropdown() {
+            var dd = document.getElementById('notif-dropdown');
+            if (dd) dd.classList.add('hidden');
+        }
+        document.addEventListener('click', function(e) {
+            var wrap = document.getElementById('notif-bell-wrap');
+            if (wrap && !wrap.contains(e.target)) closeNotifDropdown();
+        });
+
+        // === 福利标签toggle ===
+        var MAX_WELFARE = 8;
+        function toggleWelfare(el) {
+            var count = document.querySelectorAll('#welfare-tags .chip-primary').length;
+            if (el.classList.contains('chip-primary')) {
+                el.classList.remove('chip-primary');
+                el.classList.add('chip-neutral');
+            } else {
+                if (count >= MAX_WELFARE) {
+                    showToast('最多选择 ' + MAX_WELFARE + ' 项福利');
+                    return;
+                }
+                el.classList.remove('chip-neutral');
+                el.classList.add('chip-primary');
+            }
+            updateWelfareCount();
+        }
+        function updateWelfareCount() {
+            var count = document.querySelectorAll('#welfare-tags .chip-primary').length;
+            var el = document.getElementById('welfare-count');
+            if (el) el.textContent = '已选择 ' + count + ' / ' + MAX_WELFARE + ' 项';
+        }
+
+        // === Toast ===
+        function showToast(msg) {
+            var t = document.createElement('div');
+            t.textContent = msg;
+            t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#064e3b;color:#fff;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:600;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,0.2);';
+            document.body.appendChild(t);
+            setTimeout(function(){ t.remove(); }, 2500);
+        }
+
+        // === 移动端导航 ===
+        function openMobileNav() {
+            document.getElementById('mobileNavDrawer').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeMobileNav() {
+            document.getElementById('mobileNavDrawer').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+    </script>
+</body>
+</html>

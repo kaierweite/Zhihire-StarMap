@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
+﻿<script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import * as echarts from 'echarts'
 import { BarChart3, Lightbulb, TrendingUp, Briefcase, Loader2, ArrowLeft } from 'lucide-vue-next'
 import { ElMessage } from 'element-plus'
@@ -40,32 +40,12 @@ const categoryStats = computed(() => {
 
 const skillCount = computed(() => graphData.value.nodes.length)
 
-function buildChartData(data: GraphResult) {
-  const { nodes, edges } = data
-
-  const catSet = new Set<string>()
-  for (const n of nodes) catSet.add(n.category || '通用')
-  const categories = (data.categories || []).filter((c) => catSet.has(c.name)).map((c) => ({
-    name: c.name,
-    itemStyle: { color: c.color },
-  }))
-
-  const chartNodes = nodes.map((n) => ({
-    id: n.id,
-    name: n.name,
-    symbolSize: n.symbolSize,
-    category: categories.findIndex((c) => c.name === (n.category || '通用')),
-    itemStyle: n.itemStyle || { color: getCategoryColor(n.category), borderColor: '#fff', borderWidth: 2 },
-    label: { show: true, fontSize: 11, color: '#303133', formatter: n.name },
-  }))
-
-  const chartEdges = edges.map((e) => ({
-    source: e.source,
-    target: e.target,
-    lineStyle: e.lineStyle,
-  }))
-
-  return { categories, chartNodes, chartEdges }
+function buildSunburstData(data: GraphResult): any {
+  const root = data.sunburst_data || {
+    name: '技能图谱',
+    children: data.categories.map((c) => ({ name: c.name, itemStyle: { color: c.color }, children: [] })),
+  }
+  return root
 }
 
 function initChart(data: GraphResult, container: HTMLElement | undefined) {
@@ -76,46 +56,39 @@ function initChart(data: GraphResult, container: HTMLElement | undefined) {
     chartInstance = instance
   }
 
-  const { categories, chartNodes, chartEdges } = buildChartData(data)
+  const root = buildSunburstData(data)
 
   instance.setOption({
     tooltip: {
-      trigger: 'item' as const,
+      trigger: 'item',
       formatter: (params: any) => {
-        const name = params.data?.name || params.name || ''
-        const node = data.nodes.find((n) => n.name === name)
-        if (node) {
-          return `<strong>${node.name}</strong><br/>分类: ${node.category || '通用'}`
+        const name = params.name || ''
+        const val = params.value || 0
+        if (params.treePathInfo && params.treePathInfo.length >= 3) {
+          const category = params.treePathInfo[1]?.name || ''
+          return '<strong>' + name + '</strong><br/>分类: ' + category
+        }
+        if (params.treePathInfo && params.treePathInfo.length === 2) {
+          const childCount = params.treePathInfo[1]?.children?.length || 0
+          return '<strong>' + name + '</strong><br/>技能数: ' + childCount
         }
         return name
       },
     },
-    legend: {
-      data: categories.map((c) => c.name),
-      bottom: 0,
-      textStyle: { fontSize: 12, color: '#606266' },
-    },
     series: [{
-      type: 'graph',
-      layout: 'force',
-      data: chartNodes,
-      links: chartEdges,
-      categories,
-      roam: true,
-      draggable: true,
-      force: {
-        repulsion: 500,
-        edgeLength: [80, 150],
-        friction: 0.1,
-        gravity: 0.1,
-      },
-      lineStyle: { curveness: 0.1 },
-      emphasis: {
-        focus: 'adjacency',
-        lineStyle: { width: 3 },
-      },
+      type: 'sunburst',
+      data: [root],
+      radius: ['0%', '90%'],
+      emphasis: { focus: 'ancestor' },
+      levels: [
+        {},
+        { r0: '6%', r: '18%', label: { rotate: 'tangential', fontSize: 12, fontWeight: 700 } },
+        { r0: '18%', r: '88%', label: { rotate: 0, fontSize: 10 } },
+      ],
+      minShowLabelAngle: 5,
+      label: { rotate: 'tangential', color: '#fff', fontSize: 12, fontWeight: 600, textShadowBlur: 3, textShadowColor: 'rgba(0,0,0,0.3)' },
+      itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 },
       animationDuration: 800,
-      animationEasingUpdate: 'quinticInOut',
     }],
   })
   return instance
@@ -131,16 +104,18 @@ async function fetchData() {
       getJobGraph(jobId),
       getJobDetail(jobId),
     ])
-    const gd = graphRes.data || {}
+    const gd = graphRes.data.data || {}
     graphData.value = {
       nodes: gd.nodes || [],
       edges: gd.edges || [],
       state: gd.state || (gd.nodes && gd.nodes.length ? 'ready' : 'empty'),
       categories: gd.categories || [],
+      sunburst_data: gd.sunburst_data,
     }
     if (detailRes.data.code === 200) {
       jobDetail.value = detailRes.data.data
     }
+    loading.value = false
     await nextTick()
     initChart(graphData.value, chartRef.value)
   } catch (e: any) {
@@ -173,7 +148,7 @@ onUnmounted(() => {
         <button class="back-btn" @click="goBack"><ArrowLeft :size="18" /></button>
         <div class="header-text">
           <h1>岗位能力图谱</h1>
-          <span class="subtitle">基于岗位技能要求构建的知识图谱</span>
+          <span class="subtitle">基于岗位技能要求构建的知识图谱 — 旭日图</span>
         </div>
       </div>
 
@@ -205,27 +180,22 @@ onUnmounted(() => {
       <div v-show="!loading && graphData.nodes.length > 0" class="graph-layout fade-up d2">
         <div class="graph-main card">
           <div class="card-header">
-            <h3>技能知识图谱</h3>
+            <h3>技能旭日图</h3>
           </div>
           <div ref="chartRef" class="echarts-container" />
           <div class="legend">
-            <div class="legend-group">
-              <span class="legend-label">关系：</span>
-              <span class="legend-item"><span class="line-solid line-primary" /> 前置</span>
-              <span class="legend-item"><span class="line-dashed line-green" /> 包含</span>
-              <span class="legend-item"><span class="line-dotted line-yellow" /> 相似</span>
-              <span class="legend-item"><span class="line-thick line-purple" /> 互补</span>
-            </div>
             <div class="legend-group">
               <span class="legend-label">分类：</span>
               <span v-for="cat in (graphData.categories || [])" :key="cat.name" class="legend-item">
                 <span class="dot" :style="{ background: cat.color }" /> {{ cat.name }}
               </span>
             </div>
+        </div>
           </div>
         </div>
+      </div>
 
-        <div class="graph-sidebar">
+      <div class="graph-sidebar">
           <div class="card">
             <div class="card-header"><BarChart3 :size="18" /><h3>技能概览</h3></div>
             <div class="stat-big">{{ skillCount }} <span class="stat-unit">项技能</span></div>
@@ -258,21 +228,19 @@ onUnmounted(() => {
             <div v-if="skillCount === 0" class="empty-hint">暂无技能数据</div>
             <div v-else class="suggestions">
               <div class="suggestion-item">
-                <span class="suggestion-icon">•</span>
-                <span>建议优先筛选具备 <strong>{{ Object.keys(categoryStats).slice(0, 2).join('、') }}</strong> 技术栈的候选人</span>
+                <span class="suggestion-icon">&#8226;</span>
+                <span>建议优先筛选具备<strong>{{ Object.keys(categoryStats).slice(0, 2).join('、') }}</strong> 技术栈的候选人</span>
               </div>
               <div class="suggestion-item">
-                <span class="suggestion-icon">•</span>
-                <span>关注技能图谱中<strong>前置关系</strong>较强的核心技能，这些是岗位的基础能力</span>
+                <span class="suggestion-icon">&#8226;</span>
+                <span>关注技能图谱中<strong>核心技能</strong>，这些是岗位的基础能力</span>
               </div>
               <div class="suggestion-item">
-                <span class="suggestion-icon">•</span>
+                <span class="suggestion-icon">&#8226;</span>
                 <span>可在智能筛选中设置技能匹配度阈值，精准定位候选人</span>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
       <div v-show="!loading && graphData.nodes.length === 0 && !error" class="empty-graph-card fade-up d2">
         <div class="empty-content">
@@ -280,7 +248,7 @@ onUnmounted(() => {
           <h3>暂无能力图谱</h3>
           <p>该岗位尚未添加技能要求，无法生成能力图谱。</p>
           <p>请在岗位管理中为该岗位添加技能要求。</p>
-          <router-link :to="`/company/jobs/detail/${jobId}`" class="empty-btn">
+          <router-link to="/company/jobs/detail/" class="empty-btn">
             管理技能要求
           </router-link>
         </div>
@@ -351,25 +319,17 @@ onUnmounted(() => {
 .card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e5e7eb; }
 .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; h3 { font-size: 15px; font-weight: 600; color: #303133; } svg { color: #1a3a5c; } }
 
-.graph-layout { display: grid; grid-template-columns: 1fr 360px; gap: 20px; }
+.graph-layout { width: 100%; margin-bottom: 20px; }
 .graph-main { min-height: 0; }
-.echarts-container { width: 100%; height: 480px; border-radius: 8px; background: #f8f9fa; }
+.echarts-container { width: 100%; height: 640px; border-radius: 8px; background: #f8f9fa; }
 
 .legend { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
 .legend-group { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .legend-label { font-size: 12px; color: #909399; font-weight: 600; }
 .legend-item { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #606266; }
-.line-solid { display: inline-block; width: 16px; height: 2px; }
-.line-dashed { display: inline-block; width: 16px; height: 0; border-top: 2px dashed; }
-.line-dotted { display: inline-block; width: 16px; height: 0; border-top: 2px dotted; }
-.line-thick { display: inline-block; width: 16px; height: 3px; }
-.line-primary { background: #5470C6; border-color: #5470C6; }
-.line-green { border-color: #91CC75; }
-.line-yellow { border-color: #FAC858; }
-.line-purple { background: #9A60B4; }
 .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
 
-.graph-sidebar { display: flex; flex-direction: column; gap: 16px; }
+.graph-sidebar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .stat-big { font-size: 36px; font-weight: 700; color: #303133; letter-spacing: -1px; margin-bottom: 16px; }
 .stat-unit { font-size: 14px; font-weight: 500; color: #909399; }
 
@@ -406,7 +366,8 @@ onUnmounted(() => {
 }
 
 @media (max-width: 1024px) {
-  .graph-layout { grid-template-columns: 1fr; }
+  .graph-sidebar { grid-template-columns: 1fr; }
   .echarts-container { height: 360px; }
 }
 </style>
+

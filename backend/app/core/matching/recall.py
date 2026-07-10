@@ -1,6 +1,6 @@
 ﻿"""召回层：SQL 查询扩充候选集。
 
-通过城市、学历、技能同义扩展缩小匹配范围，输出候选 (resume_id, job_id) 对。
+通过技能交集缩小匹配范围，输出候选 (resume_id, job_id) 对。
 每端最多返回 50 对，避免全量笛卡尔积。
 """
 import logging
@@ -11,9 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.entities.job import Job
 from app.models.entities.resume import Resume
-from app.models.entities.skill import Skill
-from app.models.entities.skill_synonym import SkillSynonym
-from app.models.entities.user_profile import UserProfile
 from app.models.entities.user_skill import UserSkill
 from app.models.entities.job_skill import JobSkill
 
@@ -29,14 +26,14 @@ async def recall_jobs_for_user(
     """为求职者召回候选岗位。
 
     策略：
-    1. 获取用户技能（含同义扩展）
+    1. 获取用户简历和技能
     2. 按有技能交集的 OPEN 岗位召回
     3. 限制 MAX_CANDIDATES 个
 
     Returns:
         list[dict]: [{resume_id, job_id}] 候选对。
     """
-    # 1. 获取用户简历
+    # 1. 获取用户正常简历
     stmt_resume = select(Resume).where(
         Resume.user_id == user_id,
         Resume.deleted_at == "0",
@@ -47,28 +44,17 @@ async def recall_jobs_for_user(
     if not resumes:
         return []
 
-    # 2. 获取用户技能 ID 集合（含同义扩展）
+    # 2. 获取用户技能 ID 集合
     stmt_us = select(UserSkill.skill_id).where(
         UserSkill.user_id == user_id,
         UserSkill.deleted_at == "0",
     )
     result = await db.execute(stmt_us)
     skill_ids = {row[0] for row in result.all()}
-
     if not skill_ids:
         return []
 
-    # 3. 同义扩展：查 synonym -> standard_skill_id
-    stmt_syn = select(SkillSynonym.standard_skill_id).where(
-        SkillSynonym.skill_id.in_(skill_ids),
-        SkillSynonym.deleted_at == "0",
-        SkillSynonym.status == "ACTIVE",
-    )
-    result = await db.execute(stmt_syn)
-    for row in result.all():
-        skill_ids.add(row[0])
-
-    # 4. 召回有技能交集的 OPEN 岗位
+    # 3. 按技能交集召回 OPEN 岗位
     stmt_job_skill = (
         select(JobSkill.job_id)
         .where(
@@ -81,7 +67,7 @@ async def recall_jobs_for_user(
     result = await db.execute(stmt_job_skill)
     job_ids = [row[0] for row in result.all()]
 
-    # 5. 验证岗位为 OPEN 状态
+    # 4. 验证岗位为 OPEN 状态
     if job_ids:
         stmt_job = select(Job.id).where(
             Job.id.in_(job_ids),
@@ -89,8 +75,8 @@ async def recall_jobs_for_user(
             Job.status == "OPEN",
         )
         result = await db.execute(stmt_job)
-        valid_job_ids = {row[0] for row in result.all()}
-        job_ids = [jid for jid in job_ids if jid in valid_job_ids]
+        valid_ids = {row[0] for row in result.all()}
+        job_ids = [jid for jid in job_ids if jid in valid_ids]
 
     candidates = [
         {"resume_id": resumes[0].id, "job_id": jid}
@@ -107,13 +93,13 @@ async def recall_candidates_for_job(
 
     策略：
     1. 获取岗位技能要求
-    2. 按技能交集召回用户（含同义扩展）
+    2. 按技能交集召回用户
     3. 限制 MAX_CANDIDATES 个
 
     Returns:
         list[dict]: [{resume_id, job_id, user_id}] 候选对。
     """
-    # 1. 验证岗位
+    # 1. 验证岗位存在且 OPEN
     stmt_job = select(Job).where(
         Job.id == job_id,
         Job.deleted_at == "0",
@@ -131,7 +117,6 @@ async def recall_candidates_for_job(
     )
     result = await db.execute(stmt_js)
     skill_ids = {row[0] for row in result.all()}
-
     if not skill_ids:
         return []
 

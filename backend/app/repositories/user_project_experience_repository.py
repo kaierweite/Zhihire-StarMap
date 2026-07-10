@@ -26,3 +26,16 @@ async def soft_delete_all_by_user(db: AsyncSession, user_id: int) -> None:
         .where(UserProjectExperience.user_id == user_id, UserProjectExperience.deleted_at == "0")
         .values(deleted_at="1")
     )
+
+
+async def find_active_by_name(
+    db: AsyncSession, user_id: int, name: str,
+) -> UserProjectExperience | None:
+    """???????????????????"""
+    stmt = select(UserProjectExperience).where(
+        UserProjectExperience.user_id == user_id,
+        UserProjectExperience.name == name,
+        UserProjectExperience.deleted_at == "0",
+    )
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none()

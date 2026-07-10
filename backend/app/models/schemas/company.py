@@ -1,11 +1,11 @@
- """企业模块 Pydantic 请求/响应模型。
+"""企业模块 Pydantic 请求/响应模型。
 
- 包含企业信息查询、更新、Dashboard 首页统计的请求与响应模型。
- """
- from datetime import datetime
- from typing import Any
+包含企业信息查询、更新、Dashboard 首页统计的请求与响应模型。
+"""
+from datetime import datetime
+from typing import Any
 
- from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 # ========== 响应模型 ==========
@@ -19,6 +19,7 @@ class CompanyInfoResponse(BaseModel):
     company_name: str
     industry: str | None = None
     scale: str | None = None
+    company_type: str | None = None
     website: str | None = None
     logo_url: str | None = None
     description: str | None = None
@@ -84,6 +85,7 @@ class CompanyUpdateRequest(BaseModel):
     company_name: str | None = Field(None, max_length=200)
     industry: str | None = Field(None, max_length=100)
     scale: str | None = Field(None, max_length=50)
+    company_type: str | None = Field(None, max_length=50)
     website: str | None = Field(None, max_length=500)
     logo_url: str | None = Field(None, max_length=500)
     description: str | None = None

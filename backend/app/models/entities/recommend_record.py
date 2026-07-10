@@ -1,7 +1,7 @@
 ﻿"""推荐记录实体 ORM 模块。
 
 映射 KingbaseES `zhihire` 库中 `recommend_record` 表，
-记录为用户推荐的岗位及用户交互行为。
+记录为用户/企业推荐的岗位/候选人及交互行为。
 """
 from datetime import datetime
 
@@ -17,8 +17,10 @@ class RecommendRecord(Base):
     Attributes:
         id: 推荐记录主键，自增 BIGINT。
         user_id: 被推荐用户主键，FK -> user.id。
+        resume_id: 简历主键（企业端候选人推荐时使用），可空，FK -> resume.id。
         job_id: 推荐的岗位主键，FK -> job.id。
         score: 推荐匹配分。
+        recommend_type: 推荐方向（JOB=求职者推荐岗位 / TALENT=企业推荐候选人）。
         is_clicked: 是否已点击查看。
         is_applied: 是否已投递。
         is_invited: 是否已被企业邀请。
@@ -33,10 +35,14 @@ class RecommendRecord(Base):
     user_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True,
     )
+    resume_id: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey("resume.id", ondelete="SET NULL"), nullable=True,
+    )
     job_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("job.id", ondelete="CASCADE"), nullable=False, index=True,
     )
     score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    recommend_type: Mapped[str] = mapped_column(String(10), nullable=False, default="JOB")
     is_clicked: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     is_applied: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     is_invited: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
@@ -51,4 +57,4 @@ class RecommendRecord(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<RecommendRecord id={self.id} user_id={self.user_id} job_id={self.job_id} score={self.score}>"
+        return f"<RecommendRecord id={self.id} user_id={self.user_id} job_id={self.job_id} type={self.recommend_type}>"

@@ -1,4 +1,4 @@
-"""图谱模块 Pydantic 请求/响应模型。
+﻿"""Graph module Pydantic request/response models.
 """
 from pydantic import BaseModel
 
@@ -8,6 +8,7 @@ class GraphNode(BaseModel):
     name: str
     category: str | None = None
     level: float = 0.0
+    level_label: str = "none"          # "none" | "beginner" | "intermediate" | "advanced"
     symbolSize: int = 20
     itemStyle: dict | None = None
 
@@ -17,16 +18,24 @@ class GraphEdge(BaseModel):
     target: str
     relation_type: str
     weight: float = 0.5
-    lineStyle: dict | None = None
+    lineStyle: dict = {}               # Always populated by backend
+
+
+class CategoryItem(BaseModel):
+    name: str
+    color: str
 
 
 class GraphResult(BaseModel):
     nodes: list[GraphNode] = []
     edges: list[GraphEdge] = []
+    state: str = "ready"               # "empty" | "ready"
+    categories: list[CategoryItem] = [] # name -> color for frontend
+    sunburst_data: dict | None = None   # Hierarchical tree for ECharts sunburst 旭日图 series
 
 
 class UserGraphResult(GraphResult):
-    gap_skills: list[str] = []
+    gap_skills: list = []
 
 
 class GapSkill(BaseModel):

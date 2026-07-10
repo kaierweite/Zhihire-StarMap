@@ -1,0 +1,503 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>面试记录 - 智聘星图</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="config.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#003527', container: '#064e3b' },
+                        'primary-container': '#064e3b',
+                        'on-primary': '#ffffff',
+                        'on-primary-container': '#b0f0d6',
+                        on: { primary: '#ffffff', surface: '#1a1c1e', 'surface-variant': '#777680' },
+                        'on-surface': '#191c1d',
+                        'on-surface-variant': '#434656',
+                        surface: { DEFAULT: '#f8f9fa', container: '#edeeef', 'container-variant': '#e7e0ec', 'container-lowest': '#ffffff' },
+                        'surface-container': '#edeeef',
+                        'surface-container-lowest': '#ffffff',
+                        outline: { DEFAULT: '#79747e', variant: '#c4c5d9' },
+                        'outline-variant': '#c4c5d9',
+                        secondary: '#434656',
+                    },
+                    fontFamily: { sans: ['Inter', 'Noto Sans SC', 'system-ui', 'sans-serif'] },
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', 'Noto Sans SC', system-ui, sans-serif; }
+        .active-tab { color: var(--color-primary, #064e3b); border-bottom: 2px solid var(--color-primary, #064e3b); font-weight: 600; }
+    </style>
+</head>
+<body class="bg-surface min-h-screen">
+
+
+    
+    <nav class="fixed top-0 w-full z-50 bg-white h-14 border-b border-outline-variant/50 transition-all duration-300">
+        <div class="flex justify-between items-center w-full px-4 lg:px-10 max-w-[1440px] mx-auto h-full">
+            <a href="../common/首页着陆页.html" class="font-bold text-[22px] tracking-tight text-primary-container shrink-0">智聘星图</a>
+            <div class="hidden lg:flex items-center gap-6 xl:gap-8">
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="../common/首页着陆页.html">探索</a>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="职位推荐.html">职位推荐</a>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="职位搜索.html">职位搜索</a>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="简历中心.html">简历中心</a>
+                <div class="relative" id="interviewDD-wrap-desk">
+                    <button onclick="toggleInterviewDD(event, 'desk')" class="active-tab font-medium text-[13px] hover:text-primary-container transition-all pb-1 whitespace-nowrap cursor-pointer flex items-center gap-0.5">
+                        面试功能
+                        <span class="material-symbols-outlined text-sm transition-transform" id="interview-arrow-desk">expand_more</span>
+                    </button>
+                    <div id="interviewDD-desk" class="hidden absolute left-0 top-full mt-1 w-36 bg-white rounded-xl shadow-2xl border border-outline-variant/30 z-50 overflow-hidden">
+                        <a href="模拟面试.html" class="block px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors">智能面试</a>
+                        <a href="面试记录.html" class="block px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors">面试记录</a>
+                    </div>
+                </div>
+                <a class="font-medium text-[13px] text-on-surface-variant hover:text-primary-container transition-all pb-1 whitespace-nowrap" href="社交.html">社交</a>
+            </div>
+            <div class="flex items-center gap-2 lg:gap-3">
+                <a href="通知中心.html" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer hidden xl:block" title="通知中心">notifications</a>
+                <div class="hidden xl:flex items-center bg-surface-container rounded-full px-3 py-1.5 border border-outline-variant/60">
+                    <span class="material-symbols-outlined text-outline text-base">search</span>
+                    <input class="bg-transparent border-none focus:ring-0 text-sm w-32 ml-1 text-on-surface placeholder-on-surface-variant/60" placeholder="搜索职位..." type="text"/>
+                </div>
+                <div id="nav-guest" class="flex items-center gap-2">
+                    <a href="../common/登录.html" class="text-primary-container font-medium text-[13px] px-3 py-1.5 hover:bg-surface-container rounded-full transition-all hidden sm:inline-block">登录</a>
+                    <a href="../common/注册.html" class="bg-primary-container text-on-primary font-medium text-[13px] px-4 py-1.5 rounded-full hover:opacity-90 transition-all hidden sm:inline-block">注册</a>
+                </div>
+                <div id="nav-user" class="hidden items-center gap-3">
+                    <div class="relative">
+                        <div id="user-dropdown-trigger" class="flex items-center gap-2 cursor-pointer hover:bg-surface-container rounded-full px-3 py-1.5 transition-all">
+                            <div id="user-avatar" class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-xs font-bold">Q</div>
+                            <span id="user-nickname" class="text-sm font-medium text-on-surface hidden xl:inline-block">求职小能手</span>
+                            <span class="material-symbols-outlined text-sm text-on-surface-variant">expand_more</span>
+                        </div>
+                        <div id="user-dropdown" class="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-outline-variant/30 py-2 z-50 hidden">
+                            <a href="个人中心.html" class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-primary-container/10 hover:text-primary transition-colors"><span class="material-symbols-outlined text-base">person</span><span>个人中心</span></a>
+                            <a href="面试记录.html" class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-primary-container/10 hover:text-primary transition-colors"><span class="material-symbols-outlined text-base">calendar_today</span><span>我的面试</span></a>
+                            <div class="border-t border-outline-variant/20 my-1"></div>
+                            <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"><span class="material-symbols-outlined text-base">logout</span><span>退出登录</span></button>
+                        </div>
+                    </div>
+                </div>
+                <button id="mobile-menu-btn" class="lg:hidden p-1.5 hover:bg-surface-container rounded-lg transition-colors" onclick="toggleMobileMenu()"><span class="material-symbols-outlined text-on-surface text-xl">menu</span></button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-outline-variant/50 shadow-lg">
+            <div class="flex flex-col px-4 py-3 gap-1">
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="../common/首页着陆页.html">探索</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="职位推荐.html">职位推荐</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="职位搜索.html">职位搜索</a>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="简历中心.html">简历中心</a>
+                <div class="relative" id="interviewDD-wrap-mob">
+                    <button onclick="toggleInterviewDD(event, 'mob')" class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all cursor-pointer flex items-center justify-between w-full">
+                        面试功能
+                        <span class="material-symbols-outlined text-base transition-transform" id="interview-arrow-mob">expand_more</span>
+                    </button>
+                    <div id="interviewDD-mob" class="hidden ml-4 space-y-0.5 mt-0.5">
+                        <a href="模拟面试.html" class="block py-2 px-3 text-sm text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">智能面试</a>
+                        <a href="面试记录.html" class="block py-2 px-3 text-sm text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">面试记录</a>
+                    </div>
+                </div>
+                <a class="font-medium text-sm text-on-surface-variant hover:bg-surface-container py-2.5 px-3 rounded-lg transition-all" href="社交.html">社交</a>
+                <div class="border-t border-outline-variant/30 my-2"></div>
+                <div id="mobile-guest" class="flex gap-2">
+                    <a href="../common/登录.html" class="flex-1 text-center text-primary-container font-medium text-sm py-2.5 border border-outline-variant/40 rounded-lg hover:bg-surface-container transition-all">登录</a>
+                    <a href="../common/注册.html" class="flex-1 text-center bg-primary-container text-on-primary font-medium text-sm py-2.5 rounded-lg hover:opacity-90 transition-all">注册</a>
+                </div>
+                <div id="mobile-user" class="hidden items-center gap-3 px-3 py-2">
+                    <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center text-sm font-bold" id="mobile-avatar">Q</div>
+                    <span class="text-sm font-medium text-on-surface flex-1" id="mobile-nickname">求职小能手</span>
+                    <button onclick="logout()" class="text-on-surface-variant hover:text-red-500 transition-all"><span class="material-symbols-outlined text-lg">logout</span></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-8 px-4 lg:px-10 max-w-[1200px] mx-auto">
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-on-surface">面试记录</h1>
+            <p class="text-sm text-on-surface-variant mt-1">查看你的历史面试记录与评估报告</p>
+        </div>
+
+        <!-- 面试统计 -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-xl p-4 border border-outline-variant/30">
+                <div class="text-2xl font-bold text-primary" id="total-interviews">0</div>
+                <div class="text-sm text-on-surface-variant">总面试次数</div>
+            </div>
+            <div class="bg-white rounded-xl p-4 border border-outline-variant/30">
+                <div class="text-2xl font-bold text-green-600" id="completed-interviews">0</div>
+                <div class="text-sm text-on-surface-variant">已完成</div>
+            </div>
+            <div class="bg-white rounded-xl p-4 border border-outline-variant/30">
+                <div class="text-2xl font-bold text-blue-600" id="avg-score">0</div>
+                <div class="text-sm text-on-surface-variant">平均得分</div>
+            </div>
+            <div class="bg-white rounded-xl p-4 border border-outline-variant/30">
+                <div class="text-2xl font-bold text-orange-500" id="best-score">0</div>
+                <div class="text-sm text-on-surface-variant">最高得分</div>
+            </div>
+        </div>
+
+        <!-- 筛选标签 -->
+        <div class="flex items-center gap-2 mb-6 border-b border-outline-variant/30 pb-2">
+            <button onclick="filterRecords('all')" class="px-4 py-2 text-sm font-medium rounded-lg transition-all active-tab" data-filter="all">全部</button>
+            <button onclick="filterRecords('completed')" class="px-4 py-2 text-sm font-medium text-on-surface-variant hover:text-primary-container transition-all rounded-lg" data-filter="completed">已完成</button>
+            <button onclick="filterRecords('video')" class="px-4 py-2 text-sm font-medium text-on-surface-variant hover:text-primary-container transition-all rounded-lg" data-filter="video">视频面试</button>
+            <button onclick="filterRecords('audio')" class="px-4 py-2 text-sm font-medium text-on-surface-variant hover:text-primary-container transition-all rounded-lg" data-filter="audio">电话面试</button>
+            <button onclick="filterRecords('chat')" class="px-4 py-2 text-sm font-medium text-on-surface-variant hover:text-primary-container transition-all rounded-lg" data-filter="chat">聊天式</button>
+        </div>
+
+        <!-- 面试记录列表 -->
+        <div id="interview-list" class="space-y-4">
+            <!-- 动态渲染 -->
+        </div>
+        
+        <!-- 空状态 -->
+        <div id="empty-state" class="rounded-2xl border border-outline-variant/30 bg-white p-12 text-center hidden">
+            <span class="material-symbols-outlined text-6xl text-on-surface-variant/40 mb-4 block">history</span>
+            <h3 class="text-lg font-semibold text-on-surface mb-2">暂无面试记录</h3>
+            <p class="text-sm text-on-surface-variant mb-6">完成面试后，记录将在此展示</p>
+            <a href="模拟面试.html" class="inline-flex items-center gap-2 bg-primary text-on-primary px-5 py-2.5 rounded-full text-sm font-medium hover:opacity-90 transition-all">
+                <span class="material-symbols-outlined text-base">play_arrow</span>
+                开始面试
+            </a>
+        </div>
+    </main>
+
+    <script>
+        function toggleMobileMenu() {
+            var menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+        function toggleUserDropdown(e) {
+            e.stopPropagation();
+            var dd = document.getElementById('user-dropdown');
+            dd.classList.toggle('hidden');
+        }
+        function closeUserDropdown() {
+            var dd = document.getElementById('user-dropdown');
+            if (dd) dd.classList.add('hidden');
+        }
+        document.addEventListener('click', function(e) {
+            var trigger = document.getElementById('user-dropdown-trigger');
+            if (trigger && !trigger.contains(e.target)) closeUserDropdown();
+            ['desk', 'mob'].forEach(function(s) {
+                var wrap = document.getElementById('interviewDD-wrap-' + s);
+                if (wrap && !wrap.contains(e.target)) closeInterviewDD(s);
+            });
+        });
+        function _OLD_REMOVED(e, suffix) {
+            e.stopPropagation();
+            var dd = document.getElementById('interviewDD-' + suffix);
+            var arrow = document.getElementById('interview-arrow-' + suffix);
+            dd.classList.toggle('hidden');
+            if (arrow) arrow.style.transform = dd.classList.contains('hidden') ? '' : 'rotate(180deg)';
+        }
+        function closeInterviewDD(suffix) {
+            var dd = document.getElementById('interviewDD-' + suffix);
+            var arrow = document.getElementById('interview-arrow-' + suffix);
+            if (dd) dd.classList.add('hidden');
+            if (arrow) arrow.style.transform = '';
+        }
+        function syncLoginState() {
+            var isLoggedIn = localStorage.getItem('loggedIn') === 'true';
+            var userNickname = localStorage.getItem('userNickname') || '用户';
+            var userAvatar = localStorage.getItem('userAvatar') || 'U';
+            if (isLoggedIn) {
+                var ng = document.getElementById('nav-guest');
+                var nu = document.getElementById('nav-user');
+                if (ng) ng.classList.add('hidden');
+                if (nu) { nu.classList.remove('hidden'); nu.classList.add('flex'); }
+                var ua = document.getElementById('user-avatar');
+                var un = document.getElementById('user-nickname');
+                if (ua) ua.textContent = userAvatar;
+                if (un) un.textContent = userNickname;
+                var mg = document.getElementById('mobile-guest');
+                var mu = document.getElementById('mobile-user');
+                if (mg) mg.classList.add('hidden');
+                if (mu) { mu.classList.remove('hidden'); mu.classList.add('flex'); }
+                var ma = document.getElementById('mobile-avatar');
+                var mn = document.getElementById('mobile-nickname');
+                if (ma) ma.textContent = userAvatar;
+                if (mn) mn.textContent = userNickname;
+            }
+        }
+        function logout() {
+            localStorage.removeItem('loggedIn');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('userNickname');
+            localStorage.removeItem('userAvatar');
+            localStorage.removeItem('zhihire_resume');
+            window.location.href = '../common/首页着陆页.html';
+        }
+        // 面试记录数据
+        var interviewRecords = [];
+        var currentFilter = 'all';
+
+        // 初始化
+        function init() {
+            syncLoginState();
+            loadInterviewRecords();
+            renderRecords();
+        }
+
+        // 加载面试记录
+        function loadInterviewRecords() {
+            var records = localStorage.getItem('interviewRecords');
+            if (records) {
+                interviewRecords = JSON.parse(records);
+            } else {
+                // 添加示例数据
+                interviewRecords = [
+                    {
+                        id: 1,
+                        jobTitle: '高级前端工程师',
+                        company: '字节跳动',
+                        stage: '初面',
+                        pressure: '标准',
+                        scene: '视频',
+                        score: 88,
+                        date: '2024-01-15 14:30',
+                        duration: '45:23',
+                        status: 'completed',
+                        dimensions: {
+                            technical: 90,
+                            communication: 85,
+                            logic: 88
+                        }
+                    },
+                    {
+                        id: 2,
+                        jobTitle: '后端开发工程师',
+                        company: '美团',
+                        stage: '复面',
+                        pressure: '高压',
+                        scene: '电话',
+                        score: 76,
+                        date: '2024-01-12 10:00',
+                        duration: '38:15',
+                        status: 'completed',
+                        dimensions: {
+                            technical: 78,
+                            communication: 72,
+                            logic: 80
+                        }
+                    },
+                    {
+                        id: 3,
+                        jobTitle: '全栈工程师',
+                        company: '阿里巴巴',
+                        stage: '初面',
+                        pressure: '轻松',
+                        scene: '聊天',
+                        score: 82,
+                        date: '2024-01-10 16:45',
+                        duration: '32:00',
+                        status: 'completed',
+                        dimensions: {
+                            technical: 80,
+                            communication: 85,
+                            logic: 82
+                        }
+                    }
+                ];
+                localStorage.setItem('interviewRecords', JSON.stringify(interviewRecords));
+            }
+        }
+
+        // 渲染面试记录
+        function renderRecords() {
+            var list = document.getElementById('interview-list');
+            var emptyState = document.getElementById('empty-state');
+            
+            var filteredRecords = interviewRecords;
+            if (currentFilter !== 'all') {
+                if (currentFilter === 'completed') {
+                    filteredRecords = interviewRecords.filter(r => r.status === 'completed');
+                } else if (currentFilter === 'video') {
+                    filteredRecords = interviewRecords.filter(r => r.scene === '视频');
+                } else if (currentFilter === 'audio') {
+                    filteredRecords = interviewRecords.filter(r => r.scene === '电话');
+                } else if (currentFilter === 'chat') {
+                    filteredRecords = interviewRecords.filter(r => r.scene === '聊天');
+                }
+            }
+
+            // 更新统计
+            updateStats();
+
+            if (filteredRecords.length === 0) {
+                list.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            
+            list.innerHTML = filteredRecords.map(function(record) {
+                var sceneIcon = record.scene === '视频' ? 'videocam' : record.scene === '电话' ? 'phone' : 'chat';
+                var sceneColor = record.scene === '视频' ? 'blue' : record.scene === '电话' ? 'green' : 'purple';
+                var scoreColor = record.score >= 80 ? 'text-green-600' : record.score >= 60 ? 'text-yellow-600' : 'text-red-600';
+                
+                return `
+                    <div class="bg-white rounded-xl border border-outline-variant/30 p-5 hover:shadow-md transition-all">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 rounded-xl bg-${sceneColor}-100 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-${sceneColor}-600 text-xl">${sceneIcon}</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-on-surface">${record.jobTitle}</h3>
+                                    <p class="text-sm text-on-surface-variant">${record.company} · ${record.stage} · ${record.pressure}模式</p>
+                                    <div class="flex items-center gap-4 mt-2 text-xs text-on-surface-variant">
+                                        <span class="flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-sm">calendar_today</span>
+                                            ${record.date}
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-sm">timer</span>
+                                            ${record.duration}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-3xl font-bold ${scoreColor}">${record.score}</div>
+                                <div class="text-xs text-on-surface-variant">得分</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-outline-variant/20">
+                            <div class="grid grid-cols-3 gap-4">
+                                <div>
+                                    <div class="flex items-center justify-between text-xs mb-1">
+                                        <span class="text-on-surface-variant">技术深度</span>
+                                        <span class="text-on-surface">${record.dimensions.technical}</span>
+                                    </div>
+                                    <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="h-full bg-blue-500 rounded-full" style="width:${record.dimensions.technical}%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex items-center justify-between text-xs mb-1">
+                                        <span class="text-on-surface-variant">表达能力</span>
+                                        <span class="text-on-surface">${record.dimensions.communication}</span>
+                                    </div>
+                                    <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="h-full bg-green-500 rounded-full" style="width:${record.dimensions.communication}%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex items-center justify-between text-xs mb-1">
+                                        <span class="text-on-surface-variant">逻辑思维</span>
+                                        <span class="text-on-surface">${record.dimensions.logic}</span>
+                                    </div>
+                                    <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="h-full bg-purple-500 rounded-full" style="width:${record.dimensions.logic}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex justify-end gap-2 mt-4">
+                                <button onclick="viewReport(${record.id})" class="px-4 py-2 text-sm font-medium text-primary-container hover:bg-primary-container/10 rounded-lg transition-all">
+                                    查看报告
+                                </button>
+                                <button onclick="retakeInterview(${record.id})" class="px-4 py-2 text-sm font-medium bg-primary-container text-white rounded-lg hover:bg-primary transition-all">
+                                    再次挑战
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 更新统计数据
+        function updateStats() {
+            var total = interviewRecords.length;
+            var completed = interviewRecords.filter(r => r.status === 'completed').length;
+            var avgScore = total > 0 ? Math.round(interviewRecords.reduce((sum, r) => sum + r.score, 0) / total) : 0;
+            var bestScore = total > 0 ? Math.max(...interviewRecords.map(r => r.score)) : 0;
+
+            document.getElementById('total-interviews').textContent = total;
+            document.getElementById('completed-interviews').textContent = completed;
+            document.getElementById('avg-score').textContent = avgScore;
+            document.getElementById('best-score').textContent = bestScore;
+        }
+
+        // 筛选记录
+        function filterRecords(filter) {
+            currentFilter = filter;
+            
+            // 更新按钮状态
+            document.querySelectorAll('[data-filter]').forEach(function(btn) {
+                btn.classList.remove('active-tab');
+                btn.classList.add('text-on-surface-variant');
+            });
+            document.querySelector('[data-filter="' + filter + '"]').classList.add('active-tab');
+            document.querySelector('[data-filter="' + filter + '"]').classList.remove('text-on-surface-variant');
+            
+            renderRecords();
+        }
+
+        // 查看报告
+        function viewReport(id) {
+            window.location.href = '面试报告.html?id=' + id;
+        }
+
+        // 再次挑战
+        function retakeInterview(id) {
+            var record = interviewRecords.find(r => r.id === id);
+            if (record) {
+                var config = {
+                    jobId: null,
+                    stage: record.stage,
+                    pressure: record.pressure,
+                    scene: record.scene === '视频' ? '直播' : record.scene === '电话' ? '音频' : '聊天'
+                };
+                localStorage.setItem('interviewConfig', JSON.stringify(config));
+                window.location.href = '模拟面试.html';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+    <script>
+        function toggleInterviewDD(e, suffix) {
+            e.stopPropagation();
+            var dd = document.getElementById('interviewDD-' + suffix);
+            var arrow = document.getElementById('interview-arrow-' + suffix);
+            if (dd) dd.classList.toggle('hidden');
+            if (arrow) arrow.style.transform = dd && dd.classList.contains('hidden') ? '' : 'rotate(180deg)';
+        }
+        function closeInterviewDD(suffix) {
+            var dd = document.getElementById('interviewDD-' + suffix);
+            var arrow = document.getElementById('interview-arrow-' + suffix);
+            if (dd) dd.classList.add('hidden');
+            if (arrow) arrow.style.transform = '';
+        }
+        document.addEventListener('click', function(e) {
+            ['desk', 'mob'].forEach(function(s) {
+                var wrap = document.getElementById('interviewDD-wrap-' + s);
+                if (wrap && !wrap.contains(e.target)) closeInterviewDD(s);
+            });
+        });
+        function toggleMobileMenu() {
+            var menu = document.getElementById('mobile-menu');
+            if (menu) menu.classList.toggle('hidden');
+        }
+        function logout() {
+            localStorage.removeItem('loggedIn');
+            window.location.href = '../common/登录.html';
+        }
+    </script>
+</body>
+</html>

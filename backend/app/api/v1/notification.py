@@ -6,6 +6,7 @@ from app.api.deps import get_current_user, require_role
 from app.db.session import get_db
 from app.models.entities.user import User
 from app.models.enums.role import RoleEnum
+from app.models.enums.role import RoleEnum
 from app.models.schemas.notification import NotificationItem, UnreadCountResponse
 from app.models.schemas.result import PageResult, Result
 from app.services import notification_service
@@ -18,7 +19,7 @@ router = APIRouter(prefix="/notification", tags=["通知"])
 async def list_notifications(
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
-    current_user: User = Depends(require_role(RoleEnum.USER)),
+    current_user: User = Depends(require_role(RoleEnum.USER, RoleEnum.COMPANY)),
     db: AsyncSession = Depends(get_db),
 ):
     try:
@@ -40,7 +41,7 @@ async def list_notifications(
 @router.put("/{notification_id}/read", summary="标记单条已读")
 async def mark_read(
     notification_id: int,
-    current_user: User = Depends(require_role(RoleEnum.USER)),
+    current_user: User = Depends(require_role(RoleEnum.USER, RoleEnum.COMPANY)),
     db: AsyncSession = Depends(get_db),
 ):
     try:
@@ -52,7 +53,7 @@ async def mark_read(
 
 @router.put("/read-all", summary="全部已读")
 async def mark_all_read(
-    current_user: User = Depends(require_role(RoleEnum.USER)),
+    current_user: User = Depends(require_role(RoleEnum.USER, RoleEnum.COMPANY)),
     db: AsyncSession = Depends(get_db),
 ):
     try:
@@ -64,7 +65,7 @@ async def mark_all_read(
 
 @router.get("/unread-count", summary="未读通知数")
 async def unread_count(
-    current_user: User = Depends(require_role(RoleEnum.USER)),
+    current_user: User = Depends(require_role(RoleEnum.USER, RoleEnum.COMPANY)),
     db: AsyncSession = Depends(get_db),
 ):
     try:

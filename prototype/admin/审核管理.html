@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>审核管理 - 智聘星图</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="../config.js"></script>
+    <style>
+        .glass-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(196,197,217,0.4); box-shadow: 0 4px 20px rgba(0,0,0,0.04); transition: all 0.3s; border-radius: 12px; }
+        .glass-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+        .btn-primary { position: relative; overflow: hidden; background: #064e3b; color: #fff; padding: 12px 32px; border-radius: 9999px; font-weight: 600; font-size: 14px; letter-spacing: 0.02em; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; }
+        .btn-primary:hover { background: #003527; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(6,78,59,0.25); }
+        .btn-primary::after { content:""; position:absolute; top:0; left:-150%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent); transform:skewX(-20deg); animation:shimmer 4s infinite; }
+        @keyframes shimmer { 0%{left:-150%} 30%{left:150%} 100%{left:150%} }
+        .btn-ghost { border: 1px solid #191c1d; color: #191c1d; padding: 12px 32px; border-radius: 9999px; font-weight: 600; font-size: 14px; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; background: transparent; cursor: pointer; }
+        .btn-ghost:hover { background: #191c1d; color: #fff; }
+        .btn-success { background: #155724; color: #fff; padding: 6px 16px; border-radius: 9999px; font-weight: 600; font-size: 13px; transition: all 0.3s; border: none; cursor: pointer; }
+        .btn-success:hover { background: #0d3b16; }
+        .btn-danger { background: #ba1a1a; color: #fff; padding: 6px 16px; border-radius: 9999px; font-weight: 600; font-size: 13px; transition: all 0.3s; border: none; cursor: pointer; }
+        .btn-danger:hover { background: #93000a; }
+        .chip { display:inline-flex; align-items:center; gap:4px; padding:4px 12px; border-radius:4px; font-size:12px; font-weight:600; letter-spacing:0.05em; }
+        .chip-primary { background: #b0f0d6; color: #003527; }
+        .chip-success { background: #d4edda; color: #155724; }
+        .chip-warning { background: #fff3cd; color: #856404; }
+        .chip-error { background: #ffdad6; color: #93000a; }
+        .chip-neutral { background: #f3f4f5; color: #434656; }
+        .ambient-orb { position:absolute; border-radius:50%; filter:blur(100px); opacity:0.12; pointer-events:none; z-index:-1; }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .animate-fade-in-up { animation:fadeInUp 0.6s ease forwards; }
+        ::selection { background: #b0f0d6; color: #002117; }
+        .mobile-nav-drawer { display:none; position:fixed; inset:0; z-index:100; }
+        .mobile-nav-drawer.open { display:flex; }
+        .mobile-nav-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.4); }
+        .mobile-nav-panel { position:absolute; right:0; top:0; bottom:0; width:280px; background:#fff; box-shadow:-4px 0 24px rgba(0,0,0,0.15); padding:24px; overflow-y:auto; }
+        .tab-active { color: #064e3b; border-bottom: 3px solid #064e3b; font-weight: 600; }
+        .tab-inactive { color: #434656; border-bottom: 3px solid transparent; }
+        .tab-inactive:hover { color: #064e3b; }
+        .table-container { overflow-x: auto; }
+        .table-row:hover, .skill-table-row:hover { background: rgba(176,240,214,0.15); }
+        .stat-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(16px); border: 1px solid rgba(196,197,217,0.3); border-radius: 12px; padding: 20px; transition: all 0.3s; }
+        input, textarea, select { font-family: 'Inter', sans-serif; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #064e3b; box-shadow: 0 0 0 3px rgba(6,78,59,0.1); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .detail-panel { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border: 1px solid rgba(196,197,217,0.4); border-radius: 16px; box-shadow: 0 24px 80px rgba(0,0,0,0.15); max-width: 640px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .btn-sm { padding: 6px 14px; border-radius: 9999px; font-weight: 600; font-size: 12px; transition: all 0.3s; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+    </style>
+</head>
+<body class="bg-surface font-sans text-on-surface min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm h-20">
+        <div class="flex justify-between items-center w-full px-4 md:px-16 max-w-[1440px] mx-auto h-full">
+            <a href="管理员仪表板.html" class="font-bold text-3xl tracking-tight text-primary">智聘星图</a>
+            <div class="hidden md:flex items-center gap-6 text-sm">
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="管理员仪表板.html">仪表板</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="用户管理.html">用户管理</a>
+                <a class="text-primary border-b-2 border-primary pb-1 font-semibold" href="审核管理.html">审核管理</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="系统日志.html">系统日志</a>
+            </div>
+            <div class="flex items-center gap-3">
+                <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-all p-2">notifications</button>
+                <div class="w-9 h-9 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center text-xs font-bold cursor-pointer">管</div>
+                <button class="md:hidden p-1.5 hover:bg-surface-container rounded-lg transition-colors" onclick="openMobileNav()">
+                    <span class="material-symbols-outlined text-on-surface text-xl">menu</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 移动端导航抽屉 -->
+    <div id="mobileNavDrawer" class="mobile-nav-drawer">
+        <div class="mobile-nav-overlay" onclick="closeMobileNav()"></div>
+        <div class="mobile-nav-panel">
+            <div class="flex items-center justify-between mb-8">
+                <span class="font-bold text-lg text-primary">智聘星图</span>
+                <button onclick="closeMobileNav()" class="p-1 hover:bg-surface-container rounded-lg">
+                    <span class="material-symbols-outlined text-on-surface-variant">close</span>
+                </button>
+            </div>
+            <div class="flex flex-col gap-1">
+                <a href="管理员仪表板.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">dashboard</span>
+                    <span class="text-sm font-medium">仪表板</span>
+                </a>
+                <a href="用户管理.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">group</span>
+                    <span class="text-sm font-medium">用户管理</span>
+                </a>
+                <a href="审核管理.html" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary font-semibold transition-colors">
+                    <span class="material-symbols-outlined text-xl">verified</span>
+                    <span class="text-sm font-medium">审核管理</span>
+                </a>
+                <a href="系统日志.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">description</span>
+                    <span class="text-sm font-medium">系统日志</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Background orbs -->
+    <div class="ambient-orb w-[500px] h-[500px] bg-primary top-20 -left-60" style="position:fixed;"></div>
+    <div class="ambient-orb w-[400px] h-[400px] bg-tertiary bottom-20 -right-40" style="position:fixed;"></div>
+
+    <!-- Page Content -->
+    <main class="pt-24 pb-16 px-4 md:px-16 max-w-[1440px] mx-auto">
+
+        <!-- Page Header -->
+        <div class="mb-10 animate-fade-in-up">
+            <h1 class="text-[40px] leading-[48px] font-bold tracking-tight text-on-surface mb-2" style="letter-spacing:-0.03em;">审核管理</h1>
+            <p class="text-on-surface-variant text-lg">企业资质审核与技能字典管理</p>
+        </div>
+
+        <!-- Mode Tabs -->
+        <div class="flex gap-8 mb-8 border-b border-outline-variant/40">
+            <button id="tabAudit" class="pb-3 text-[15px] font-semibold tab-active transition-all" onclick="switchTab('audit')">
+                <span class="material-symbols-outlined text-[18px] align-middle mr-1">verified</span>
+                企业资质审核
+            </button>
+            <button id="tabSkill" class="pb-3 text-[15px] tab-inactive transition-all" onclick="switchTab('skill')">
+                <span class="material-symbols-outlined text-[18px] align-middle mr-1">psychology</span>
+                技能字典管理
+            </button>
+        </div>
+
+        <!-- ===== Enterprise Audit Tab ===== -->
+        <div id="auditTab" class="animate-fade-in-up">
+            <!-- Audit Stats -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+                <div class="stat-card">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#fff3cd;">
+                            <span class="material-symbols-outlined text-xl" style="color:#856404;">pending</span>
+                        </div>
+                        <div>
+                            <div class="text-[28px] font-bold text-on-surface leading-none">8</div>
+                            <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant" style="letter-spacing:0.1em;">待审核</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#d4edda;">
+                            <span class="material-symbols-outlined text-xl" style="color:#155724;">check_circle</span>
+                        </div>
+                        <div>
+                            <div class="text-[28px] font-bold text-on-surface leading-none">156</div>
+                            <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant" style="letter-spacing:0.1em;">已通过</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#ffdad6;">
+                            <span class="material-symbols-outlined text-xl" style="color:#93000a;">cancel</span>
+                        </div>
+                        <div>
+                            <div class="text-[28px] font-bold text-on-surface leading-none">12</div>
+                            <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant" style="letter-spacing:0.1em;">已驳回</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audit Table -->
+            <div class="glass-card mb-8" style="border-radius:12px;">
+                <div class="px-6 py-4 border-b border-outline-variant/30 flex items-center justify-between">
+                    <h3 class="text-base font-semibold text-on-surface">审核列表</h3>
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-on-surface-variant text-[18px]">filter_list</span>
+                        <select id="auditStatusFilter" class="px-3 py-1.5 rounded-lg border border-outline-variant/60 bg-white/60 text-xs text-on-surface" onchange="filterAuditByStatus()">
+                            <option value="all">全部状态</option>
+                            <option value="待审核">待审核</option>
+                            <option value="已通过">已通过</option>
+                            <option value="已驳回">已驳回</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <!-- Table Header -->
+                    <div class="table-header" style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1.5fr;font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#434656;padding:12px 20px;border-bottom:2px solid rgba(196,197,217,0.4);min-width:700px;">
+                        <div>企业名称</div>
+                        <div>提交时间</div>
+                        <div>行业</div>
+                        <div>状态</div>
+                        <div>操作</div>
+                    </div>
+
+                    <!-- Row 1 - Pending -->
+                    <div class="table-row audit-row" style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1.5fr;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(196,197,217,0.3);min-width:700px;" data-status="待审核" onclick="showDetail('星辰科技')">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary font-bold text-sm">星</div>
+                            <span class="text-sm font-semibold text-on-surface">星辰科技</span>
+                        </div>
+                        <div class="text-sm text-on-surface-variant">2024-01-15</div>
+                        <div class="text-sm text-on-surface-variant">互联网</div>
+                        <div><span class="chip chip-warning">待审核</span></div>
+                        <div class="flex gap-2" onclick="event.stopPropagation()">
+                            <button class="btn-sm btn-success" onclick="approveAudit(this, '星辰科技')">通过</button>
+                            <button class="btn-sm btn-danger" onclick="showRejectReason(this)">驳回</button>
+                        </div>
+                    </div>
+
+                    <!-- Row 2 - Pending -->
+                    <div class="table-row audit-row" style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1.5fr;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(196,197,217,0.3);min-width:700px;" data-status="待审核" onclick="showDetail('蓝海数据')">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary font-bold text-sm">蓝</div>
+                            <span class="text-sm font-semibold text-on-surface">蓝海数据</span>
+                        </div>
+                        <div class="text-sm text-on-surface-variant">2024-01-14</div>
+                        <div class="text-sm text-on-surface-variant">互联网</div>
+                        <div><span class="chip chip-warning">待审核</span></div>
+                        <div class="flex gap-2" onclick="event.stopPropagation()">
+                            <button class="btn-sm btn-success" onclick="approveAudit(this, '蓝海数据')">通过</button>
+                            <button class="btn-sm btn-danger" onclick="showRejectReason(this)">驳回</button>
+                        </div>
+                    </div>
+
+                    <!-- Row 3 - Pending -->
+                    <div class="table-row audit-row" style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1.5fr;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(196,197,217,0.3);min-width:700px;" data-status="待审核" onclick="showDetail('云途科技')">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary font-bold text-sm">云</div>
+                            <span class="text-sm font-semibold text-on-surface">云途科技</span>
+                        </div>
+                        <div class="text-sm text-on-surface-variant">2024-01-14</div>
+                        <div class="text-sm text-on-surface-variant">人工智能</div>
+                        <div><span class="chip chip-warning">待审核</span></div>
+                        <div class="flex gap-2" onclick="event.stopPropagation()">
+                            <button class="btn-sm btn-success" onclick="approveAudit(this, '云途科技')">通过</button>
+                            <button class="btn-sm btn-danger" onclick="showRejectReason(this)">驳回</button>
+                        </div>
+                    </div>
+
+                    <!-- Row 4 - Approved -->
+                    <div class="table-row audit-row" style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1.5fr;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(196,197,217,0.3);min-width:700px;" data-status="已通过" onclick="showDetail('金山办公')">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary font-bold text-sm">金</div>
+                            <span class="text-sm font-semibold text-on-surface">金山办公</span>
+                        </div>
+                        <div class="text-sm text-on-surface-variant">2024-01-13</div>
+                        <div class="text-sm text-on-surface-variant">办公软件</div>
+                        <div><span class="chip chip-success">已通过</span></div>
+                        <div class="flex gap-2" onclick="event.stopPropagation()">
+                            <button class="btn-sm" style="background:#f3f4f5; color:#434656;" disabled>已审核</button>
+                        </div>
+                    </div>
+
+                    <!-- Row 5 - Approved -->
+                    <div class="table-row audit-row" style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1.5fr;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(196,197,217,0.3);min-width:700px;" data-status="已通过" onclick="showDetail('华为技术')">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary font-bold text-sm">华</div>
+                            <span class="text-sm font-semibold text-on-surface">华为技术</span>
+                        </div>
+                        <div class="text-sm text-on-surface-variant">2024-01-12</div>
+                        <div class="text-sm text-on-surface-variant">通讯</div>
+                        <div><span class="chip chip-success">已通过</span></div>
+                        <div class="flex gap-2" onclick="event.stopPropagation()">
+                            <button class="btn-sm" style="background:#f3f4f5; color:#434656;" disabled>已审核</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reject Reason Panel (hidden) -->
+            <div id="rejectPanel" class="hidden glass-card p-6 mb-8" style="border-radius:12px; border-color: rgba(186,26,26,0.3);">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-semibold text-on-surface flex items-center gap-2">
+                        <span class="material-symbols-outlined text-error">warning</span>
+                        驳回原因
+                    </h3>
+                    <button class="text-on-surface-variant hover:text-on-surface transition-colors" onclick="document.getElementById('rejectPanel').classList.add('hidden')">
+                        <span class="material-symbols-outlined text-[20px]">close</span>
+                    </button>
+                </div>
+                <textarea id="rejectReasonText" rows="3" placeholder="填写并说明原因，该原因将通知企业..." class="w-full px-4 py-3 rounded-lg border border-outline-variant/60 bg-white/60 text-sm text-on-surface mb-4 resize-y"></textarea>
+                <div class="flex gap-3">
+                    <button class="btn-danger px-5 py-2" onclick="confirmReject()">确认驳回</button>
+                    <button class="btn-ghost px-5 py-2" onclick="document.getElementById('rejectPanel').classList.add('hidden')">取消</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== Skill Dictionary Tab ===== -->
+        <div id="skillTab" class="hidden animate-fade-in-up">
+            <!-- Skill Stats -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+                <div class="stat-card">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#d4edda;">
+                            <span class="material-symbols-outlined text-xl" style="color:#155724;">check_circle</span>
+                        </div>
+                        <div>
+                            <div class="text-[28px] font-bold text-on-surface leading-none">128</div>
+                            <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant" style="letter-spacing:0.1em;">正式技能</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#fff3cd;">
+                            <span class="material-symbols-outlined text-xl" style="color:#856404;">hourglass_top</span>
+                        </div>
+                        <div>
+                            <div class="text-[28px] font-bold text-on-surface leading-none">23</div>
+                            <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant" style="letter-spacing:0.1em;">候选技能</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#f3f4f5;">
+                            <span class="material-symbols-outlined text-xl" style="color:#434656;">merge</span>
+                        </div>
+                        <div>
+                            <div class="text-[28px] font-bold text-on-surface leading-none">15</div>
+                            <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant" style="letter-spacing:0.1em;">已合并</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skill Table -->
+            <div class="glass-card mb-8" style="border-radius:12px;">
+                <div class="px-6 py-4 border-b border-outline-variant/30 flex items-center justify-between">
+                    <h3 class="text-base font-semibold text-on-surface">技能字典</h3>
+                    <div class="flex items-center gap-3">
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
+                            <input id="skillSearchInput" type="text" placeholder="搜索技能..." class="pl-9 pr-4 py-2 rounded-lg border border-outline-variant/60 bg-white/60 text-sm text-on-surface w-56" oninput="filterSkills()">
+                        </div>
+                        <button class="btn-primary px-5 py-2 text-xs" onclick="showAddSkillModal()">
+                            <span class="material-symbols-outlined text-[16px]">add</span>
+                            添加技能
+                        </button>
+                    </div>
+                </div>
+                <div class="table-container">
+                <div id="skillTableBody">
+                    <!-- Table Header -->
+                    <div class="skill-table-header" style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1.5fr;font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#434656;padding:12px 20px;border-bottom:2px solid rgba(196,197,217,0.4);min-width:700px;">
+                        <div>技能名称</div>
+                        <div>分类</div>
+                        <div>状态</div>
+                        <div>同义词数</div>
+                        <div>操作</div>
+                    </div>
+
+                    <!-- Skill Row 1 - ACTIVE -->
+                    <div class="skill-table-row skill-row" style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1.5fr;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(196,197,217,0.3);min-width:700px;" data-name="Python">
+                        <div class="text-sm font-semibold text-on-surface">Python</div>
+                        <div class="text-sm text-on-surface-variant">编程语言</div>
+                        <div><span class="chip chip-success">ACTIVE</span></div>
+                        <div class="text-sm text-on-surface-variant">4</div>
+                        <div class="flex gap-2">
+                            <button class="btn-sm" style="background:#f3f4f5; color:#434656;" onclick="showEditSkillModal('Python','编程语言')">
+                                <span class="material-symbols-outlined text-[14px]">edit</span>
+                                编辑
+                            </button>
+                            <button class="btn-sm" style="background:#f3f4f5; color:#434656;" onclick="confirmMergeSkill('Python')">
+                                <span class="material-symbols-outlined text-[14px]">merge</span>
+                                合并
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Skill Row 2 - ACTIVE -->
+                    <div class="skill-table-row skill-row" style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1.5fr;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(196,197,217,0.3);min-width:700px;" data-name="React">
+                        <div class="text-sm font-semibold text-on-surface">React</div>
+                        <div class="text-sm text-on-surface-variant">前端开发</div>
+                        <div><span class="chip chip-success">ACTIVE</span></div>
+                        <div class="text-sm text-on-surface-variant">2</div>
+                        <div class="flex gap-2">
+                            <button class="btn-sm" style="background:#f3f4f5; color:#434656;" onclick="showEditSkillModal('React','前端开发')">
+                                <span class="material-symbols-outlined text-[14px]">edit</span>
+                                编辑
+                            </button>
+                            <button class="btn-sm" style="background:#f3f4f5; color:#434656;" onclick="confirmMergeSkill('React')">
+                                <span class="material-symbols-outlined text-[14px]">merge</span>
+                                合并
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Skill Row 3 - ACTIVE -->
+                    <div class="skill-table-row skill-row" style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1.5fr;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(196,197,217,0.3);min-width:700px;" data-name="Kubernetes">
+                        <div class="text-sm font-semibold text-on-surface">Kubernetes</div>
+                        <div class="text-sm text-on-surface-variant">云计算</div>
+                        <div><span class="chip chip-success">ACTIVE</span></div>
+                        <div class="text-sm text-on-surface-variant">3</div>
+                        <div class="flex gap-2">
+                            <button class="btn-sm" style="background:#f3f4f5; color:#434656;" onclick="showEditSkillModal('Kubernetes','云计算')">
+                                <span class="material-symbols-outlined text-[14px]">edit</span>
+                                编辑
+                            </button>
+                            <button class="btn-sm" style="background:#f3f4f5; color:#434656;" onclick="confirmMergeSkill('Kubernetes')">
+                                <span class="material-symbols-outlined text-[14px]">merge</span>
+                                合并
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Skill Row 4 - CANDIDATE -->
+                    <div class="skill-table-row skill-row" style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1.5fr;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(196,197,217,0.3);min-width:700px;" data-name="Rust">
+                        <div class="text-sm font-semibold text-on-surface">Rust</div>
+                        <div class="text-sm text-on-surface-variant">编程语言</div>
+                        <div><span class="chip chip-warning">CANDIDATE</span></div>
+                        <div class="text-sm text-on-surface-variant">1</div>
+                        <div class="flex gap-2">
+                            <button class="btn-sm btn-success" onclick="auditCandidateSkill(this,'Rust')">
+                                <span class="material-symbols-outlined text-[14px]">check</span>
+                                审核
+                            </button>
+                            <button class="btn-sm" style="background:#f3f4f5; color:#434656;" onclick="confirmMergeSkill('Rust')">
+                                <span class="material-symbols-outlined text-[14px]">merge</span>
+                                合并
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Skill Row 5 - CANDIDATE -->
+                    <div class="skill-table-row skill-row" style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1.5fr;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(196,197,217,0.3);min-width:700px;" data-name="Tailwind CSS">
+                        <div class="text-sm font-semibold text-on-surface">Tailwind CSS</div>
+                        <div class="text-sm text-on-surface-variant">前端开发</div>
+                        <div><span class="chip chip-warning">CANDIDATE</span></div>
+                        <div class="text-sm text-on-surface-variant">2</div>
+                        <div class="flex gap-2">
+                            <button class="btn-sm btn-success" onclick="auditCandidateSkill(this,'Tailwind CSS')">
+                                <span class="material-symbols-outlined text-[14px]">check</span>
+                                审核
+                            </button>
+                            <button class="btn-sm" style="background:#f3f4f5; color:#434656;" onclick="confirmMergeSkill('Tailwind CSS')">
+                                <span class="material-symbols-outlined text-[14px]">merge</span>
+                                合并
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Skill Row 6 - MERGED -->
+                    <div class="skill-table-row skill-row" style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1.5fr;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(196,197,217,0.3);min-width:700px;" data-name="ML">
+                        <div class="text-sm font-semibold text-on-surface-variant" style="text-decoration:line-through;">ML</div>
+                        <div class="text-sm text-on-surface-variant">机器学习</div>
+                        <div><span class="chip chip-neutral">MERGED</span></div>
+                        <div class="text-sm text-on-surface-variant">至 机器学习</div>
+                        <div class="flex gap-2">
+                            <button class="btn-sm" style="background:#f3f4f5; color:#434656;" disabled>已合并</button>
+                        </div>
+                    </div>
+
+                    <!-- Skill Row 7 - CANDIDATE -->
+                    <div class="skill-table-row skill-row" style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1.5fr;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(196,197,217,0.3);min-width:700px;" data-name="Go">
+                        <div class="text-sm font-semibold text-on-surface">Go</div>
+                        <div class="text-sm text-on-surface-variant">编程语言</div>
+                        <div><span class="chip chip-warning">CANDIDATE</span></div>
+                        <div class="text-sm text-on-surface-variant">2</div>
+                        <div class="flex gap-2">
+                            <button class="btn-sm btn-success" onclick="auditCandidateSkill(this,'Go')">
+                                <span class="material-symbols-outlined text-[14px]">check</span>
+                                审核
+                            </button>
+                            <button class="btn-sm" style="background:#f3f4f5; color:#434656;" onclick="confirmMergeSkill('Go')">
+                                <span class="material-symbols-outlined text-[14px]">merge</span>
+                                合并
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Skill Row 8 - MERGED -->
+                    <div class="skill-table-row skill-row" style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1.5fr;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(196,197,217,0.3);min-width:700px;" data-name="K8s">
+                        <div class="text-sm font-semibold text-on-surface-variant" style="text-decoration:line-through;">K8s</div>
+                        <div class="text-sm text-on-surface-variant">云计算</div>
+                        <div><span class="chip chip-neutral">MERGED</span></div>
+                        <div class="text-sm text-on-surface-variant">至 Kubernetes</div>
+                        <div class="flex gap-2">
+                            <button class="btn-sm" style="background:#f3f4f5; color:#434656;" disabled>已合并</button>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detail Modal Overlay -->
+        <div id="detailModal" class="modal-overlay hidden" onclick="closeDetail(event)">
+            <div class="detail-panel p-8" onclick="event.stopPropagation()">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold text-on-surface flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">business</span>
+                        企业资质
+                    </h2>
+                    <button class="text-on-surface-variant hover:text-on-surface transition-colors" onclick="closeDetail()">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                <div class="space-y-5">
+                    <!-- Company Info -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">企业名称</label>
+                            <div id="detailName" class="text-sm font-semibold text-on-surface">星辰科技</div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">行业</label>
+                            <div class="text-sm text-on-surface">互联网</div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">联系人</label>
+                            <div class="text-sm text-on-surface">张经理</div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">联系电话</label>
+                            <div class="text-sm text-on-surface">138-0013-8000</div>
+                        </div>
+                    </div>
+
+                    <!-- Uploaded Credentials -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">上传的资质文件</label>
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-3 px-4 py-3 rounded-lg bg-surface-container-low/60">
+                                <span class="material-symbols-outlined text-primary text-[20px]">description</span>
+                                <span class="text-sm text-on-surface">营业执照副本.pdf</span>
+                                <span class="text-xs text-on-surface-variant ml-auto">2.1 MB</span>
+                            </div>
+                            <div class="flex items-center gap-3 px-4 py-3 rounded-lg bg-surface-container-low/60">
+                                <span class="material-symbols-outlined text-primary text-[20px]">description</span>
+                                <span class="text-sm text-on-surface">法人身份证.pdf</span>
+                                <span class="text-xs text-on-surface-variant ml-auto">1.4 MB</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Risk Assessment -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">AI 风险评估</label>
+                        <div class="p-4 rounded-lg border border-outline-variant/30 bg-surface-container-low/40">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="material-symbols-outlined text-[18px]" style="color:#155724;">shield</span>
+                                <span class="text-sm font-semibold" style="color:#155724;">低风险</span>
+                            </div>
+                            <p class="text-sm text-on-surface-variant leading-relaxed">AI 智能评估该企业工商信息与营业执照一致，注册资本 5000 万人民币以上，成立 5 年以上，无负面舆情记录，综合评定建议通过审核。</p>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-3 pt-2">
+                        <button class="btn-primary px-6 py-2.5 text-sm" onclick="closeDetail()">
+                            <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                            通过审核
+                        </button>
+                        <button class="btn-danger px-6 py-2.5" onclick="closeDetail()">
+                            驳回
+                        </button>
+                        <button class="btn-ghost px-6 py-2.5 text-sm" onclick="closeDetail()">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Skill Edit Modal -->
+    <div id="skillEditModal" class="modal-overlay hidden" onclick="closeSkillEditModal(event)">
+        <div class="detail-panel p-8" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-on-surface flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">edit</span>
+                    编辑技能
+                </h2>
+                <button class="text-on-surface-variant hover:text-on-surface transition-colors" onclick="closeSkillEditModal()">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">技能名称</label>
+                    <input id="editSkillName" type="text" class="w-full px-4 py-2.5 text-sm bg-surface-container-low rounded-lg border border-outline-variant/40">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">分类</label>
+                    <select id="editSkillCategory" class="w-full px-4 py-2.5 text-sm bg-surface-container-low rounded-lg border border-outline-variant/40">
+                        <option>编程语言</option>
+                        <option>前端开发</option>
+                        <option>后端开发</option>
+                        <option>云计算</option>
+                        <option>数据库</option>
+                        <option>AI/ML</option>
+                        <option>DevOps</option>
+                        <option>运维部署</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">同义词（逗号分隔）</label>
+                    <input id="editSkillSynonyms" type="text" placeholder="如: py, python3" class="w-full px-4 py-2.5 text-sm bg-surface-container-low rounded-lg border border-outline-variant/40">
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button class="btn-primary px-6 py-2.5 text-sm" onclick="saveSkillEdit()">
+                        <span class="material-symbols-outlined text-[18px]">save</span>
+                        保存
+                    </button>
+                    <button class="btn-ghost px-6 py-2.5 text-sm" onclick="closeSkillEditModal()">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skill Add Modal -->
+    <div id="skillAddModal" class="modal-overlay hidden" onclick="closeSkillAddModal(event)">
+        <div class="detail-panel p-8" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-on-surface flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">add_circle</span>
+                    添加技能
+                </h2>
+                <button class="text-on-surface-variant hover:text-on-surface transition-colors" onclick="closeSkillAddModal()">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">技能名称 <span style="color:#93000a;">*</span></label>
+                    <input id="addSkillName" type="text" placeholder="请输入技能名称" class="w-full px-4 py-2.5 text-sm bg-surface-container-low rounded-lg border border-outline-variant/40">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">分类 <span style="color:#93000a;">*</span></label>
+                    <select id="addSkillCategory" class="w-full px-4 py-2.5 text-sm bg-surface-container-low rounded-lg border border-outline-variant/40">
+                        <option>编程语言</option>
+                        <option>前端开发</option>
+                        <option>后端开发</option>
+                        <option>云计算</option>
+                        <option>数据库</option>
+                        <option>AI/ML</option>
+                        <option>DevOps</option>
+                        <option>运维部署</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">同义词（逗号分隔）</label>
+                    <input id="addSkillSynonyms" type="text" placeholder="如: py, python3" class="w-full px-4 py-2.5 text-sm bg-surface-container-low rounded-lg border border-outline-variant/40">
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button class="btn-primary px-6 py-2.5 text-sm" onclick="saveSkillAdd()">
+                        <span class="material-symbols-outlined text-[18px]">add</span>
+                        保存
+                    </button>
+                    <button class="btn-ghost px-6 py-2.5 text-sm" onclick="closeSkillAddModal()">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Merge Confirm Modal -->
+    <div id="mergeModal" class="modal-overlay hidden" onclick="closeMergeModal(event)">
+        <div class="detail-panel p-8" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-on-surface flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">merge</span>
+                    合并操作
+                </h2>
+                <button class="text-on-surface-variant hover:text-on-surface transition-colors" onclick="closeMergeModal()">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <p class="text-sm text-on-surface-variant">将 "<strong id="mergeSourceSkill"></strong>" 合并至以下正式技能中：</p>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">目标技能</label>
+                    <select id="mergeTargetSkill" class="w-full px-4 py-2.5 text-sm bg-surface-container-low rounded-lg border border-outline-variant/40">
+                        <option>Python</option>
+                        <option>React</option>
+                        <option>Kubernetes</option>
+                    </select>
+                </div>
+                <div class="p-3 rounded-lg" style="background:#fff3cd; color:#856404;">
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="material-symbols-outlined text-[14px]">warning</span>
+                        <span>合并后技能将变为 MERGED 状态，不可恢复</span>
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button class="btn-primary px-6 py-2.5 text-sm" onclick="executeMerge()">
+                        <span class="material-symbols-outlined text-[18px]">check</span>
+                        确认合并
+                    </button>
+                    <button class="btn-ghost px-6 py-2.5 text-sm" onclick="closeMergeModal()">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skill Audit Confirm Modal -->
+    <div id="skillAuditModal" class="modal-overlay hidden" onclick="closeSkillAuditModal(event)">
+        <div class="detail-panel p-8" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-on-surface flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">verified</span>
+                    审核候选技能
+                </h2>
+                <button class="text-on-surface-variant hover:text-on-surface transition-colors" onclick="closeSkillAuditModal()">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <p class="text-sm text-on-surface-variant">确认将 "<strong id="auditSkillName"></strong>" 从 CANDIDATE 状态提升为 ACTIVE 正式技能？</p>
+                <div class="flex gap-3 pt-2">
+                    <button class="btn-primary px-6 py-2.5 text-sm" onclick="approveSkillAudit()">
+                        <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                        通过审核
+                    </button>
+                    <button class="btn-danger px-6 py-2.5" onclick="rejectSkillAudit()">
+                        驳回
+                    </button>
+                    <button class="btn-ghost px-6 py-2.5 text-sm" onclick="closeSkillAuditModal()">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-surface-container-lowest border-t border-outline-variant w-full py-12 mt-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-16 max-w-[1440px] mx-auto">
+            <div>
+                <div class="font-bold text-3xl text-on-surface mb-3">智聘星图</div>
+                <p class="text-on-surface-variant">AI 驱动的智能招聘平台<br>基于银河麒麟 · 人大金仓 · DeepSeek</p>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">平台</h4>
+                <div class="flex flex-col gap-1 text-secondary text-sm">
+                    <a href="#" class="hover:text-primary transition-colors">品牌宣言</a>
+                    <a href="#" class="hover:text-primary transition-colors">精选职位</a>
+                    <a href="#" class="hover:text-primary transition-colors">能力图谱</a>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">支持</h4>
+                <div class="flex flex-col gap-1 text-secondary text-sm">
+                    <a href="#" class="hover:text-primary transition-colors">隐私政策</a>
+                    <a href="#" class="hover:text-primary transition-colors">联系支持</a>
+                    <a href="#" class="hover:text-primary transition-colors">常见问题</a>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-6 text-sm text-on-surface-variant">&copy; 2024 智聘星图. 策就领导力的未来</div>
+    </footer>
+
+    <script>
+        // === 移动端导航 ===
+        function openMobileNav() {
+            document.getElementById('mobileNavDrawer').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeMobileNav() {
+            document.getElementById('mobileNavDrawer').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        // === Tab 切换 ===
+        function switchTab(mode) {
+            const tabAudit = document.getElementById('tabAudit');
+            const tabSkill = document.getElementById('tabSkill');
+            const auditTab = document.getElementById('auditTab');
+            const skillTab = document.getElementById('skillTab');
+            if (mode === 'audit') {
+                tabAudit.className = 'pb-3 text-[15px] font-semibold tab-active transition-all';
+                tabSkill.className = 'pb-3 text-[15px] tab-inactive transition-all';
+                auditTab.classList.remove('hidden');
+                skillTab.classList.add('hidden');
+            } else {
+                tabSkill.className = 'pb-3 text-[15px] font-semibold tab-active transition-all';
+                tabAudit.className = 'pb-3 text-[15px] tab-inactive transition-all';
+                skillTab.classList.remove('hidden');
+                auditTab.classList.add('hidden');
+            }
+        }
+
+        // === 企业审核状态筛选 ===
+        function filterAuditByStatus() {
+            var filter = document.getElementById('auditStatusFilter').value;
+            var rows = document.querySelectorAll('.audit-row');
+            rows.forEach(function(row) {
+                if (filter === 'all' || row.getAttribute('data-status') === filter) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // === 企业审核通过 ===
+        function approveAudit(btn, name) {
+            var row = btn.closest('.audit-row');
+            var statusCell = row.querySelectorAll('div')[3];
+            statusCell.innerHTML = '<span class="chip chip-success">已通过</span>';
+            row.setAttribute('data-status', '已通过');
+            var actionCell = row.querySelectorAll('div')[4];
+            actionCell.innerHTML = '<button class="btn-sm" style="background:#f3f4f5; color:#434656;" disabled>已审核</button>';
+            // 保存到localStorage
+            saveAuditAction(name, '通过');
+        }
+
+        // === 企业审核驳回 ===
+        var currentRejectBtn = null;
+        function showRejectReason(btn) {
+            currentRejectBtn = btn;
+            document.getElementById('rejectPanel').classList.remove('hidden');
+            document.getElementById('rejectReasonText').focus();
+        }
+
+        function confirmReject() {
+            var reason = document.getElementById('rejectReasonText').value.trim();
+            if (!reason) {
+                document.getElementById('rejectReasonText').style.borderColor = '#ba1a1a';
+                document.getElementById('rejectReasonText').focus();
+                return;
+            }
+            if (currentRejectBtn) {
+                var row = currentRejectBtn.closest('.audit-row');
+                var name = row.querySelector('.font-semibold').textContent;
+                var statusCell = row.querySelectorAll('div')[3];
+                statusCell.innerHTML = '<span class="chip chip-error">已驳回</span>';
+                row.setAttribute('data-status', '已驳回');
+                var actionCell = row.querySelectorAll('div')[4];
+                actionCell.innerHTML = '<button class="btn-sm" style="background:#f3f4f5; color:#434656;" disabled>已审核</button>';
+                saveAuditAction(name, '驳回', reason);
+            }
+            document.getElementById('rejectPanel').classList.add('hidden');
+            document.getElementById('rejectReasonText').value = '';
+            document.getElementById('rejectReasonText').style.borderColor = '';
+            currentRejectBtn = null;
+        }
+
+        function saveAuditAction(name, action, reason) {
+            try {
+                var logs = JSON.parse(localStorage.getItem('admin_auditLogs') || '[]');
+                logs.unshift({
+                    name: name,
+                    action: action,
+                    reason: reason || '',
+                    time: new Date().toLocaleString('zh-CN')
+                });
+                localStorage.setItem('admin_auditLogs', JSON.stringify(logs));
+            } catch(e) {}
+        }
+
+        // === 企业审核详情弹窗 ===
+        function showDetail(name) {
+            document.getElementById('detailName').textContent = name;
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function closeDetail(e) {
+            if (!e || e.target === document.getElementById('detailModal')) {
+                document.getElementById('detailModal').classList.add('hidden');
+            }
+        }
+
+        // === 技能字典搜索过滤 ===
+        function filterSkills() {
+            var query = document.getElementById('skillSearchInput').value.trim().toLowerCase();
+            var rows = document.querySelectorAll('.skill-row');
+            rows.forEach(function(row) {
+                var name = (row.getAttribute('data-name') || '').toLowerCase();
+                var text = row.textContent.toLowerCase();
+                if (!query || name.includes(query) || text.includes(query)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // === 编辑技能弹窗 ===
+        function showEditSkillModal(name, category) {
+            document.getElementById('editSkillName').value = name;
+            // 设置分类选项
+            var sel = document.getElementById('editSkillCategory');
+            for (var i = 0; i < sel.options.length; i++) {
+                if (sel.options[i].text === category) { sel.selectedIndex = i; break; }
+            }
+            document.getElementById('editSkillSynonyms').value = '';
+            document.getElementById('skillEditModal').classList.remove('hidden');
+        }
+
+        function saveSkillEdit() {
+            var name = document.getElementById('editSkillName').value.trim();
+            var category = document.getElementById('editSkillCategory').value;
+            if (!name) { alert('请输入技能名称'); return; }
+            // 更新对应行的显示
+            var rows = document.querySelectorAll('.skill-row');
+            rows.forEach(function(row) {
+                if (row.getAttribute('data-name') === name) {
+                    var cells = row.querySelectorAll(':scope > div');
+                    if (cells[1]) cells[1].textContent = category;
+                }
+            });
+            closeSkillEditModal();
+            showToast('技能 "' + name + '" 已更新');
+        }
+
+        function closeSkillEditModal(e) {
+            if (!e || e.target === document.getElementById('skillEditModal')) {
+                document.getElementById('skillEditModal').classList.add('hidden');
+            }
+        }
+
+        // === 添加技能弹窗 ===
+        function showAddSkillModal() {
+            document.getElementById('addSkillName').value = '';
+            document.getElementById('addSkillCategory').selectedIndex = 0;
+            document.getElementById('addSkillSynonyms').value = '';
+            document.getElementById('skillAddModal').classList.remove('hidden');
+        }
+
+        function saveSkillAdd() {
+            var name = document.getElementById('addSkillName').value.trim();
+            var category = document.getElementById('addSkillCategory').value;
+            if (!name) { alert('请输入技能名称'); return; }
+
+            var tbody = document.getElementById('skillTableBody');
+            var newRow = document.createElement('div');
+            newRow.className = 'skill-table-row skill-row';
+            newRow.setAttribute('data-name', name);
+            newRow.style.cssText = 'grid-template-columns: 2fr 1.5fr 1fr 1fr 1.5fr;';
+            newRow.innerHTML =
+                '<div class="text-sm font-semibold text-on-surface">' + name + '</div>' +
+                '<div class="text-sm text-on-surface-variant">' + category + '</div>' +
+                '<div><span class="chip chip-warning">CANDIDATE</span></div>' +
+                '<div class="text-sm text-on-surface-variant">0</div>' +
+                '<div class="flex gap-2">' +
+                    '<button class="btn-sm btn-success" onclick="auditCandidateSkill(this,\'' + name + '\')">' +
+                        '<span class="material-symbols-outlined text-[14px]">check</span> 审核' +
+                    '</button>' +
+                    '<button class="btn-sm" style="background:#f3f4f5; color:#434656;" onclick="confirmMergeSkill(\'' + name + '\')">' +
+                        '<span class="material-symbols-outlined text-[14px]">merge</span> 合并' +
+                    '</button>' +
+                '</div>';
+            tbody.appendChild(newRow);
+
+            closeSkillAddModal();
+            showToast('技能 "' + name + '" 已添加（CANDIDATE）');
+        }
+
+        function closeSkillAddModal(e) {
+            if (!e || e.target === document.getElementById('skillAddModal')) {
+                document.getElementById('skillAddModal').classList.add('hidden');
+            }
+        }
+
+        // === 合并操作 ===
+        var currentMergeSkill = null;
+        function confirmMergeSkill(name) {
+            currentMergeSkill = name;
+            document.getElementById('mergeSourceSkill').textContent = name;
+            document.getElementById('mergeModal').classList.remove('hidden');
+        }
+
+        function executeMerge() {
+            var target = document.getElementById('mergeTargetSkill').value;
+            if (currentMergeSkill && currentMergeSkill !== target) {
+                // 更新行状态
+                var rows = document.querySelectorAll('.skill-row');
+                rows.forEach(function(row) {
+                    if (row.getAttribute('data-name') === currentMergeSkill) {
+                        var cells = row.querySelectorAll(':scope > div');
+                        cells[0].style.textDecoration = 'line-through';
+                        cells[0].classList.remove('font-semibold');
+                        cells[0].classList.add('text-on-surface-variant');
+                        cells[2].innerHTML = '<span class="chip chip-neutral">MERGED</span>';
+                        cells[3].textContent = '至 ' + target;
+                        cells[4].innerHTML = '<button class="btn-sm" style="background:#f3f4f5; color:#434656;" disabled>已合并</button>';
+                    }
+                });
+                showToast('"' + currentMergeSkill + '" 已合并至 "' + target + '"');
+            }
+            closeMergeModal();
+        }
+
+        function closeMergeModal(e) {
+            if (!e || e.target === document.getElementById('mergeModal')) {
+                document.getElementById('mergeModal').classList.add('hidden');
+            }
+        }
+
+        // === 审核候选技能 ===
+        var currentAuditSkillBtn = null;
+        var currentAuditSkillName = '';
+        function auditCandidateSkill(btn, name) {
+            currentAuditSkillBtn = btn;
+            currentAuditSkillName = name;
+            document.getElementById('auditSkillName').textContent = name;
+            document.getElementById('skillAuditModal').classList.remove('hidden');
+        }
+
+        function approveSkillAudit() {
+            if (currentAuditSkillBtn) {
+                var row = currentAuditSkillBtn.closest('.skill-row');
+                var cells = row.querySelectorAll(':scope > div');
+                cells[2].innerHTML = '<span class="chip chip-success">ACTIVE</span>';
+                cells[4].innerHTML =
+                    '<button class="btn-sm" style="background:#f3f4f5; color:#434656;" onclick="showEditSkillModal(\'' + currentAuditSkillName + '\',\'' + (cells[1].textContent) + '\')">' +
+                        '<span class="material-symbols-outlined text-[14px]">edit</span> 编辑' +
+                    '</button>' +
+                    '<button class="btn-sm" style="background:#f3f4f5; color:#434656;" onclick="confirmMergeSkill(\'' + currentAuditSkillName + '\')">' +
+                        '<span class="material-symbols-outlined text-[14px]">merge</span> 合并' +
+                    '</button>';
+                showToast('"' + currentAuditSkillName + '" 通过审核，已变为 ACTIVE');
+            }
+            closeSkillAuditModal();
+        }
+
+        function rejectSkillAudit() {
+            if (currentAuditSkillBtn) {
+                var row = currentAuditSkillBtn.closest('.skill-row');
+                var cells = row.querySelectorAll(':scope > div');
+                cells[2].innerHTML = '<span class="chip chip-error">已驳回</span>';
+                cells[4].innerHTML = '<button class="btn-sm" style="background:#f3f4f5; color:#434656;" disabled>已驳回</button>';
+                showToast('"' + currentAuditSkillName + '" 已驳回');
+            }
+            closeSkillAuditModal();
+        }
+
+        function closeSkillAuditModal(e) {
+            if (!e || e.target === document.getElementById('skillAuditModal')) {
+                document.getElementById('skillAuditModal').classList.add('hidden');
+            }
+        }
+
+        // === Toast ===
+        function showToast(msg) {
+            var t = document.createElement('div');
+            t.textContent = msg;
+            t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#064e3b;color:#fff;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:600;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,0.2);';
+            document.body.appendChild(t);
+            setTimeout(function(){ t.remove(); }, 2500);
+        }
+    </script>
+</body>
+</html>

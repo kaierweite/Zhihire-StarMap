@@ -15,6 +15,8 @@ from app.models.schemas.admin import (
     JobStatusRequest,
     SkillAuditRequest,
     UserStatusRequest,
+    AiProviderCreateRequest,
+    AiProviderUpdateRequest
 )
 from app.models.schemas.result import Result
 from app.services import admin_service
@@ -177,3 +179,55 @@ async def audit_skill(
         data=skill_item.model_dump(mode="json"),
         message=f"技能{action_label}",
     )
+
+
+
+
+@router.get("/ai-config", summary="Get all AI providers")
+async def list_ai_providers(
+    current_user: User = Depends(require_role(RoleEnum.ADMIN)),
+    db: AsyncSession = Depends(get_db),
+) -> Result:
+    providers = await admin_service.list_ai_providers(db)
+    return Result.success(data=[p.model_dump(mode="json") for p in providers])
+
+
+@router.post("/ai-config", summary="Create AI provider")
+async def create_ai_provider(
+    req: AiProviderCreateRequest,
+    current_user: User = Depends(require_role(RoleEnum.ADMIN)),
+    db: AsyncSession = Depends(get_db),
+) -> Result:
+    provider = await admin_service.create_ai_provider(db, req)
+    return Result.success(data=provider.model_dump(mode="json"), message="Created")
+
+
+@router.put("/ai-config/{provider_id}", summary="Update AI provider")
+async def update_ai_provider(
+    provider_id: int,
+    req: AiProviderUpdateRequest,
+    current_user: User = Depends(require_role(RoleEnum.ADMIN)),
+    db: AsyncSession = Depends(get_db),
+) -> Result:
+    provider = await admin_service.update_ai_provider(db, provider_id, req)
+    return Result.success(data=provider.model_dump(mode="json"), message="Updated")
+
+
+@router.post("/ai-config/{provider_id}/test", summary="Test AI provider")
+async def test_ai_provider(
+    provider_id: int,
+    current_user: User = Depends(require_role(RoleEnum.ADMIN)),
+    db: AsyncSession = Depends(get_db),
+) -> Result:
+    result = await admin_service.test_ai_connection(db, provider_id)
+    return Result.success(data=result.model_dump(mode="json"))
+
+
+@router.delete("/ai-config/{provider_id}", summary="Delete AI provider")
+async def delete_ai_provider(
+    provider_id: int,
+    current_user: User = Depends(require_role(RoleEnum.ADMIN)),
+    db: AsyncSession = Depends(get_db),
+) -> Result:
+    await admin_service.delete_ai_provider(db, provider_id)
+    return Result.success(message="Deleted")

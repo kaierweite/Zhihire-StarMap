@@ -26,7 +26,7 @@ from app.models.schemas.resume import (
 from app.models.schemas.result import Result, PageResult
 from app.services import resume_service
 from app.services.errors import BusinessError
-from app.services.parse_service import run_parse_pipeline
+from app.services.parse_service import run_parse_pipeline, sync_resume_to_profile
 
 router = APIRouter(prefix="/resume", tags=["??"])
 
@@ -52,14 +52,16 @@ async def upload_resume(
     return Result.success(data=result, message="?????????")
 
 
-@router.get("", summary="????")
+@router.get("", summary="???????")
 async def list_resumes(
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=50),
     current_user: User = Depends(require_role(RoleEnum.USER)),
     db: AsyncSession = Depends(get_db),
 ) -> Result[PageResult]:
-    """??????????????"""
+    """?????????????page/size??
+    ???? size ??? 50??????? 20??????????????
+    """
     try:
         items, total = await resume_service.list_resumes(db, current_user, page, size)
     except BusinessError as exc:
@@ -109,6 +111,24 @@ async def delete_resume(
     except BusinessError as exc:
         return Result.error(code=exc.code, message=exc.message, data=exc.data)
     return Result.success(message="????")
+
+
+@router.post("/{resume_id}/sync-profile", summary="???????")
+async def sync_profile(
+    resume_id: int,
+    current_user: User = Depends(require_role(RoleEnum.USER)),
+    db: AsyncSession = Depends(get_db),
+) -> Result[dict]:
+    """???????????????????????
+
+    ??????????????? company+title ???
+    ??????????????????????
+    """
+    try:
+        result = await sync_resume_to_profile(db, current_user.id, resume_id)
+    except BusinessError as exc:
+        return Result.error(code=exc.code, message=exc.message, data=exc.data)
+    return Result.success(data=result, message="????")
 
 
 @router.post("/optimize", summary="AI ????")

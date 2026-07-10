@@ -20,6 +20,8 @@ class ResumeListItem(BaseModel):
     title: str | None = None
     status: str = 'NORMAL'
     created_at: datetime | None = None
+    updated_at: datetime | None = None
+    file_name: str | None = None
 
 
 class ResumeDetail(BaseModel):

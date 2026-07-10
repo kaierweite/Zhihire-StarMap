@@ -6,11 +6,14 @@
 - me：按主键加载用户并返回完整信息
 
 事务提交由本层负责，仓储层仅做原子数据访问。
+
+密码哈希直接使用 bcrypt 库（而非 passlib），以避免 passlib 1.7.4 与
+bcrypt 4.x 之间因 `__about__.__version__` 缺失及环回式自检引发的兼容性故障。
 """
 from datetime import datetime, timedelta, timezone  # 时间计算与时区
 
+import bcrypt  # bcrypt 哈希与校验
 from jose import jwt  # JWT 编码
-from passlib.context import CryptContext  # bcrypt 哈希上下文
 from sqlalchemy.ext.asyncio import AsyncSession  # 异步会话类型
 
 from app.config.settings import settings  # 全局配置（JWT 密钥、有效期、算法）
@@ -31,8 +34,8 @@ from app.repositories import company_repository, user_repository  # 仓储层
 from app.services.errors import BusinessError  # 业务异常
 
 
-# bcrypt 哈希上下文：scheme 固定 bcrypt，自动标记旧算法弃用
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# bcrypt 算法对单条密码最大处理 72 字节，超出会抛 ValueError，统一在此截断
+_BCRYPT_MAX_BYTES = 72
 
 
 def _hash_password(plain: str) -> str:
@@ -42,10 +45,12 @@ def _hash_password(plain: str) -> str:
         plain: 明文密码。
 
     Returns:
-        str: 哈希后的密码字符串。
+        str: 哈希后的密码字符串（形如 `$2b$...`，可直接入库）。
     """
-    # 调用 passlib 生成哈希
-    return _pwd_context.hash(plain)
+    # 编码为字节并截断至 72 字节，规避 bcrypt 长度上限
+    pw_bytes = plain.encode("utf-8")[:_BCRYPT_MAX_BYTES]
+    # 生成哈希并解码为字符串存储
+    return bcrypt.hashpw(pw_bytes, bcrypt.gensalt()).decode("utf-8")
 
 
 def _verify_password(plain: str, hashed: str) -> bool:
@@ -53,13 +58,19 @@ def _verify_password(plain: str, hashed: str) -> bool:
 
     Args:
         plain: 明文密码。
-        hashed: 数据库中存储的哈希。
+        hashed: 数据库中存储的哈希字符串。
 
     Returns:
         bool: 匹配返回 True，否则 False。
     """
-    # passlib 内部处理常量时间比较，避免计时侧信道
-    return _pwd_context.verify(plain, hashed)
+    # 哈希字符串内必须为合法 bcrypt 哈希，否则 checkpw 会抛 ValueError
+    try:
+        # 同样对明文做 72 字节截断，保证与入库时一致
+        pw_bytes = plain.encode("utf-8")[:_BCRYPT_MAX_BYTES]
+        return bcrypt.checkpw(pw_bytes, hashed.encode("utf-8"))
+    except ValueError:
+        # 哈希格式不合法或长度超限，统一视为不匹配
+        return False
 
 
 def _create_access_token(user: User) -> str:

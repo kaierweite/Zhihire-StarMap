@@ -1,6 +1,6 @@
 """Check user_skill records for zm_test2 user."""
 import asyncio, sys, json
-sys.path.insert(0, "backend")
+sys.path.insert(0, r"C:\\Users\\Administrator\\Desktop\\Zhihire-StarMap\\backend")
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 from app.db import compat
