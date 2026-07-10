@@ -329,7 +329,7 @@ async function handleApply(job: Job) {
 .clear-btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; border: 1px solid #f56c6c; background: none; color: #f56c6c; font-size: 12px; cursor: pointer; transition: all 0.2s; &:hover { background: #f56c6c; color: #fff; } }
 .filter-count { font-size: 13px; color: #909399; margin-top: 10px; }
 
-.job-list { display: flex; flex-direction: column; gap: 20px; }
+.job-list { display: flex; flex-direction: column; gap: 16px; }
 .job-card { background: #fff; border-radius: 16px; border: 1px solid #e5e7eb; padding: 20px; transition: all 0.3s; &:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.08); } }
 .job-card-inner { display: flex; gap: 24px; align-items: stretch; }
 .job-left { flex: 1; min-width: 0; display: flex; flex-direction: column; }
