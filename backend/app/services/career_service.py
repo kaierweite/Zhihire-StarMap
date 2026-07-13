@@ -1,4 +1,4 @@
-"""职业规划业务服务模块。
+﻿"""职业规划业务服务模块。
 
 编排核心算法（缺口分析 + 学习路径规划 + 图谱提示），
 调用仓储层持久化规划结果，末句经 LLM 润色。
@@ -15,6 +15,8 @@ from app.models.schemas.career import CareerPlanResponse
 from app.repositories import career_repository, role_repository, role_skill_repository, \
     skill_relation_repository, skill_repository, user_skill_repository
 from app.services.errors import BusinessError
+from app.core.career.ai_planner import analyze_and_plan as ai_analyze_and_plan
+from app.repositories import resume_repository as resume_repo
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +28,6 @@ async def generate_plan(
     source: str = "PROACTIVE",
 ) -> CareerPlanResponse:
     """为指定用户生成对目标角色的职业规划。
-
     算法流程（分数/路径不经大模型）：
     1. 取角色 MUST/NICE/BONUS 技能集 - 用户已有技能 = gap_skills
     2. 对 gap_skills 沿 PREREQUISITE 边做拓扑排序 -> learning_path
@@ -140,9 +141,61 @@ async def get_plan(db: AsyncSession, user_id: int) -> CareerPlan | None:
     return await career_repository.get_by_user(db, user_id)
 
 
+async def ai_generate_plan(
+    db: AsyncSession,
+    user_id: int,
+    input_type: str,
+    target_text: str,
+) -> dict:
+    """AI 驱动生成职业规划（基于用户输入的专业或岗位 JD）。
+
+    流程：
+    1. 获取用户已有技能
+    2. 获取用户最新简历摘要
+    3. 调用 AI 分析差距并生成思维导图
+    4. 返回结构化结果
+
+    Args:
+        db: 异步数据库会话。
+        user_id: 用户主键。
+        input_type: 输入类型（PROFESSION / JOB_DESCRIPTION / JOB_URL）。
+        target_text: 目标专业名称或 JD 内容。
+
+    Returns:
+        dict: AI 分析结果，包含 gap_skills, mind_map, match_score 等。
+    """
+    # 1. 获取用户技能
+    user_skills = await user_skill_repository.list_by_user(db, user_id)
+    user_skill_names = [sk.name for _, sk in user_skills]
+
+    # 2. 获取用户简历摘要
+    resume_summary = None
+    try:
+        resumes, _ = await resume_repo.list_by_user(db, user_id, page=1, size=1)
+        if resumes and resumes[0].content_text:
+            text = resumes[0].content_text.strip()
+            resume_summary = text[:800] if len(text) > 800 else text
+    except Exception:
+        logger.debug("获取简历摘要失败，跳过", exc_info=True)
+
+    # 3. 调用 AI 分析
+    result = await ai_analyze_and_plan(
+        deepseek_client.chat,
+        target_text=target_text,
+        input_type=input_type,
+        user_skills=user_skill_names,
+        resume_summary=resume_summary,
+    )
+
+    logger.info(
+        "AI career plan generated for user_id=%s input_type=%s target=%s",
+        user_id, input_type, target_text[:50],
+    )
+    return result
+
+
 async def _polish_rationale(role_name: str, score: float, gap_count: int) -> str:
     """调用 LLM 对规划说明末句进行润色。
-
     API key 不存在时返回空字符串（跳过润色）。
 
     Args:

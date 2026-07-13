@@ -1,25 +1,43 @@
 ﻿<script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import * as echarts from 'echarts'
 import {
-  Route, Briefcase, Lightbulb, CheckCircle, ArrowRight, RefreshCw,
-  Sparkles, Target, AlertTriangle, Info, Gift, Loader2,
+  Route, Lightbulb, CheckCircle, RefreshCw,
+  Sparkles, AlertTriangle, Info, Gift, Loader2, Eye, Code,
+  FileText, Link, GraduationCap, BookOpen,
+  ZoomIn, ZoomOut, Download, Plus, Minus,
 } from 'lucide-vue-next'
 import { ElMessage } from 'element-plus'
-import { listRoles } from '@/api/graph'
-import { getCareerPlan, generateCareerPlan } from '@/api/career'
-import type { OccupationRole } from '@/types/graph'
-import type { CareerPlanData } from '@/api/career'
+import { aiGenerateCareerPlan } from '@/api/career'
+import type { AiPlanResponse, MindMapNode } from '@/api/career'
 
 // ====== State ======
-const roles = ref<OccupationRole[]>([])
-const selectedRoleId = ref<number | null>(null)
-const pageLoading = ref(true)
+const inputType = ref<'PROFESSION' | 'JOB_DESCRIPTION' | 'JOB_URL'>('PROFESSION')
+const professionText = ref('')
+const jobDescriptionText = ref('')
+const jobUrlText = ref('')
 const generating = ref(false)
-const planData = ref<CareerPlanData | null>(null)
-const hasPlan = ref(false)
+const planData = ref<AiPlanResponse | null>(null)
 const errorMsg = ref('')
+const hasPlan = ref(false)
+const mindMapMode = ref<'render' | 'code'>('render')
+const chartRef = ref<HTMLElement>()
+let chartInstance: echarts.ECharts | null = null
+const zoomLevel = ref(1)
+const MIN_ZOOM = 0.5
+const MAX_ZOOM = 3
 
 // ====== Computed ======
+const targetText = computed(() => {
+  switch (inputType.value) {
+    case 'PROFESSION': return professionText.value.trim()
+    case 'JOB_DESCRIPTION': return jobDescriptionText.value.trim()
+    case 'JOB_URL': return jobUrlText.value.trim()
+  }
+})
+
+const canGenerate = computed(() => targetText.value.length > 0)
+
 const gapMustSkills = computed(() =>
   (planData.value?.gap_skills || []).filter((g) => g.requirement_level === 'MUST'),
 )
@@ -30,74 +48,217 @@ const gapBonusSkills = computed(() =>
   (planData.value?.gap_skills || []).filter((g) => g.requirement_level === 'BONUS'),
 )
 
-const selectedRoleName = computed(() => {
-  if (!planData.value) return ''
-  return planData.value.target_role
-})
-
 const scoreColor = computed(() => {
-  const s = planData.value?.score ?? 0
+  const s = planData.value?.match_score ?? 0
   if (s >= 80) return '#198754'
   if (s >= 60) return '#1a3a5c'
   if (s >= 40) return '#e67e22'
   return '#e74c3c'
 })
 
-// SVG circular progress — circumference for r=54 is 2*pi*54 ≈ 339.292
 const CIRCUMFERENCE = 2 * Math.PI * 54
 const scoreOffset = computed(() => {
-  const s = planData.value?.score ?? 0
+  const s = planData.value?.match_score ?? 0
   return CIRCUMFERENCE * (1 - s / 100)
 })
 
-// ====== Lifecycle ======
-onMounted(async () => {
-  pageLoading.value = true
-  try {
-    const [rolesRes, planRes] = await Promise.all([listRoles(), getCareerPlan()])
-    roles.value = rolesRes.data.data || []
-    const planResp = planRes.data
-    if (planResp.data) {
-      planData.value = planResp.data
-      hasPlan.value = true
-      selectedRoleId.value = planResp.data.target_role_id ?? null
-    }
-  } catch {
-    // errors handled by request interceptor
-  } finally {
-    pageLoading.value = false
+const formattedJson = computed(() => {
+  if (!planData.value?.mind_map) return '{}'
+  return JSON.stringify(planData.value.mind_map, null, 2)
+})
+
+// ====== ECharts Mind Map ======
+function initMindMap() {
+  zoomLevel.value = 1
+  if (!chartRef.value || !planData.value?.mind_map) return
+
+  if (!chartInstance) {
+    chartInstance = echarts.init(chartRef.value, undefined, { renderer: 'canvas' })
   }
+  chartInstance.clear()
+
+  const nodes = deepCount(planData.value.mind_map)
+  const chartHeight = Math.max(nodes * 52 + 120, 500)
+
+  chartInstance.setOption({
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: 'rgba(255,255,255,0.96)',
+      borderColor: '#e8e8e8',
+      borderWidth: 1,
+      padding: [8, 14],
+      textStyle: { color: '#303133', fontSize: 13 },
+      formatter: (params: any) => {
+        const name = params.name || ''
+        const depth = params.treePathInfo?.length || 0
+        if (depth <= 2) return '<strong style="font-size:15px;color:#1a3a5c;">' + name + '</strong>'
+        return '<span style="color:#606266;font-size:13px;">' + name + '</span>'
+      },
+    },
+    series: [{
+      type: 'tree',
+      data: [planData.value.mind_map],
+      top: 5,
+      left: 5,
+      bottom: 5,
+      right: 5,
+      symbolSize: 8,
+      orient: 'LR',
+      expandAndCollapse: true,
+      initialTreeDepth: 3,
+      label: {
+        position: 'bottom',
+        fontSize: 14,
+        fontWeight: 500,
+        color: '#303133',
+        width: 200,
+        overflow: 'break',
+        formatter: (params: any) => {
+          const name = params.name || ''
+          const depth = params.treePathInfo?.length || 0
+          if (depth <= 2) return '{bold|' + name + '}'
+          return name
+        },
+        rich: {
+          bold: { fontSize: 16, fontWeight: 700, color: '#1a3a5c' },
+        },
+      },
+      leaves: {
+        label: {
+          position: 'bottom',
+          fontSize: 13,
+          color: '#606266',
+          width: 180,
+          overflow: 'break',
+        },
+      },
+      lineStyle: {
+        color: '#1a3a5c',
+        width: 1.5,
+        curveness: 0.5,
+      },
+      animationDuration: 800,
+      animationEasing: 'cubicOut',
+    }],
+  }, true)
+
+  chartRef.value.style.height = chartHeight + 'px'
+  chartInstance.resize()
+  baseChartWidth = chartRef.value.clientWidth
+  baseChartHeight = chartRef.value.clientHeight
+}
+
+function deepCount(node: MindMapNode): number {
+  let count = 1
+  if (node.children) {
+    for (const child of node.children) {
+      count += deepCount(child)
+    }
+  }
+  return count
+}
+
+function handleResize() {
+  chartInstance?.resize()
+}
+
+// ====== Lifecycle ======
+onMounted(() => {
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  chartInstance?.dispose()
+  chartInstance = null
+  window.removeEventListener('resize', handleResize)
 })
 
 // ====== Actions ======
 async function handleGenerate() {
-  if (selectedRoleId.value == null) {
-    ElMessage.warning('请先选择一个目标职业角色')
+  const text = targetText.value
+  if (!text) {
+    ElMessage.warning('请输入目标专业名称或招聘 JD')
     return
   }
+
   generating.value = true
   errorMsg.value = ''
   try {
-    const res = await generateCareerPlan(selectedRoleId.value)
+    const res = await aiGenerateCareerPlan({
+      input_type: inputType.value,
+      target_text: text,
+    })
     planData.value = res.data.data
     hasPlan.value = true
+
+    await nextTick()
+    initMindMap()
   } catch (err: any) {
-    if (err?.response?.status === 400 || err?.response?.status === 404) {
-      errorMsg.value = err.response.data?.message || '该角色暂无可用数据'
-    } else {
-      errorMsg.value = '生成失败，请稍后重试'
-    }
+    errorMsg.value = err?.response?.data?.message || 'AI 分析失败，请稍后重试'
   } finally {
     generating.value = false
   }
 }
 
-async function handleRegenerate() {
-  if (selectedRoleId.value == null) {
-    ElMessage.warning('请先选择一个目标职业角色')
-    return
+function handleRegenerate() {
+  handleGenerate()
+}
+
+function switchMindMapMode(mode: 'render' | 'code') {
+  mindMapMode.value = mode
+  if (mode === 'render') {
+    nextTick(() => initMindMap())
   }
-  await handleGenerate()
+}
+
+// ====== Zoom & Download ======
+let baseChartWidth = 800
+let baseChartHeight = 400
+
+function applyZoom() {
+  if (!chartRef.value || !chartInstance) return
+  if (zoomLevel.value === 1) {
+    chartRef.value.style.width = ''
+    chartRef.value.style.height = baseChartHeight + 'px'
+  } else {
+    chartRef.value.style.width = Math.round(baseChartWidth * zoomLevel.value) + 'px'
+    chartRef.value.style.height = Math.round(baseChartHeight * zoomLevel.value) + 'px'
+  }
+  nextTick(() => chartInstance?.resize())
+}
+
+function zoomIn() {
+  if (zoomLevel.value < MAX_ZOOM) {
+    zoomLevel.value = Math.round((zoomLevel.value + 0.25) * 100) / 100
+    applyZoom()
+  }
+}
+
+function zoomOut() {
+  if (zoomLevel.value > MIN_ZOOM) {
+    zoomLevel.value = Math.round((zoomLevel.value - 0.25) * 100) / 100
+    applyZoom()
+  }
+}
+
+function resetZoom() {
+  zoomLevel.value = 1
+  applyZoom()
+}
+
+function downloadChart() {
+  if (!chartInstance) return
+  const url = chartInstance.getDataURL({
+    type: 'png',
+    pixelRatio: 2,
+    backgroundColor: '#fff',
+  })
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'career-plan-mindmap.png'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 }
 </script>
 
@@ -106,53 +267,92 @@ async function handleRegenerate() {
     <div class="career-container">
       <!-- Header -->
       <h1 class="page-title">AI 智能职业规划</h1>
-      <p class="page-desc">基于技能图谱的拓扑排序算法，生成可复现、可解释的学习路径</p>
+      <p class="page-desc">输入你感兴趣的专业方向或目标公司岗位，AI 分析能力差距并生成专属学习思维导图</p>
 
-      <!-- Loading state -->
-      <div v-if="pageLoading" class="loading-state">
-        <Loader2 :size="36" class="spin-icon" />
-        <p>加载中...</p>
-      </div>
-
-      <!-- ====== No plan yet: Role selector ====== -->
-      <template v-else-if="!hasPlan">
-        <section class="fade-up">
-          <h2 class="section-heading"><Briefcase :size="22" /> 选择目标职业角色</h2>
-          <div v-if="roles.length === 0" class="empty-role">
-            <p>暂无可用的职业角色数据</p>
-          </div>
-          <div v-else class="role-grid">
-            <div
-              v-for="role in roles"
-              :key="role.id"
-              class="role-card"
-              :class="{ active: selectedRoleId === role.id }"
-              @click="selectedRoleId = role.id"
-            >
-              <div class="role-info">
-                <h3>{{ role.name }}</h3>
-                <p v-if="role.description" class="role-desc">{{ role.description }}</p>
-              </div>
-              <CheckCircle v-if="selectedRoleId === role.id" :size="20" class="check-icon" />
-            </div>
-          </div>
-
-          <div v-if="errorMsg" class="error-banner">{{ errorMsg }}</div>
-
+      <!-- ====== Input Section ====== -->
+      <section class="input-section fade-up">
+        <!-- Input type tabs -->
+        <div class="input-tabs">
           <button
-            class="generate-btn"
-            :disabled="selectedRoleId == null || generating"
-            @click="handleGenerate"
+            class="input-tab"
+            :class="{ active: inputType === 'PROFESSION' }"
+            @click="inputType = 'PROFESSION'"
           >
-            <Loader2 v-if="generating" :size="18" class="spin-icon" />
-            <Sparkles v-else :size="18" />
-            {{ generating ? '生成中...' : '生成职业规划' }}
+            <GraduationCap :size="16" />
+            对口专业
           </button>
-        </section>
-      </template>
+          <button
+            class="input-tab"
+            :class="{ active: inputType === 'JOB_DESCRIPTION' }"
+            @click="inputType = 'JOB_DESCRIPTION'"
+          >
+            <FileText :size="16" />
+            招聘 JD
+          </button>
+          <button
+            class="input-tab"
+            :class="{ active: inputType === 'JOB_URL' }"
+            @click="inputType = 'JOB_URL'"
+          >
+            <Link :size="16" />
+            招聘链接
+          </button>
+        </div>
 
-      <!-- ====== Plan exists: Show result ====== -->
-      <template v-else-if="planData">
+        <!-- Input area -->
+        <div class="input-area">
+          <template v-if="inputType === 'PROFESSION'">
+            <label class="input-label">你想学习什么专业或从事什么方向？</label>
+            <div class="input-with-hint">
+              <input
+                v-model="professionText"
+                type="text"
+                class="text-input"
+                placeholder="例如：软件工程、人工智能、数据分析、产品经理..."
+                @keyup.enter="handleGenerate"
+              />
+            </div>
+          </template>
+
+          <template v-else-if="inputType === 'JOB_DESCRIPTION'">
+            <label class="input-label">粘贴目标公司的招聘岗位 JD</label>
+            <textarea
+              v-model="jobDescriptionText"
+              class="text-area"
+              rows="6"
+              placeholder="将招聘岗位的职位描述和要求粘贴到这里..."
+            ></textarea>
+          </template>
+
+          <template v-else>
+            <label class="input-label">输入目标公司的招聘岗位链接</label>
+            <div class="input-with-hint">
+              <input
+                v-model="jobUrlText"
+                type="url"
+                class="text-input"
+                placeholder="例如：https://www.zhipin.com/job/..."
+                @keyup.enter="handleGenerate"
+              />
+            </div>
+          </template>
+        </div>
+
+        <div v-if="errorMsg" class="error-banner">{{ errorMsg }}</div>
+
+        <button
+          class="generate-btn"
+          :disabled="!canGenerate || generating"
+          @click="handleGenerate"
+        >
+          <Loader2 v-if="generating" :size="18" class="spin-icon" />
+          <Sparkles v-else :size="18" />
+          {{ generating ? 'AI 分析中...' : 'AI 生成规划' }}
+        </button>
+      </section>
+
+      <!-- ====== Results (after generation) ====== -->
+      <template v-if="hasPlan && planData">
         <!-- Score + Target role hero -->
         <div class="score-section fade-up">
           <div class="score-ring-wrap">
@@ -167,102 +367,117 @@ async function handleRegenerate() {
                 transform="rotate(-90 70 70)"
                 class="score-arc"
               />
-              <text x="70" y="62" text-anchor="middle" fill="#303133" font-size="32" font-weight="700">{{ planData.score }}</text>
+              <text x="70" y="62" text-anchor="middle" fill="#303133" font-size="32" font-weight="700">{{ planData.match_score }}</text>
               <text x="70" y="82" text-anchor="middle" fill="#909399" font-size="13">分</text>
             </svg>
           </div>
           <div class="score-meta">
             <h2 class="target-role">{{ planData.target_role }}</h2>
             <div class="score-tags">
-              <span class="source-badge">{{ planData.source }}</span>
-              <span class="match-label">技能匹配度</span>
+              <span class="source-badge">AI 分析</span>
+              <span class="match-label" v-if="planData.has_resume">已结合简历分析</span>
+              <span class="match-label" v-else>仅基于技能评估</span>
             </div>
-            <p class="score-desc">
-              与目标岗位匹配度为 <strong>{{ planData.score }}%</strong>，
-              需补充 {{ planData.gap_skills.length }} 项技能。
-            </p>
+            <p class="score-desc">{{ planData.analysis_summary }}</p>
           </div>
         </div>
 
         <!-- Gap Skills -->
         <section class="fade-up gap-section">
-          <h2 class="section-heading"><Lightbulb :size="22" /> 缺口技能</h2>
+          <h2 class="section-heading"><Lightbulb :size="22" /> 技能差距分析</h2>
 
           <div v-if="gapMustSkills.length" class="skill-group">
             <div class="group-head"><AlertTriangle :size="16" class="must-icon" /> MUST — 必备</div>
             <div class="skill-chips">
-              <span v-for="s in gapMustSkills" :key="s.skill_name" class="skill-chip must">{{ s.skill_name }}</span>
+              <span
+                v-for="s in gapMustSkills"
+                :key="s.skill_name"
+                class="skill-chip must"
+                :title="s.description"
+              >{{ s.skill_name }}</span>
             </div>
           </div>
 
           <div v-if="gapNiceSkills.length" class="skill-group">
             <div class="group-head"><Info :size="16" class="nice-icon" /> NICE — 加分</div>
             <div class="skill-chips">
-              <span v-for="s in gapNiceSkills" :key="s.skill_name" class="skill-chip nice">{{ s.skill_name }}</span>
+              <span
+                v-for="s in gapNiceSkills"
+                :key="s.skill_name"
+                class="skill-chip nice"
+                :title="s.description"
+              >{{ s.skill_name }}</span>
             </div>
           </div>
 
           <div v-if="gapBonusSkills.length" class="skill-group">
             <div class="group-head"><Gift :size="16" class="bonus-icon" /> BONUS — 锦上添花</div>
             <div class="skill-chips">
-              <span v-for="s in gapBonusSkills" :key="s.skill_name" class="skill-chip bonus">{{ s.skill_name }}</span>
+              <span
+                v-for="s in gapBonusSkills"
+                :key="s.skill_name"
+                class="skill-chip bonus"
+                :title="s.description"
+              >{{ s.skill_name }}</span>
             </div>
           </div>
 
           <div v-if="planData.gap_skills.length === 0" class="no-gap">
-            <CheckCircle :size="20" /> 已掌握所有必需技能，无需额外补充！
+            <CheckCircle :size="20" /> 太棒了！你已掌握目标所需的核心技能。
           </div>
         </section>
 
-        <!-- Learning Path -->
-        <section class="fade-up">
-          <h2 class="section-heading">
-            <Route :size="22" /> 学习路径
-            <span class="role-tag">{{ planData.target_role }}</span>
-          </h2>
-
-          <div class="path-steps">
-            <div
-              v-for="(step, idx) in planData.learning_path"
-              :key="idx"
-              class="path-step-card"
-            >
-              <div class="step-index">{{ idx + 1 }}</div>
-              <div class="step-body">
-                <div class="step-skills">
-                  <span
-                    v-for="(skill, si) in step.skills"
-                    :key="si"
-                    class="skill-node"
-                  >
-                    {{ skill }}
-                    <ArrowRight v-if="si < step.skills.length - 1" :size="14" class="arrow-icon" />
-                  </span>
-                </div>
-              </div>
+        <!-- ====== Mind Map ====== -->
+        <section class="fade-up mindmap-section">
+          <div class="mindmap-header">
+            <h2 class="section-heading"><Route :size="22" /> 学习路径思维导图</h2>
+            <div class="mode-toggle">
+              <button
+                class="mode-btn"
+                :class="{ active: mindMapMode === 'render' }"
+                @click="switchMindMapMode('render')"
+              >
+                <Eye :size="14" /> 渲染
+              </button>
+              <button
+                class="mode-btn"
+                :class="{ active: mindMapMode === 'code' }"
+                @click="switchMindMapMode('code')"
+              >
+                <Code :size="14" /> 代码
+              </button>
             </div>
           </div>
-        </section>
 
-        <!-- Graph Hints -->
-        <section v-if="planData.graph_hints.length" class="fade-up">
-          <h2 class="section-heading"><Lightbulb :size="22" /> 图谱关联提示</h2>
-          <div class="hints-grid">
-            <div v-for="(hint, idx) in planData.graph_hints" :key="idx" class="hint-card">
-              <Lightbulb :size="18" class="hint-icon" />
-              <p>{{ hint }}</p>
+          <!-- Render mode: ECharts -->
+          <div v-show="mindMapMode === 'render'" class="mindmap-render">
+            <div class="mindmap-toolbar">
+              <button class="toolbar-btn" @click="zoomOut" title="缩小">
+                <Minus :size="16" />
+              </button>
+              <span class="zoom-label">{{ Math.round(zoomLevel * 100) }}%</span>
+              <button class="toolbar-btn" @click="zoomIn" title="放大">
+                <Plus :size="16" />
+              </button>
+              <span class="toolbar-divider"></span>
+              <button class="toolbar-btn" @click="downloadChart" title="下载为图片">
+                <Download :size="16" />
+              </button>
+            </div>
+            <div v-if="planData.mind_map" ref="chartRef" class="chart-box"></div>
+            <div v-else class="empty-mindmap">
+              <BookOpen :size="40" />
+              <p>暂无思维导图数据</p>
+            </div>
+            <div class="mindmap-tip">
+              <Lightbulb :size="12" />
+              <span>点击节点展开/收起子分支 · 滚轮缩放</span>
             </div>
           </div>
-        </section>
 
-        <!-- Rationale -->
-        <section v-if="planData.rationale" class="fade-up">
-          <h2 class="section-heading"><Sparkles :size="22" /> 规划说明</h2>
-          <div class="rationale-card">
-            <p class="rationale-text">{{ planData.rationale }}</p>
-            <div v-if="planData.created_at" class="rationale-footer">
-              生成时间：{{ planData.created_at }}
-            </div>
+          <!-- Code mode: JSON -->
+          <div v-show="mindMapMode === 'code'" class="mindmap-code">
+            <pre class="code-block"><code>{{ formattedJson }}</code></pre>
           </div>
         </section>
 
@@ -271,7 +486,7 @@ async function handleRegenerate() {
           <button class="regen-btn" :disabled="generating" @click="handleRegenerate">
             <Loader2 v-if="generating" :size="16" class="spin-icon" />
             <RefreshCw v-else :size="16" />
-            {{ generating ? '重新生成中...' : '重新生成' }}
+            {{ generating ? '重新分析中...' : '重新生成' }}
           </button>
         </div>
       </template>
@@ -281,9 +496,8 @@ async function handleRegenerate() {
 
 <style scoped lang="scss">
 .career-page { padding: 24px 16px; }
-.career-container { max-width: 900px; margin: 0 auto; }
+.career-container { max-width: 960px; margin: 0 auto; }
 
-// ====== Animation ======
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -294,7 +508,6 @@ async function handleRegenerate() {
 .fade-up:nth-child(3) { animation-delay: 0.15s; }
 .fade-up:nth-child(4) { animation-delay: 0.22s; }
 .fade-up:nth-child(5) { animation-delay: 0.3s; }
-.fade-up:nth-child(6) { animation-delay: 0.37s; }
 
 .spin-icon { animation: spin 1s linear infinite; }
 
@@ -306,47 +519,59 @@ async function handleRegenerate() {
 }
 .section-heading {
   display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 600;
-  color: #303133; margin-bottom: 20px;
+  color: #303133; margin: 0;
   svg { color: #1a3a5c; }
 }
-.role-tag {
-  font-size: 13px; padding: 3px 12px; border-radius: 4px; background: #dbeafe;
-  color: #1e3a8a; font-weight: 600;
-}
 
-// ====== Loading ======
-.loading-state {
-  display: flex; flex-direction: column; align-items: center; gap: 12px;
-  padding: 80px 0; color: #909399;
+// ====== Input Section ======
+.input-section {
+  background: #fff; border-radius: 16px; padding: 28px 32px;
+  border: 1px solid #e5e7eb; margin-bottom: 28px;
 }
-
-// ====== Role Selector ======
-.role-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
-.role-card {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 16px; background: #fff; border-radius: 12px;
-  border: 2px solid #e5e7eb; cursor: pointer; transition: all 0.25s;
-  &:hover { border-color: #1a3a5c; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
-  &.active { border-color: #1a3a5c; box-shadow: 0 6px 20px rgba(26,58,92,0.1); }
+.input-tabs {
+  display: flex; gap: 6px; margin-bottom: 20px;
+  background: #f3f4f5; border-radius: 10px; padding: 4px;
 }
-.role-info { flex: 1; min-width: 0;
-  h3 { font-size: 15px; font-weight: 600; color: #303133; margin-bottom: 3px; }
+.input-tab {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 16px; border: none; border-radius: 8px;
+  background: transparent; color: #606266; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+  &:hover { color: #303133; }
+  &.active {
+    background: #fff; color: #1a3a5c; font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
 }
-.role-desc { font-size: 12px; color: #909399; margin: 0; line-height: 1.4; }
-.check-icon { color: #1a3a5c; flex-shrink: 0; }
-.empty-role { text-align: center; padding: 40px 0; color: #909399; }
-
+.input-area { margin-bottom: 16px; }
+.input-label {
+  display: block; font-size: 14px; font-weight: 600; color: #303133; margin-bottom: 10px;
+}
+.text-input {
+  width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px;
+  font-size: 15px; color: #303133; outline: none; transition: border-color 0.2s;
+  box-sizing: border-box;
+  &:focus { border-color: #1a3a5c; }
+  &::placeholder { color: #c0c4cc; }
+}
+.text-area {
+  width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px;
+  font-size: 14px; color: #303133; outline: none; resize: vertical; transition: border-color 0.2s;
+  font-family: inherit; line-height: 1.6; box-sizing: border-box;
+  &:focus { border-color: #1a3a5c; }
+  &::placeholder { color: #c0c4cc; }
+}
 .error-banner {
   background: #fdf0ef; border: 1px solid #f56c6c; border-radius: 8px; padding: 12px 16px;
   color: #e74c3c; font-size: 14px; margin-bottom: 16px;
 }
-
 .generate-btn {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 12px 28px; border: none; border-radius: 10px;
-  background: #1a3a5c; color: #fff; font-size: 15px; font-weight: 600;
+  background: linear-gradient(135deg, #1a3a5c 0%, #2c5282 100%);
+  color: #fff; font-size: 15px; font-weight: 600;
   cursor: pointer; transition: all 0.2s;
-  &:hover:not(:disabled) { background: #0f2b47; transform: translateY(-1px); }
+  &:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(26,58,92,0.25); }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
@@ -363,10 +588,11 @@ async function handleRegenerate() {
 .score-tags { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .source-badge {
   font-size: 11px; padding: 2px 10px; border-radius: 4px;
-  background: #dbeafe; color: #1e3a8a; font-weight: 600; text-transform: uppercase;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff; font-weight: 600;
 }
-.match-label { font-size: 13px; color: #909399; }
-.score-desc { font-size: 14px; color: #606266; margin: 0; line-height: 1.6; }
+.match-label { font-size: 13px; color: #909399; background: #f3f4f5; padding: 2px 10px; border-radius: 4px; }
+.score-desc { font-size: 14px; color: #606266; margin: 0; line-height: 1.7; }
 
 // ====== Gap Skills ======
 .gap-section { margin-bottom: 28px; }
@@ -382,6 +608,7 @@ async function handleRegenerate() {
 .skill-chip {
   display: inline-flex; align-items: center; gap: 4px;
   padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500;
+  cursor: default;
   &.must { background: #fdf0ef; color: #c0392b; border: 1px solid #f5c6cb; }
   &.nice { background: #ebf5fb; color: #2980b9; border: 1px solid #aed6f1; }
   &.bonus { background: #f8f9fa; color: #7f8c8d; border: 1px solid #dee2e6; }
@@ -392,58 +619,55 @@ async function handleRegenerate() {
   color: #155724; font-size: 14px; font-weight: 500;
 }
 
-// ====== Learning Path ======
-.path-steps { margin-bottom: 28px; }
-.path-step-card {
-  display: flex; align-items: flex-start; gap: 16px;
-  margin-bottom: 14px; position: relative;
-  &:not(:last-child)::after {
-    content: ''; position: absolute; left: 18px; top: 44px;
-    width: 2px; height: calc(100% + 14px);
-    background: linear-gradient(180deg, #1a3a5c 60%, #e9ecef 100%);
+// ====== Mind Map ======
+.mindmap-section { margin-bottom: 28px; }
+.mindmap-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+}
+.mode-toggle {
+  display: flex; gap: 4px;
+  background: #f3f4f5; border-radius: 8px; padding: 3px;
+}
+.mode-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 14px; border: none; border-radius: 6px;
+  background: transparent; color: #606266; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+  &:hover { color: #303133; }
+  &.active {
+    background: #fff; color: #1a3a5c; font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
   }
 }
-.step-index {
-  width: 38px; height: 38px; border-radius: 50%;
-  background: #1a3a5c; color: #fff; font-size: 16px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  z-index: 1;
+.mindmap-render {
+  position: relative;
+  overflow: auto;
+  background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; padding: 16px;
 }
-.step-body {
-  flex: 1; background: #fff; border-radius: 12px;
-  padding: 14px 18px; border: 1px solid #e5e7eb;
+.chart-box {
+  width: 100%; min-height: 400px; border-radius: 8px;
+  transition: height 0.3s ease;
 }
-.step-skills {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+.mindmap-tip {
+  display: flex; align-items: center; gap: 6px; margin-top: 10px;
+  font-size: 12px; color: #c0c4cc; justify-content: center;
+  svg { color: #c0c4cc; }
 }
-.skill-node {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-size: 13px; font-weight: 500; color: #303133;
-  background: #f3f4f5; padding: 4px 12px; border-radius: 6px;
+.empty-mindmap {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 60px 0; color: #c0c4cc;
+  svg { opacity: 0.4; }
+  p { font-size: 14px; margin: 0; }
 }
-.arrow-icon { color: #909399; flex-shrink: 0; }
-
-// ====== Graph Hints ======
-.hints-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
-.hint-card {
-  display: flex; align-items: flex-start; gap: 12px;
-  background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px;
-  padding: 16px;
-  .hint-icon { color: #1a3a5c; flex-shrink: 0; margin-top: 1px; }
-  p { font-size: 13px; color: #303133; line-height: 1.6; margin: 0; }
+.mindmap-code {
+  background: #1e1e2e; border-radius: 12px; overflow: hidden;
+  border: 1px solid #313244;
 }
-
-// ====== Rationale ======
-.rationale-card {
-  background: #fff; border-radius: 12px; padding: 24px 28px;
-  border: 1px solid #e5e7eb; margin-bottom: 28px;
-}
-.rationale-text {
-  font-size: 14px; color: #606266; line-height: 1.8; margin: 0; white-space: pre-wrap;
-}
-.rationale-footer {
-  margin-top: 16px; padding-top: 12px; border-top: 1px solid #f0f0f0;
-  font-size: 12px; color: #c0c4cc;
+.code-block {
+  margin: 0; padding: 20px 24px; overflow-x: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 13px; line-height: 1.6; color: #cdd6f4;
+  code { white-space: pre; }
 }
 
 // ====== Action Bar ======
@@ -457,13 +681,58 @@ async function handleRegenerate() {
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
+
+// ====== Mind Map Toolbar ======
+.mindmap-toolbar {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 4px 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #606266;
+  cursor: pointer;
+  transition: all 0.15s;
+  &:hover { background: #f3f4f5; color: #1a3a5c; }
+  &:active { background: #e5e7eb; }
+}
+.zoom-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #606266;
+  min-width: 36px;
+  text-align: center;
+  user-select: none;
+}
+.toolbar-divider {
+  width: 1px;
+  height: 18px;
+  background: #e5e7eb;
+  margin: 0 2px;
+}
+
 // ====== Responsive ======
 @media (max-width: 768px) {
-  .role-grid { grid-template-columns: 1fr 1fr; }
-  .hints-grid { grid-template-columns: 1fr; }
   .score-section { flex-direction: column; text-align: center; }
+  .mindmap-header { flex-direction: column; align-items: flex-start; gap: 12px; }
 }
 @media (max-width: 480px) {
-  .role-grid { grid-template-columns: 1fr; }
+  .input-tabs { flex-direction: column; }
 }
 </style>

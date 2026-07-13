@@ -1,4 +1,4 @@
-import request from '@/utils/request'
+﻿import request from '@/utils/request'
 import type { ApiResponse } from '@/types/api'
 import type { GapSkill } from '@/types/graph'
 
@@ -22,6 +22,32 @@ export interface CareerPlanData {
   updated_at?: string
 }
 
+/** AI career plan request */
+export interface AiPlanGenerateRequest {
+  input_type: 'PROFESSION' | 'JOB_DESCRIPTION' | 'JOB_URL'
+  target_text: string
+}
+
+/** Mind map node for tree visualization */
+export interface MindMapNode {
+  name: string
+  children?: MindMapNode[]
+}
+
+/** AI career plan response from backend */
+export interface AiPlanResponse {
+  target_role: string
+  analysis_summary: string
+  match_score: number
+  has_resume: boolean
+  gap_skills: Array<{
+    skill_name: string
+    requirement_level: 'MUST' | 'NICE' | 'BONUS'
+    description?: string
+  }>
+  mind_map: MindMapNode | null
+}
+
 /** Generate a career plan for the given target role */
 export function generateCareerPlan(target_role_id: number) {
   return request.post<ApiResponse<CareerPlanData>>('/career/plan/generate', { target_role_id })
@@ -30,4 +56,9 @@ export function generateCareerPlan(target_role_id: number) {
 /** Get existing career plan (returns null if none) */
 export function getCareerPlan() {
   return request.get<ApiResponse<CareerPlanData | null>>('/career/plan')
+}
+
+/** AI generate career plan from profession name or JD */
+export function aiGenerateCareerPlan(data: AiPlanGenerateRequest) {
+  return request.post<ApiResponse<AiPlanResponse>>('/career/plan/ai-generate', data)
 }
