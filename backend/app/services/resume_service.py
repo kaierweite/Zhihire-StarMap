@@ -30,6 +30,8 @@ from app.repositories import (
     resume_repository,
     parse_task_repository,
 )
+
+from app.services import notification_service as _notification_service
 from app.services.errors import BusinessError
 from app.db.session import AsyncSessionLocal
 
@@ -307,6 +309,18 @@ async def get_task_status(db: AsyncSession, task_id: int) -> TaskStatus:
     )
 
 
+async def get_resume_task_status(db: AsyncSession, user_id: int, resume_id: int) -> TaskStatus:
+    """通过 resume_id 获取最新的解析任务状态"""
+    from app.repositories.resume_repository import get_by_user_and_id
+    resume = await get_by_user_and_id(db, resume_id, user_id)
+    if resume is None or resume.file_id is None:
+        raise BusinessError(404, "简历不存在")
+    task = await parse_task_repository.get_by_file_and_user(db, resume.file_id, user_id)
+    if task is None:
+        raise BusinessError(404, "解析任务不存在")
+    return TaskStatus(task_id=task.id, status=task.status, result=task.result)
+
+
 async def optimize_resume(
     db: AsyncSession,
     user: User,
@@ -329,11 +343,11 @@ async def optimize_resume(
         raise BusinessError(404, "?????")
 
     resume_text = resume.content_text or ""
-    prompt = f"??????????????????????????????????\n\n?????\n{resume_text}\n"
+    resume_text = resume.content_text or ""
+    prompt = f"你是专业的简历优化顾问。请对以下简历内容逐段进行优化改写。\n\n在保留原内容所有关键信息的基础上进行精细优化改写，使表达更专业、更有说服力。丰富细节和量化成果，语言使用正式商务风格，不要过度精简。每段的优化改写结果放在 suggestion 字段中，只输出改写后的内容，不要附加评价和分析。\n\n简历内容\n{resume_text}\n"
     if job_description:
-        prompt += f"\n???????\n{job_description}\n"
-    prompt += "\n?? JSON ???????????????? section??????current???????suggestion???????relates_to_skill??????????"
-
+        prompt += f"\n请参考以下岗位描述进行针对性优化：\n{job_description}\n"
+    prompt += "\n请以JSON格式输出，每个优化项包含 section（段落标题）、current（原始内容）、suggestion（优化改写后的内容，只包含改写文本，不要添加分析或评价）、relates_to_skill（关联技能，可选）。suggestion 字段只输出纯文本改写结果，不要包含JSON、Markdown标记或分析说明。"
     messages = [{"role": "user", "content": prompt}]
     response = await deepseek_client.chat(messages, temperature=0.3, max_tokens=4096)
 
@@ -344,6 +358,11 @@ async def optimize_resume(
             raw = raw[7:]
         if raw.endswith("```"):
             raw = raw[:-3]
+        # Find JSON array in the response (handles introductory text from LLM)
+        json_start = raw.find("[")
+        json_end = raw.rfind("]")
+        if json_start >= 0 and json_end > json_start:
+            raw = raw[json_start:json_end + 1]
         raw = raw.strip()
         items = json.loads(raw)
         if isinstance(items, list):

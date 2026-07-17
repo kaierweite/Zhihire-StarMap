@@ -34,17 +34,82 @@ export interface MindMapNode {
   children?: MindMapNode[]
 }
 
+/** AI suggestion item */
+export interface AiSuggestion {
+  title: string
+  icon?: string
+}
+
+/** Strengths and weaknesses analysis */
+export interface StrengthWeakness {
+  strengths: string[]
+  weaknesses: string[]
+}
+
+/** Career development stage */
+export interface CareerStage {
+  stage: string
+  title: string
+  icon?: string
+}
+
+/** Skill gap item with progress */
+export interface SkillGapWithProgress {
+  skill_name: string
+  requirement_level: 'MUST' | 'NICE' | 'BONUS'
+  current_level: number
+  target_level: number
+  description?: string
+}
+
+/** Growth curve point */
+export interface GrowthCurvePoint {
+  label: string
+  value: number
+}
+
+/** Recommended learning resource */
+export interface LearningResource {
+  id: number
+  title: string
+  cover?: string
+  rating: number
+  duration?: string
+  type?: string
+}
+
+/** Employment outlook */
+export interface EmploymentOutlook {
+  salary_range: string
+  demand_level: string
+  growth_rate: string
+  trend?: 'up' | 'down' | 'stable'
+}
+
+/** Learning statistics overview */
+export interface LearningStats {
+  total_hours: number
+  completed_courses: number
+  planned_courses: number
+  certificates: number
+  completion_rate: number
+  target_completion_rate: number
+}
+
 /** AI career plan response from backend */
 export interface AiPlanResponse {
   target_role: string
   analysis_summary: string
   match_score: number
   has_resume: boolean
-  gap_skills: Array<{
-    skill_name: string
-    requirement_level: 'MUST' | 'NICE' | 'BONUS'
-    description?: string
-  }>
+  ai_suggestions: AiSuggestion[]
+  strength_weakness: StrengthWeakness
+  career_stages: CareerStage[]
+  gap_skills: SkillGapWithProgress[]
+  growth_curve: GrowthCurvePoint[]
+  learning_resources: LearningResource[]
+  employment_outlook: EmploymentOutlook
+  learning_stats: LearningStats
   mind_map: MindMapNode | null
 }
 

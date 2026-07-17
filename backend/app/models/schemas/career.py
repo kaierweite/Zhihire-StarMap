@@ -37,25 +37,6 @@ class MindMapNode(BaseModel):
     children: list["MindMapNode"] = []
 
 
-class AiPlanResponse(BaseModel):
-    """AI 职业规划响应。
-
-    Attributes:
-        target_role: 目标角色/专业名称。
-        analysis_summary: AI 分析总结。
-        match_score: 匹配度（0-100）。
-        has_resume: 是否使用了简历数据。
-        gap_skills: 缺口技能列表。
-        mind_map: 思维导图树形数据。
-    """
-    target_role: str
-    analysis_summary: str = ""
-    match_score: float = 0.0
-    has_resume: bool = False
-    gap_skills: list[dict] = []
-    mind_map: dict | None = None
-
-
 class GapSkillItem(BaseModel):
     """缺口技能条目。"""
     skill_name: str
@@ -92,3 +73,98 @@ class CareerPlanRecord(BaseModel):
     source: str
     created_at: str | None = None
     updated_at: str | None = None
+
+
+class AiSuggestion(BaseModel):
+    """AI 建议项。"""
+    title: str
+    icon: str | None = None
+
+
+class StrengthWeakness(BaseModel):
+    """优势与不足分析。"""
+    strengths: list[str] = []
+    weaknesses: list[str] = []
+
+
+class CareerStage(BaseModel):
+    """职业发展阶段。"""
+    stage: str
+    title: str
+    icon: str | None = None
+
+
+class SkillGapWithProgress(BaseModel):
+    """带进度的技能缺口。"""
+    skill_name: str
+    requirement_level: str  # MUST / NICE / BONUS
+    current_level: int = 0
+    target_level: int = 100
+    description: str | None = None
+
+
+class GrowthCurvePoint(BaseModel):
+    """成长曲线点。"""
+    label: str
+    value: int
+
+
+class LearningResource(BaseModel):
+    """推荐学习资源。"""
+    id: int
+    title: str
+    cover: str | None = None
+    rating: float = 0.0
+    duration: str | None = None
+    type: str | None = None
+
+
+class EmploymentOutlook(BaseModel):
+    """就业前景预测。"""
+    salary_range: str = ""
+    demand_level: str = ""
+    growth_rate: str = ""
+    trend: str = "up"
+
+
+class LearningStats(BaseModel):
+    """学习数据概览。"""
+    total_hours: int = 0
+    completed_courses: int = 0
+    planned_courses: int = 0
+    certificates: int = 0
+    completion_rate: int = 0
+    target_completion_rate: int = 0
+
+
+class AiPlanResponse(BaseModel):
+    """AI 职业规划响应。
+
+    Attributes:
+        target_role: 目标角色/专业名称。
+        analysis_summary: AI 分析总结。
+        match_score: 匹配度（0-100）。
+        has_resume: 是否使用了简历数据。
+        ai_suggestions: AI 建议列表。
+        strength_weakness: 优势与不足分析。
+        career_stages: 职业发展阶段列表。
+        gap_skills: 缺口技能列表（带进度）。
+        growth_curve: 能力成长曲线数据。
+        learning_resources: 推荐学习资源列表。
+        employment_outlook: 就业前景预测。
+        learning_stats: 学习数据概览。
+        mind_map: 思维导图树形数据。
+    """
+    target_role: str
+    analysis_summary: str = ""
+    match_score: float = 0.0
+    has_resume: bool = False
+    ai_suggestions: list[AiSuggestion] = []
+    strength_weakness: StrengthWeakness = StrengthWeakness()
+    career_stages: list[CareerStage] = []
+    gap_skills: list[SkillGapWithProgress] = []
+    growth_curve: list[GrowthCurvePoint] = []
+    learning_resources: list[LearningResource] = []
+    employment_outlook: EmploymentOutlook = EmploymentOutlook()
+    learning_stats: LearningStats = LearningStats()
+    mind_map: dict | None = None

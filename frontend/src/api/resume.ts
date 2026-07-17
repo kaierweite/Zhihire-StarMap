@@ -99,6 +99,11 @@ export function getParseTaskStatus(taskId: number) {
   return request.get<ApiResponse<TaskStatus>>(`/parse/task/${taskId}`)
 }
 
+/** Get the latest parse task status for a given resume (no need to remember task_id) */
+export function getParseTaskByResume(resumeId: number) {
+  return request.get<ApiResponse<TaskStatus>>(`/parse/resume/${resumeId}`)
+}
+
 /* ========== AI Optimize ========== */
 
 /** AI-powered resume optimization (calls DeepSeek, may be slow) */

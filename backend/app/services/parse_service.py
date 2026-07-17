@@ -6,6 +6,9 @@ BackgroundTasks ???????????
 import json
 import re as _re_module
 from typing import Any
+import logging
+
+logger = logging.getLogger(__name__)
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,6 +32,8 @@ from app.repositories import (
     user_profile_repository as _user_profile_repository,
     user_work_experience_repository as _user_work_experience_repository,
 )
+
+from app.services import notification_service as _notification_service
 
 
 async def run_parse_pipeline(file_id: int, user_id: int) -> None:
@@ -146,11 +151,44 @@ async def run_parse_pipeline(file_id: int, user_id: int) -> None:
                 **sync_info,
             }
             await parse_task_repository.update(db, task)
+
+            # 8.1 Send parse success notification
+            try:
+                skill_count = len(structured.get("skills", []))
+                exp_count = len(structured.get("experience", []))
+                title_text = "简历解析完成"
+                content_text = (
+                    f"简历「{resume.title if resume else '未命名'}」解析完成，"
+                    f"共识别 {skill_count} 项技能、{exp_count} 段经历。"
+                )
+                await _notification_service.send_notification(
+                    db, user_id, title_text,
+                    type_="RESUME_PARSE",
+                    content=content_text,
+                )
+                logger.info("Parse success notification sent for user %d", user_id)
+            except Exception as exc:
+                logger.warning("Failed to send parse success notification: %s", exc)
+
             await db.commit()
 
         except Exception as exc:
             # ????
             try:
+                # Send parse failure notification
+                try:
+                    resume_title = "未命名"
+                    if task and task.file_id:
+                        from app.repositories import upload_file_repository
+                        ue = await upload_file_repository.get_by_id(db, task.file_id)
+                        if ue:
+                            resume_title = ue.original_name
+                    await _notification_service.send_notification(
+                        db, user_id, "简历解析失败",
+                        type_="RESUME_PARSE", content=f"简历「{resume_title}」解析失败：{str(exc)[:200]}"
+                    )
+                except Exception:
+                    pass
                 task = await parse_task_repository.get_by_file_and_user(db, file_id, user_id)
                 if task:
                     task.status = "FAILED"

@@ -35,7 +35,7 @@ def build_prompt(
     """
     system_prompt = """你是一位资深的职业规划师和技能图谱分析专家。
 你需要基于用户已有的技能和简历信息，分析其与目标专业/岗位的差距，
-并生成结构化的学习路径思维导图。
+并生成结构化的学习路径思维导图和完整的职业规划报告。
 
 请严格按照以下格式输出纯 JSON（不要添加 markdown 代码块标记）：
 
@@ -44,9 +44,50 @@ def build_prompt(
   "analysis_summary": "一段分析总结，包括用户当前水平与目标的差距、建议方向等，不超过200字",
   "match_score": 匹配度分数(0-100之间的整数),
   "has_resume": true或false,
-  "gap_skills": [
-    {"skill_name": "技能名称", "requirement_level": "MUST", "description": "为什么需要这个技能"}
+  "ai_suggestions": [
+    {"title": "建议内容1"},
+    {"title": "建议内容2"},
+    {"title": "建议内容3"},
+    {"title": "建议内容4"},
+    {"title": "建议内容5"}
   ],
+  "strength_weakness": {
+    "strengths": ["优势1", "优势2", "优势3", "优势4"],
+    "weaknesses": ["不足1", "不足2", "不足3", "不足4"]
+  },
+  "career_stages": [
+    {"stage": "初级阶段", "title": "初级职位名称"},
+    {"stage": "中级阶段", "title": "中级职位名称"},
+    {"stage": "高级阶段", "title": "高级职位名称"},
+    {"stage": "管理阶段", "title": "管理职位名称"}
+  ],
+  "gap_skills": [
+    {"skill_name": "技能名称", "requirement_level": "MUST", "current_level": 当前掌握程度(0-100), "target_level": 目标掌握程度(0-100), "description": "技能描述"}
+  ],
+  "growth_curve": [
+    {"label": "现在", "value": 当前能力值},
+    {"label": "3个月后", "value": 预计能力值},
+    {"label": "6个月后", "value": 预计能力值},
+    {"label": "12个月后", "value": 预计能力值}
+  ],
+  "learning_resources": [
+    {"id": 1, "title": "资源名称", "rating": 评分(1-5), "type": "类型"},
+    {"id": 2, "title": "资源名称", "rating": 评分(1-5), "type": "类型"},
+    {"id": 3, "title": "资源名称", "rating": 评分(1-5), "type": "类型"}
+  ],
+  "employment_outlook": {
+    "salary_range": "薪资范围",
+    "demand_level": "需求等级",
+    "growth_rate": "增长率"
+  },
+  "learning_stats": {
+    "total_hours": 预计总学习时长(小时),
+    "completed_courses": 已完成课程数,
+    "planned_courses": 计划学习课程数,
+    "certificates": 已获得证书数,
+    "completion_rate": 当前完成率(0-100),
+    "target_completion_rate": 目标完成率(0-100)
+  },
   "mind_map": {
     "name": "学习路径总览",
     "children": [
@@ -67,6 +108,13 @@ def build_prompt(
 3. match_score 基于用户已有技能与目标要求的重合度计算
 4. analysis_summary 用中文，简洁专业
 5. 如果用户没有简历信息 (has_resume=false)，请基于用户输入的技能进行分析
+6. ai_suggestions 提供 5 条具体的学习建议
+7. strength_weakness 各列出 3-4 项优势和不足
+8. career_stages 列出 3-5 个职业发展阶段
+9. growth_curve 根据学习路径预测未来 1 年的能力增长曲线
+10. learning_resources 推荐 3-5 个学习资源（书籍/课程/网站）
+11. employment_outlook 分析目标职业的就业前景
+12. learning_stats 估算学习数据（总学时、课程数等）
 """
 
     label = _INPUT_LABELS.get(input_type, "目标")
@@ -107,7 +155,48 @@ def _build_fallback(target_text: str) -> dict:
         "analysis_summary": "AI 分析暂时不可用，请稍后重试",
         "match_score": 0,
         "has_resume": False,
+        "ai_suggestions": [
+            {"title": "建议补充相关技能知识"},
+            {"title": "建议多参加实践项目"},
+            {"title": "建议学习行业前沿技术"},
+            {"title": "建议完善个人简历"},
+            {"title": "建议多进行模拟面试"},
+        ],
+        "strength_weakness": {
+            "strengths": ["基础扎实", "学习能力强", "态度积极"],
+            "weaknesses": ["经验不足", "技能有待提升", "需要更多实践"],
+        },
+        "career_stages": [
+            {"stage": "入门", "title": "初级岗位"},
+            {"stage": "成长", "title": "中级岗位"},
+            {"stage": "成熟", "title": "高级岗位"},
+            {"stage": "突破", "title": "专家/管理"},
+        ],
         "gap_skills": [],
+        "growth_curve": [
+            {"label": "现在", "value": 0},
+            {"label": "3个月后", "value": 30},
+            {"label": "6个月后", "value": 60},
+            {"label": "12个月后", "value": 85},
+        ],
+        "learning_resources": [
+            {"id": 1, "title": "相关技能学习课程", "rating": 4.5, "type": "在线课程"},
+            {"id": 2, "title": "行业经典书籍", "rating": 4.8, "type": "书籍"},
+            {"id": 3, "title": "技术社区与博客", "rating": 4.3, "type": "网站"},
+        ],
+        "employment_outlook": {
+            "salary_range": "待分析",
+            "demand_level": "中等",
+            "growth_rate": "稳定增长",
+        },
+        "learning_stats": {
+            "total_hours": 0,
+            "completed_courses": 0,
+            "planned_courses": 0,
+            "certificates": 0,
+            "completion_rate": 0,
+            "target_completion_rate": 100,
+        },
         "mind_map": {
             "name": "学习路径",
             "children": [
@@ -150,7 +239,17 @@ async def analyze_and_plan(
         data.setdefault("analysis_summary", "")
         data.setdefault("match_score", 0)
         data.setdefault("has_resume", resume_summary is not None)
+        data.setdefault("ai_suggestions", [])
+        data.setdefault("strength_weakness", {"strengths": [], "weaknesses": []})
+        data.setdefault("career_stages", [])
         data.setdefault("gap_skills", [])
+        data.setdefault("growth_curve", [])
+        data.setdefault("learning_resources", [])
+        data.setdefault("employment_outlook", {"salary_range": "", "demand_level": "", "growth_rate": ""})
+        data.setdefault("learning_stats", {
+            "total_hours": 0, "completed_courses": 0, "planned_courses": 0,
+            "certificates": 0, "completion_rate": 0, "target_completion_rate": 0,
+        })
         data.setdefault("mind_map", {"name": "学习路径", "children": []})
 
         return data

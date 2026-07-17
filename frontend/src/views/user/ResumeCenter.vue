@@ -1,23 +1,28 @@
 ﻿
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted } from "vue"
+import { ref, reactive, onMounted, onUnmounted, h } from "vue"
 import { ElMessage, ElMessageBox } from "element-plus"
 import { Upload, FileText, RefreshCw, Edit, Trash2, Plus, X,
         ArrowRight, Save, File, ChevronRight, Sparkles, UserCheck } from "lucide-vue-next"
 import { uploadResume, listResumes, getResumeDetail,
-        updateResume, deleteResume, getParseTaskStatus, syncToProfile } from "@/api/resume"
+        updateResume, deleteResume, getParseTaskStatus, getParseTaskByResume, syncToProfile } from "@/api/resume"
 import type { ResumeListItem, ResumeDetail as ResumeDetailType } from "@/api/resume"
 import AbilityMapSection from "./AbilityMapSection.vue"
 
-type ViewMode = "list" | "upload" | "parsing" | "detail" | "error"
+type ViewMode = "list" | "detail" | "error"
 const view = ref<ViewMode>("list")
 const selectedResumeId = ref<number | null>(null)
 const resumeTitle = ref("")
-const progress = ref(0)
-const progressText = ref("")
+
+
+// === Non-blocking parse task polling ===
+// Maps resume_id -> TaskStatus (WAITING/PARSING/SUCCESS/FAILED)
+const taskPollMap = reactive<Record<number, { status: string; taskId: number }>>({})
+// Maps resume_id -> set to true once we've notified the user
+const notifiedSet = reactive<Record<number, boolean>>({})
+let backgroundPollTimer: ReturnType<typeof setInterval> | null = null
+// Keep error state for inline display only
 const errorMsg = ref("")
-let progressTimer: ReturnType<typeof setInterval> | null = null
-let pollingTimer: ReturnType<typeof setInterval> | null = null
 
 const listLoading = ref(false)
 const detailLoading = ref(false)
@@ -45,8 +50,7 @@ const fileInputRef = ref<HTMLInputElement | null>(null)
 
 onMounted(() => loadList())
 onUnmounted(() => {
-  if (progressTimer) clearInterval(progressTimer)
-  if (pollingTimer) clearInterval(pollingTimer)
+  if (backgroundPollTimer) { clearInterval(backgroundPollTimer); backgroundPollTimer = null }
 })
 
 async function loadList() {
@@ -67,23 +71,7 @@ function formatDate(d: string | null) { return d ? d.slice(0, 10) : "" }
 
 async function handleSync() {
   if (!selectedResumeId.value) return
-  syncing.value = true
-  try {
-    const resp = await syncToProfile(selectedResumeId.value)
-    const result = resp.data.data
-    if (result?.synced_to_profile) {
-      const fields = result.synced_fields?.join("、") || ""
-      ElMessage.success("已同步到个人中心：" + fields)
-    } else if (result?.reason === "resume_not_found_or_empty") {
-      ElMessage.warning("该简历暂无解析结果，请等待解析完成")
-    } else {
-      ElMessage.info("个人中心数据已是最新，无需同步")
-    }
-  } catch {
-    ElMessage.error("同步失败，请稍后重试")
-  } finally {
-    syncing.value = false
-  }
+  await handleSyncWithId(selectedResumeId.value)
 }
 
 const ALLOWED_TYPES = [
@@ -114,48 +102,94 @@ function validateFile(f: File): string | null {
 }
 
 async function doUpload(file: File) {
-  view.value = "parsing"; progress.value = 0
-  progressText.value = "正在上传简历..."
   let resumeId: number, taskId: number
   try {
     const resp = await uploadResume(file, file.name.replace(/\.[a-z]+$/i, ""))
     const d = resp.data.data; resumeId = d.resume_id
     taskId = d.task_id; resumeTitle.value = d.title
   } catch {
-    view.value = "error"; errorMsg.value = "上传失败"; return
+    ElMessage.error("上传失败，请重试")
+    return
   }
   selectedResumeId.value = resumeId
-  progressText.value = "正在解析简历..."
-  progress.value = 15
-  pollTask(taskId, resumeId)
+
+  // Mark task for background polling
+  taskPollMap[resumeId] = { status: "WAITING", taskId }
+  notifiedSet[resumeId] = false
+  startBackgroundPolling()
+
+  // Immediately return to list view
+  ElMessage.success("简历上传成功，正在后台解析...")
+  view.value = "list"
+  await loadList()
 }
 
-function pollTask(taskId: number, rid: number) {
-  let tries = 0; const MAX_TRIES = 120
-  pollingTimer = setInterval(async () => {
-    tries++; progress.value = Math.min(15 + Math.round((tries / MAX_TRIES) * 75), 90)
-    try {
-      const resp = await getParseTaskStatus(taskId)
-      const st = resp.data.data
-      if (st.status === "SUCCESS") {
-        if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null }
-        progress.value = 95; await loadDetail(rid); return
-      }
-      if (st.status === "FAILED") {
-        if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null }
-        view.value = "error"; errorMsg.value = "解析失败"; return
-      }
-    } catch { /* retry */ }
-    if (tries >= MAX_TRIES) {
-      if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null }
-      view.value = "error"; errorMsg.value = "超时了"
+function startBackgroundPolling() {
+  if (backgroundPollTimer) return
+  backgroundPollTimer = setInterval(async () => {
+    for (const [resumeIdStr, taskInfo] of Object.entries(taskPollMap)) {
+      const rid = Number(resumeIdStr)
+      if (taskInfo.status === "SUCCESS" || taskInfo.status === "FAILED") continue
+
+      try {
+        const resp = await getParseTaskByResume(rid)
+        const st = resp.data.data
+        taskPollMap[rid] = { status: st.status, taskId: st.task_id }
+
+        if (st.status === "SUCCESS") {
+          if (notifiedSet[rid]) continue
+          notifiedSet[rid] = true
+          showParseCompleteToast(rid)
+        } else if (st.status === "FAILED") {
+          if (notifiedSet[rid]) continue
+          notifiedSet[rid] = true
+          ElMessage.error("简历解析失败，请重新上传")
+        }
+      } catch { /* retry */ }
     }
-  }, 2000)
+    // Clean up completed tasks from map after a delay
+    for (const [ridStr, taskInfo] of Object.entries(taskPollMap)) {
+      if (taskInfo.status === "SUCCESS" || taskInfo.status === "FAILED") {
+        // Keep in map for status badges, but we can stop polling after all are done
+      }
+    }
+  }, 3000)
 }
 
+
+function showParseCompleteToast(resumeId: number) {
+  const taskInfo = taskPollMap[resumeId]
+  if (!taskInfo) return
+  ElMessage({
+    message: h("div", { style: "display: flex; flex-direction: column; gap: 8px;" }, [
+      h("div", { style: "font-weight: 600; font-size: 14px;" }, "简历解析完成！"),
+      h("div", { style: "display: flex; gap: 12px; margin-top: 4px;" }, [
+        h("span", { style: "cursor:pointer;padding:4px 12px;background:#1a3a5c;color:#fff;border-radius:6px;font-size:12px;", onClick: () => openDetail(resumeId) }, "查看详情"),
+        h("span", { style: "cursor:pointer;padding:4px 12px;background:#059669;color:#fff;border-radius:6px;font-size:12px;", onClick: () => { handleSyncWithId(resumeId); } }, "同步"),
+        h("span", { style: "cursor:pointer;padding:4px 12px;background:#0ea5e9;color:#fff;border-radius:6px;font-size:12px;", onClick: () => { window.open("/user/resume/optimize?resume_id=" + resumeId, "_self"); } }, "AI 优化"),
+      ]),
+    ]),
+    duration: 10000,
+    showClose: true,
+  })
+}
+
+async function handleSyncWithId(resumeId: number) {
+  try {
+    const resp = await syncToProfile(resumeId)
+    const result = resp.data.data
+    if (result?.synced_to_profile) {
+      ElMessage.success("已同步到个人中心：" + (result.synced_fields?.join("、") || ""))
+    } else {
+      ElMessage.info("个人中心数据已是最新，无需同步")
+    }
+  } catch {
+    ElMessage.error("同步失败，请稍后重试")
+  }
+}
 async function openDetail(id: number) {
   selectedResumeId.value = id
-  view.value = "parsing"; progress.value = 50
+  view.value = "detail"
   await loadDetail(id)
 }
 
@@ -258,8 +292,6 @@ function showUpload() { triggerFileInput() }
 function backToList() {
   view.value = "list"; selectedResumeId.value = null; errorMsg.value = ""
   hasChanges.value = false; editInfo.value = false; editSkills.value = false; editExp.value = false
-  if (progressTimer) { clearInterval(progressTimer); progressTimer = null }
-  if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null }
   loadList()
 }
 function retryUpload() { showUpload() }
@@ -278,6 +310,26 @@ function deleteExp(i: number) {
 function addExp() {
   parsedData.experience.push({ title: "New", company: "公司", period: "-", description: "" })
   editingExpIdx.value = parsedData.experience.length - 1; editExp.value = true; hasChanges.value = true
+}
+
+function getTaskStatusClass(status: string): string {
+  switch (status) {
+    case "WAITING": return "waiting"
+    case "PARSING": return "parsing"
+    case "SUCCESS": return "success"
+    case "FAILED": return "failed"
+    default: return "normal"
+  }
+}
+
+function getTaskStatusText(status: string): string {
+  switch (status) {
+    case "WAITING": return "等待解析"
+    case "PARSING": return "解析中"
+    case "SUCCESS": return "已解析"
+    case "FAILED": return "解析失败"
+    default: return status
+  }
 }
 
 const CHIPS = ["chip-primary","chip-success","chip-neutral","chip-warning","chip-purple"]
@@ -346,7 +398,8 @@ function displayYears(y: string | number): string {
             <div class="card-meta"><span class="card-title">{{ item.title || item.file_name || '未命名' }}</span><span class="card-date">{{ formatDate(item.updated_at || item.created_at) }}</span></div>
           </div>
           <div class="card-right">
-            <span class="card-status" :class="item.status.toLowerCase()">{{ item.status }}</span>
+            <span v-if="taskPollMap[item.id]" class="card-status" :class="getTaskStatusClass(taskPollMap[item.id]?.status ?? item.status)">{{ getTaskStatusText(taskPollMap[item.id]?.status ?? item.status) }}</span>
+            <span v-else class="card-status" :class="item.status.toLowerCase()">{{ item.status }}</span>
             <button class="card-delete" :disabled="deleting" @click.stop="handleDelete(item.id)"><Trash2 :size="14" /></button>
           </div>
         </div>
@@ -364,17 +417,13 @@ function displayYears(y: string | number): string {
       </div>
     </template>
 
-    <div v-if="view === 'parsing'" class="progress-card">
-      <div class="progress-header"><RefreshCw :size="20" class="spinning" /><span class="progress-label">简历处理中</span></div>
-      <div class="bar-track"><div class="bar-fill" :style="{ width: progress + '%' }" /></div>
-      <p class="progress-text">{{ progressText }}</p>
-    </div>
 
-    <div v-if="view === 'error'" class="error-card">
-      <p class="error-msg">{{ errorMsg || '出错了，请重试' }}</p>
+
+    <div v-if="errorMsg" class="error-card">
+      <p class="error-msg">{{ errorMsg }}</p>
       <div class="error-actions">
         <button class="retry-btn" @click="retryUpload"><RefreshCw :size="14" /> 重新上传</button>
-        <button class="back-btn" @click="backToList">返回列表</button>
+        <button class="back-btn" @click="errorMsg = ''">取消</button>
       </div>
     </div>
 
@@ -491,6 +540,11 @@ function displayYears(y: string | number): string {
 .card-status.normal { background: #d4edda; color: #155724; }
 .card-status.disabled { background: #f8f9fa; color: #6c757d; }
 .card-status.banned { background: #f8d7da; color: #721c24; }
+.card-status.waiting { background: #fff3cd; color: #856404; animation: pulse 1.5s ease-in-out infinite; }
+.card-status.parsing { background: #cce5ff; color: #004085; animation: pulse 1.5s ease-in-out infinite; }
+.card-status.success { background: #d4edda; color: #155724; }
+.card-status.failed { background: #f8d7da; color: #721c24; }
+@keyframes pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
 .card-delete { width: 30px; height: 30px; border-radius: 6px; border: 1px solid transparent; background: none; color: #c0c4cc; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .2s; }
 .card-delete:hover { border-color: #f56c6c; color: #f56c6c; }
 .card-delete:disabled { opacity: 0.4; cursor: not-allowed; }

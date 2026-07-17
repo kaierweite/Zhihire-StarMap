@@ -17,6 +17,23 @@ from app.services.errors import BusinessError
 router = APIRouter(prefix="/parse", tags=["????"])
 
 
+@router.get("/resume/{resume_id}", summary="查询简历解析任务状态")
+async def get_resume_task_status(
+    resume_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> Result[TaskStatus]:
+    """通过 resume_id 查询最新解析任务状态
+
+    可用于上传后后台轮询，无需保存 task_id。
+    """
+    try:
+        status = await resume_service.get_resume_task_status(db, current_user.id, resume_id)
+    except BusinessError as exc:
+        return Result.error(code=exc.code, message=exc.message, data=exc.data)
+    return Result.success(data=status)
+
+
 @router.get("/task/{task_id}", summary="????????")
 async def get_task_status(
     task_id: int,
