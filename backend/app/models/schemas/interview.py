@@ -12,6 +12,9 @@ class InterviewMessageRequest(BaseModel):
     question_id: int = Field(..., description="Question ID")
     answer: str = Field(..., description="User answer text")
 
+class InterviewFinishRequest(BaseModel):
+    session_id: int = Field(..., description="Interview session ID")
+
 class InterviewQuestionItem(BaseModel):
     question_id: int
     content: str

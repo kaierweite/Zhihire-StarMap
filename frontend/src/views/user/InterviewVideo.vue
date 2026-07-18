@@ -278,7 +278,7 @@ import {
   Users, User, Monitor, Circle, VideoOff 
 } from 'lucide-vue-next'
 import { ElMessage } from 'element-plus'
-import { startInterview, submitAnswer } from '@/api/interview'
+import { startInterview, submitAnswer, finishInterview } from '@/api/interview'
 import InterviewerAvatar from '@/components/interview/InterviewerAvatar.vue'
 import type { SessionRecord } from '@/types/interview'
 
@@ -474,10 +474,21 @@ function stopTimer() {
   }
 }
 
-function endInterview() { 
+async function endInterview() { 
   synth?.cancel(); recognition?.stop(); stopTimer()
-  updateLocalSession(true); isFinished.value = true; 
-  isRecording.value = false; isSpeaking.value = false 
+  isRecording.value = false; isSpeaking.value = false
+  
+  if (sessionId.value) {
+    try {
+      const res = await finishInterview(sessionId.value)
+      const data = res.data.data
+      overallScore.value = data.overall_score ?? null
+    } catch {
+      ElMessage.error('生成报告失败')
+    }
+  }
+  
+  updateLocalSession(true); isFinished.value = true 
 }
 
 function viewReport() { 

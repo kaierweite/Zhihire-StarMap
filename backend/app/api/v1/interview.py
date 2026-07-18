@@ -5,7 +5,7 @@ from app.api.deps import get_current_user, require_role
 from app.db.session import get_db
 from app.models.entities.user import User
 from app.models.enums.role import RoleEnum
-from app.models.schemas.interview import InterviewMessageRequest, InterviewStartRequest
+from app.models.schemas.interview import InterviewMessageRequest, InterviewStartRequest, InterviewFinishRequest
 from app.models.schemas.result import PageResult, Result
 from app.services import interview_service
 from app.services.errors import BusinessError
@@ -23,6 +23,13 @@ async def start_interview(req: InterviewStartRequest, current_user: User = Depen
 async def submit_answer(req: InterviewMessageRequest, current_user: User = Depends(require_role(RoleEnum.USER)), db: AsyncSession = Depends(get_db)):
     try:
         r = await interview_service.submit_answer(db, current_user.id, req.session_id, req.question_id, req.answer)
+    except BusinessError as e: return Result.error(code=e.code, message=e.message, data=e.data)
+    return Result.success(data=r.model_dump())
+
+@router.post("/finish", summary="\u624b\u52a8\u7ed3\u675f\u9762\u8bd5\u5e76\u751f\u6210\u62a5\u544a")
+async def finish_interview(req: InterviewFinishRequest, current_user: User = Depends(require_role(RoleEnum.USER)), db: AsyncSession = Depends(get_db)):
+    try:
+        r = await interview_service.finish_interview(db, current_user.id, req.session_id)
     except BusinessError as e: return Result.error(code=e.code, message=e.message, data=e.data)
     return Result.success(data=r.model_dump())
 

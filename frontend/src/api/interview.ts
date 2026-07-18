@@ -19,7 +19,12 @@ export function submitAnswer(data: InterviewMessageRequest) {
   return request.post<ApiResponse<InterviewMessageResponse>>('/interview/message', data)
 }
 
-/** 3. 获取面试报告 */
+/** 3. 手动结束面试并生成报告 */
+export function finishInterview(sessionId: number) {
+  return request.post<ApiResponse<InterviewReportData>>('/interview/finish', { session_id: sessionId })
+}
+
+/** 4. 获取面试报告 */
 export function getReport(sessionId: number) {
   return request.get<ApiResponse<InterviewReportData>>(`/interview/report/${sessionId}`)
 }

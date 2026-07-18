@@ -70,6 +70,27 @@ async def get_report(db, user_id, session_id):
     if report is None: raise BusinessError(404, "\u62a5\u544a\u5c1a\u672a\u751f\u6210")
     return InterviewReportResponse(session_id=session_id, overall_score=report.overall_score, radar=report.radar, feedback=report.feedback, created_at=report.created_at)
 
+async def finish_interview(db, user_id, session_id):
+    session = await interview_repository.get_session_by_id(db, session_id)
+    if session is None or session.user_id != user_id: raise BusinessError(404, "\u9762\u8bd5\u4f1a\u8bdd\u4e0d\u5b58\u5728")
+    if session.status == "COMPLETED":
+        report = await interview_repository.get_report_by_session(db, session_id)
+        if report:
+            return InterviewReportResponse(session_id=session_id, overall_score=report.overall_score, radar=report.radar, feedback=report.feedback, created_at=report.created_at)
+        raise BusinessError(404, "\u62a5\u544a\u5c1a\u672a\u751f\u6210")
+    await interview_repository.update_session_status(db, session_id, "COMPLETED", finished_at=datetime.now())
+    questions = await interview_repository.list_questions_by_session(db, session_id)
+    answers = await interview_repository.list_answers_by_session(db, session_id)
+    try:
+        await _generate_report(db, session_id, questions, answers)
+    except Exception as e:
+        logger.warning(f"Report gen failed: {e}")
+    await db.commit()
+    report = await interview_repository.get_report_by_session(db, session_id)
+    if report:
+        return InterviewReportResponse(session_id=session_id, overall_score=report.overall_score, radar=report.radar, feedback=report.feedback, created_at=report.created_at)
+    raise BusinessError(500, "\u62a5\u544a\u751f\u6210\u5931\u8d25")
+
 async def query_question_bank(db, question_type=None, page=1, size=20):
     questions, total = await interview_repository.list_bank_questions(db, question_type=question_type, page=page, size=size)
     items = [QuestionBankItem(id=q.id, question_type=q.question_type, content=q.content, order_no=q.order_no) for q in questions]
