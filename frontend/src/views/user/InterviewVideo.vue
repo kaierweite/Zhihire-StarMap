@@ -107,7 +107,7 @@
 
             <!-- 面试官 -->
             <div class="interviewer-area">
-              <InterviewerAvatar :size="420" :speaking="isSpeaking" />
+              <InterviewerAvatar :size="420" :isTalking="isSpeaking" :isListening="isRecording" />
             </div>
 
             <!-- 前景桌面 -->
@@ -1030,6 +1030,7 @@ onUnmounted(() => {
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
+  filter: saturate(0.85) contrast(0.98) brightness(1.01);
 }
 
 .foreground-desk {
