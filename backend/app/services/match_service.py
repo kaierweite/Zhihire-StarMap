@@ -1,4 +1,4 @@
-﻿"""匹配推荐业务服务模块。
+"""匹配推荐业务服务模块。
 
 编排三层匹配算法（召回→打分→图谱增值）、懒计算+新鲜度缓存、
 双向推荐（求职端/企业端）、投递和邀请业务逻辑。
@@ -253,7 +253,11 @@ async def get_candidate_recommendations(
             result["user_id"] = cand_user_id
 
         user = await user_repository.get_by_id(db, cand_user_id)
-        result["name"] = user.real_name or user.username if user else None
+        if user:
+            profile = await _get_user_profile(db, cand_user_id)
+            result["name"] = profile.real_name if profile and profile.real_name else user.username
+        else:
+            result["name"] = None
 
         existing_rec = await get_by_user_and_job(db, cand_user_id, job_id)
         if not existing_rec:

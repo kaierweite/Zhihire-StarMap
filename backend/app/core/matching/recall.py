@@ -1,4 +1,4 @@
-﻿"""召回层：SQL 查询扩充候选集。
+"""召回层：SQL 查询扩充候选集。
 
 通过技能交集缩小匹配范围，输出候选 (resume_id, job_id) 对。
 每端最多返回 50 对，避免全量笛卡尔积。
@@ -33,12 +33,12 @@ async def recall_jobs_for_user(
     Returns:
         list[dict]: [{resume_id, job_id}] 候选对。
     """
-    # 1. 获取用户正常简历
+    # 1. 获取用户正常简历（按更新时间排序，取最新）
     stmt_resume = select(Resume).where(
         Resume.user_id == user_id,
         Resume.deleted_at == "0",
         Resume.status == "NORMAL",
-    )
+    ).order_by(Resume.updated_at.desc())
     result = await db.execute(stmt_resume)
     resumes = list(result.scalars().all())
     if not resumes:
@@ -133,16 +133,16 @@ async def recall_candidates_for_job(
     result = await db.execute(stmt_us)
     user_ids = {row[0] for row in result.all()}
 
-    # 4. 查这些用户的 NORMAL 简历
+    # 4. 查这些用户的 NORMAL 简历（按更新时间排序，取最新）
     candidates = []
     for uid in user_ids:
         stmt_resume = select(Resume).where(
             Resume.user_id == uid,
             Resume.deleted_at == "0",
             Resume.status == "NORMAL",
-        )
+        ).order_by(Resume.updated_at.desc())
         result = await db.execute(stmt_resume)
-        resume = result.scalar_one_or_none()
+        resume = result.scalars().first()
         if resume:
             candidates.append({
                 "resume_id": resume.id,
