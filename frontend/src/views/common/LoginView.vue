@@ -119,42 +119,42 @@ async function handleLogin() {
 /* ====== 左侧表单 ====== */
 .form-side { width: 520px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; padding: 48px 64px; background: #fff; }
 .form-inner { max-width: 380px; }
-.logo { font-size: 28px; font-weight: 700; color: #1a3a5c; text-decoration: none; display: block; margin-bottom: 32px; &:hover { text-decoration: none; } }
-.subtitle { color: #909399; font-size: 15px; margin-bottom: 28px; }
+.logo { font-size: 28px; font-weight: 700; color: #003527; text-decoration: none; display: block; margin-bottom: 32px; &:hover { text-decoration: none; } }
+.subtitle { color: #404944; font-size: 15px; margin-bottom: 28px; }
 
 .role-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
 .role-card {
   display: flex; flex-direction: column; align-items: center; gap: 6px;
-  padding: 14px 8px; border: 2px solid #e5e7eb; border-radius: 10px;
+  padding: 14px 8px; border: 2px solid #bfc9c3; border-radius: 10px;
   cursor: pointer; transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
-  background: #fafbfc; color: #909399;
+  background: #fafbfc; color: #404944;
   span { font-size: 13px; font-weight: 600; }
-  &:hover { border-color: #1a3a5c; color: #1a3a5c; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(26,58,92,0.1); }
-  &.active { border-color: #1a3a5c; background: rgba(26,58,92,0.06); color: #1a3a5c; box-shadow: 0 4px 12px rgba(26,58,92,0.12); }
+  &:hover { border-color: #003527; color: #003527; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(26,58,92,0.1); }
+  &.active { border-color: #003527; background: rgba(26,58,92,0.06); color: #003527; box-shadow: 0 4px 12px rgba(26,58,92,0.12); }
 }
 
 :deep(.el-input__wrapper) { border-radius: 10px; padding: 4px 12px; transition: box-shadow 0.3s; &:focus-within { box-shadow: 0 0 0 3px rgba(14,165,233,0.15); } }
 .form-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.forgot-link { font-size: 13px; color: #1a3a5c; font-weight: 600; transition: color 0.2s; &:hover { color: #0ea5e9; } }
+.forgot-link { font-size: 13px; color: #003527; font-weight: 600; transition: color 0.2s; &:hover { color: #064e3b; } }
 
 .submit-btn {
   width: 100%; height: 44px; border-radius: 999px; font-size: 15px; font-weight: 600;
-  background: #1a3a5c; border-color: #1a3a5c; letter-spacing: 2px;
+  background: #003527; border-color: #003527; letter-spacing: 2px;
   position: relative; overflow: hidden; transition: all 0.3s;
   &::after {
     content: ''; position: absolute; top: 0; left: -150%; width: 100%; height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
     transform: skewX(-20deg); animation: shimmer 4s infinite;
   }
-  &:hover { background: #24507a; border-color: #24507a; transform: translateY(-1px); box-shadow: 0 8px 20px rgba(26,58,92,0.25); }
+  &:hover { background: #064e3b; border-color: #064e3b; transform: translateY(-1px); box-shadow: 0 8px 20px rgba(26,58,92,0.25); }
 }
 @keyframes shimmer { 0% { left: -150%; } 30% { left: 150%; } 100% { left: 150%; } }
 
-.switch-text { text-align: center; margin-top: 20px; color: #909399; font-size: 14px; }
-.switch-link { color: #1a3a5c; font-weight: 600; text-decoration: none; transition: color 0.2s; &:hover { color: #0ea5e9; } }
+.switch-text { text-align: center; margin-top: 20px; color: #404944; font-size: 14px; }
+.switch-link { color: #003527; font-weight: 600; text-decoration: none; transition: color 0.2s; &:hover { color: #064e3b; } }
 
 /* ====== 右侧英雄区 ====== */
-.hero-side { flex: 1; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a3a5c 0%, #1e5a8a 40%, #0ea5e9 100%); }
+.hero-side { flex: 1; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #003527 0%, #064e3b 40%, #064e3b 100%); }
 
 .decor-circle {
   position: absolute; border-radius: 50%; background: rgba(255,255,255,0.06); pointer-events: none;

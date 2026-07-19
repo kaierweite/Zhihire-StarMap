@@ -89,12 +89,12 @@ function initMindMap() {
       borderColor: '#e8e8e8',
       borderWidth: 1,
       padding: [8, 14],
-      textStyle: { color: '#303133', fontSize: 13 },
+      textStyle: { color: '#121c28', fontSize: 13 },
       formatter: (params: any) => {
         const name = params.name || ''
         const depth = params.treePathInfo?.length || 0
-        if (depth <= 2) return '<strong style="font-size:15px;color:#1a3a5c;">' + name + '</strong>'
-        return '<span style="color:#606266;font-size:13px;">' + name + '</span>'
+        if (depth <= 2) return '<strong style="font-size:15px;color:#003527;">' + name + '</strong>'
+        return '<span style="color:#404944;font-size:13px;">' + name + '</span>'
       },
     },
     series: [{
@@ -112,7 +112,7 @@ function initMindMap() {
         position: 'bottom',
         fontSize: 14,
         fontWeight: 500,
-        color: '#303133',
+        color: '#121c28',
         width: 200,
         overflow: 'break',
         formatter: (params: any) => {
@@ -122,20 +122,20 @@ function initMindMap() {
           return name
         },
         rich: {
-          bold: { fontSize: 16, fontWeight: 700, color: '#1a3a5c' },
+          bold: { fontSize: 16, fontWeight: 700, color: '#003527' },
         },
       },
       leaves: {
         label: {
           position: 'bottom',
           fontSize: 13,
-          color: '#606266',
+          color: '#404944',
           width: 180,
           overflow: 'break',
         },
       },
       lineStyle: {
-        color: '#1a3a5c',
+        color: '#003527',
         width: 1.5,
         curveness: 0.5,
       },
@@ -170,12 +170,12 @@ function initRadarChart() {
       shape: 'polygon',
       splitNumber: 4,
       axisName: {
-        color: '#606266',
+        color: '#404944',
         fontSize: 12,
       },
       splitLine: {
         lineStyle: {
-          color: ['#e5e7eb', '#e5e7eb', '#e5e7eb', '#e5e7eb'],
+          color: ['#bfc9c3', '#bfc9c3', '#bfc9c3', '#bfc9c3'],
         },
       },
       splitArea: {
@@ -186,7 +186,7 @@ function initRadarChart() {
       },
       axisLine: {
         lineStyle: {
-          color: '#dcdfe6',
+          color: '#bfc9c3',
         },
       },
     },
@@ -249,7 +249,7 @@ function initGrowthChart() {
       backgroundColor: 'rgba(255,255,255,0.96)',
       borderColor: '#e8e8e8',
       borderWidth: 1,
-      textStyle: { color: '#303133' },
+      textStyle: { color: '#121c28' },
       formatter: (params: any) => {
         const item = params[0]
         return `<strong>${item.name}</strong><br/>能力值: <span style="color:#3b82f6;font-weight:bold;">${item.value}</span>`
@@ -265,16 +265,16 @@ function initGrowthChart() {
     xAxis: {
       type: 'category',
       data: xData,
-      axisLine: { lineStyle: { color: '#e5e7eb' } },
-      axisLabel: { color: '#909399', fontSize: 12 },
+      axisLine: { lineStyle: { color: '#bfc9c3' } },
+      axisLabel: { color: '#404944', fontSize: 12 },
       axisTick: { show: false },
     },
     yAxis: {
       type: 'value',
       min: 0,
       max: 100,
-      splitLine: { lineStyle: { color: '#f5f7fa', type: 'dashed' } },
-      axisLabel: { color: '#909399', fontSize: 12 },
+      splitLine: { lineStyle: { color: '#f8f9ff', type: 'dashed' } },
+      axisLabel: { color: '#404944', fontSize: 12 },
     },
     series: [{
       type: 'line',
@@ -545,8 +545,8 @@ function downloadChart() {
                       transform="rotate(-90 60 60)"
                       class="score-arc"
                     />
-                    <text x="60" y="56" text-anchor="middle" fill="#303133" font-size="28" font-weight="700">{{ planData.match_score }}</text>
-                    <text x="60" y="74" text-anchor="middle" fill="#909399" font-size="12">%</text>
+                    <text x="60" y="56" text-anchor="middle" fill="#121c28" font-size="28" font-weight="700">{{ planData.match_score }}</text>
+                    <text x="60" y="74" text-anchor="middle" fill="#404944" font-size="12">%</text>
                   </svg>
                 </div>
                 <div class="score-stars">

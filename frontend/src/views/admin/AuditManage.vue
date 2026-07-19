@@ -107,21 +107,21 @@ onMounted(fetchSkillAudits)
 .d1 { animation-delay: 0.08s; } .d2 { animation-delay: 0.15s; }
 .spinning { animation: spin 1s linear infinite; }
 
-.page-title { font-size: 28px; font-weight: 700; color: #303133; margin-bottom: 4px; }
-.page-desc { font-size: 14px; color: #909399; margin-bottom: 20px; }
+.page-title { font-size: 28px; font-weight: 700; color: #121c28; margin-bottom: 4px; }
+.page-desc { font-size: 14px; color: #404944; margin-bottom: 20px; }
 
 .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.count { font-size: 13px; color: #909399; strong { color: #f56c6c; } }
+.count { font-size: 13px; color: #404944; strong { color: #f56c6c; } }
 .refresh-btn {
   display: flex; align-items: center; gap: 4px; padding: 6px 14px; border-radius: 6px;
-  border: 1px solid #dcdfe6; background: #fff; color: #606266; font-size: 12px; font-weight: 500; cursor: pointer;
-  &:hover:not(:disabled) { border-color: #1a3a5c; color: #1a3a5c; }
+  border: 1px solid #bfc9c3; background: #fff; color: #404944; font-size: 12px; font-weight: 500; cursor: pointer;
+  &:hover:not(:disabled) { border-color: #003527; color: #003527; }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
 .audit-list { display: flex; flex-direction: column; gap: 12px; }
-.audit-card { display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; transition: all 0.25s; &:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.04); } }
-.audit-info { flex: 1; h3 { font-size: 15px; font-weight: 600; color: #303133; margin-bottom: 2px; } p { font-size: 13px; color: #909399; } }
+.audit-card { display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: #fff; border-radius: 12px; border: 1px solid #bfc9c3; transition: all 0.25s; &:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.04); } }
+.audit-info { flex: 1; h3 { font-size: 15px; font-weight: 600; color: #121c28; margin-bottom: 2px; } p { font-size: 13px; color: #404944; } }
 .status-tag { font-size: 11px; padding: 3px 12px; border-radius: 999px; font-weight: 600; &.pending { background: #fff3cd; color: #856404; } &.approved { background: #d4edda; color: #155724; } &.rejected { background: #f8d7da; color: #721c24; } }
 .audit-actions { display: flex; gap: 8px; }
 .approve-btn { display: flex; align-items: center; gap: 4px; padding: 6px 14px; border-radius: 999px; background: #198754; color: #fff; font-size: 12px; font-weight: 600; border: none; cursor: pointer; &:hover { background: #157347; } }

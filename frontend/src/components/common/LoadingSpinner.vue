@@ -23,8 +23,8 @@ defineProps<{
 }
 
 .spinner {
-  border: 3px solid #e5e7eb;
-  border-top-color: #1a3a5c;
+  border: 3px solid #bfc9c3;
+  border-top-color: #003527;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 
@@ -37,6 +37,6 @@ defineProps<{
 
 .loading-text {
   font-size: 13px;
-  color: #909399;
+  color: #404944;
 }
 </style>

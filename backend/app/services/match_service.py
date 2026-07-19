@@ -201,6 +201,10 @@ async def get_job_recommendations(
             result["title"] = job.title
             company = await company_repository.get_by_company_id(db, job.company_id)
             result["company_name"] = company.company_name if company else None
+            if company:
+                result["industry"] = company.industry
+                result["scale"] = company.scale
+                result["company_type"] = company.company_type
 
         existing_rec = await get_by_user_and_job(db, user_id, job_id)
         if not existing_rec:

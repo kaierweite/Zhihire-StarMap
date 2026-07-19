@@ -1,4 +1,4 @@
-﻿/** Graph node from backend API */
+/** Graph node from backend API */
 export interface GraphNode {
   id: string
   name: string
@@ -8,6 +8,8 @@ export interface GraphNode {
   symbolSize: number
   itemStyle?: { color: string }
   label?: { show: boolean; formatter: string }
+  importance?: number
+  required_level?: 'MUST' | 'NICE' | 'BONUS'
 }
 
 /** Graph edge from backend API */

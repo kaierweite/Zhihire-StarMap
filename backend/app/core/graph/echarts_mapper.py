@@ -93,9 +93,27 @@ def build_user_graph(G: nx.Graph, user_skill_ids: set[str], user_proficiencies: 
     return result
 
 
-def build_job_graph(G: nx.Graph, job_skill_ids: set[str]) -> GraphResult:
+def build_job_graph(G: nx.Graph, job_skill_ids: set[str], importance: dict[str, float] | None = None, required_level: dict[str, str] | None = None) -> GraphResult:
     subgraph = G.subgraph(job_skill_ids) if job_skill_ids else nx.Graph()
-    nodes = _build_nodes(subgraph)
+    nodes = []
+    for node_id, data in subgraph.nodes(data=True):
+        name = data.get("name", node_id)
+        category = data.get("category", "tongyong")
+        color = data.get("color", "#999999")
+        imp = importance.get(node_id, 3.0) if importance else 3.0
+        req_level = required_level.get(node_id, "NICE") if required_level else "NICE"
+        nodes.append({
+            "id": node_id,
+            "name": name,
+            "category": category,
+            "level": 0.0,
+            "level_label": "none",
+            "symbolSize": int(_clamp(imp * 8 + 15, 15, 60)),
+            "itemStyle": {"color": color},
+            "label": {"show": True, "formatter": name},
+            "importance": imp,
+            "required_level": req_level,
+        })
     edges = _build_edges(subgraph)
     return GraphResult(
         nodes=[GraphNode(**n) for n in nodes],

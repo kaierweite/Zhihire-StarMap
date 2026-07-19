@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { ref, onMounted } from "vue"
 import { useRoute } from "vue-router"
 import { ElMessage } from "element-plus"
@@ -9,7 +9,8 @@ import {
 import type { JobDetail, JobSkillItem } from "@/api/job"
 import { getJobDetail, applyJob } from "@/api/job"
 import type { GapSkill } from "@/types/graph"
-import { getUserGraph } from "@/api/graph"
+import { getUserGraph, getJobGraph } from "@/api/graph"
+import AbilityGapChart from "@/components/match/AbilityGapChart.vue"
 
 const route = useRoute()
 const jobId = Number(route.params.id) || 1
@@ -19,6 +20,7 @@ const errorMessage = ref('')
 const gapSkills = ref<GapSkill[]>([])
 const graphLoaded = ref(false)
 const applied = ref(false)
+const showGapChart = ref(false)
 
 const typeDisplay: Record<string, string> = {
   FULL_TIME: "全职",
@@ -129,17 +131,42 @@ onMounted(async () => {
                 <span class="tag-neutral">{{ expDisplay(jobDetail.experience_min) }}</span>
                 <span class="tag-neutral">{{ jobDetail.education_requirement || "学历不限" }}</span>
               </div>
+              
+              <div class="company-info-bar">
+                <div class="company-info-item"><Building2 :size="14" /> {{ jobDetail.company_name }}</div>
+                <div class="company-info-item"><Eye :size="14" /> {{ jobDetail.views }} 浏览</div>
+                <div class="company-info-item"><Calendar :size="14" /> {{ jobDetail.created_at?.slice(0, 10) || "-" }}</div>
+              </div>
             </section>
 
             <section class="card animate-up d1">
               <h2 class="section-heading"><Briefcase :size="20" /> 岗位描述</h2>
               <div class="job-desc"><p>{{ jobDetail.description || "暂无岗位描述" }}</p></div>
+              
+              <div class="gap-analysis">
+                <h3 class="gap-heading">能力差距分析</h3>
+                <div v-if="gapSkills.length" class="gap-list">
+                  <div v-for="g in gapSkills" :key="g.skill_name" class="gap-item">
+                    <span class="gap-name">{{ g.skill_name }}</span>
+                    <span class="gap-level" :class="g.requirement_level.toLowerCase()">{{ g.requirement_level }}</span>
+                  </div>
+                </div>
+                <div v-else class="gap-empty">
+                  <Lightbulb :size="16" />
+                  <p v-if="graphLoaded">尚无差距分析数据，请先完善能力图谱</p>
+                  <p v-else>加载中...</p>
+                </div>
+                
+                <div class="gap-chart-wrapper">
+                  <AbilityGapChart :visible="graphLoaded" :job-id="jobId" />
+                </div>
+              </div>
             </section>
 
             <section v-if="jobDetail.skills && jobDetail.skills.length" class="card animate-up d2">
               <h2 class="section-heading">
                 <GraduationCap :size="20" /> 技能要求
-                <small style="font-weight:400;color:#909399;font-size:13px">（{{ skillCategories(jobDetail.skills) }}）</small>
+                <small style="font-weight:400;color:#404944;font-size:13px">（{{ skillCategories(jobDetail.skills) }}）</small>
               </h2>
               <div class="skills-grid">
                 <span v-for="s in jobDetail.skills" :key="s.skill_id" class="skill-badge">
@@ -159,46 +186,17 @@ onMounted(async () => {
               </div>
             </section>
           </div>
+        </div>
 
-          <div class="detail-sidebar">
-            <div class="sticky-area">
-              <section class="card animate-up d1">
-                <h2 class="section-heading">能力差距分析</h2>
-                <div v-if="gapSkills.length" class="gap-list">
-                  <div v-for="g in gapSkills" :key="g.skill_name" class="gap-item">
-                    <span class="gap-name">{{ g.skill_name }}</span>
-                    <span class="gap-level" :class="g.requirement_level.toLowerCase()">{{ g.requirement_level }}</span>
-                  </div>
-                </div>
-                <div v-else class="gap-empty">
-                  <Lightbulb :size="20" />
-                  <p v-if="graphLoaded">尚无差距分析数据，请先完善能力图谱</p>
-                  <p v-else>加载中...</p>
-                </div>
-              </section>
-
-              <div class="action-row">
-                <button
-                  class="apply-btn"
-                  :class="{ applied }"
-                  :disabled="applied"
-                  @click="handleApply"
-                >
-                  <Send :size="16" /> {{ applied ? "已投递" : "立即投递" }}
-                </button>
-              </div>
-
-              <section class="card">
-                <h2 class="section-heading"><Building2 :size="20" /> 企业信息</h2>
-                <div class="company-info-grid">
-                  <div class="company-row"><span>企业名称</span><span class="company-val">{{ jobDetail.company_name || "-" }}</span></div>
-                  <div v-if="jobDetail.occupation_role_name" class="company-row"><span>岗位方向</span><span class="company-val">{{ jobDetail.occupation_role_name }}</span></div>
-                  <div class="company-row"><span>浏览量</span><span class="company-val">{{ jobDetail.views }}</span></div>
-                  <div class="company-row"><span>发布时间</span><span class="company-val">{{ jobDetail.created_at?.slice(0, 10) || "-" }}</span></div>
-                </div>
-              </section>
-            </div>
-          </div>
+        <div class="fixed-footer">
+          <button
+            class="apply-btn"
+            :class="{ applied }"
+            :disabled="applied"
+            @click="handleApply"
+          >
+            <Send :size="16" /> {{ applied ? "已投递" : "立即投递" }}
+          </button>
         </div>
       </template>
       <div v-else class="loading-state">{{ errorMessage || "岗位加载失败" }}</div>
@@ -212,35 +210,43 @@ onMounted(async () => {
 @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 .animate-up { opacity: 0; animation: fadeUp 0.5s cubic-bezier(0.22,1,0.36,1) forwards; }
 .d1 { animation-delay: 0.08s; } .d2 { animation-delay: 0.15s; } .d3 { animation-delay: 0.22s; }
-.loading-state { text-align: center; padding: 60px; color: #909399; font-size: 15px; }
-.breadcrumb { display: flex; align-items: center; gap: 6px; margin-bottom: 20px; font-size: 13px; color: #909399; a { color: #909399; text-decoration: none; &:hover { color: #1a3a5c; } } span:last-child { color: #303133; font-weight: 500; } }
-.detail-layout { display: grid; grid-template-columns: 1fr 380px; gap: 24px; }
-.card { background: #fff; border-radius: 12px; padding: 24px; border: 1px solid #e5e7eb; margin-bottom: 16px; }
-.section-heading { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 600; color: #303133; margin-bottom: 16px; svg { color: #1a3a5c; } }
+.loading-state { text-align: center; padding: 60px; color: #404944; font-size: 15px; }
+.breadcrumb { display: flex; align-items: center; gap: 6px; margin-bottom: 20px; font-size: 13px; color: #404944; a { color: #404944; text-decoration: none; &:hover { color: #003527; } } span:last-child { color: #121c28; font-weight: 500; } }
+.detail-layout { display: flex; justify-content: center; }
+.detail-main { width: 100%; max-width: 800px; }
+.card { background: #fff; border-radius: 12px; padding: 24px; border: 1px solid #bfc9c3; margin-bottom: 16px; }
+.section-heading { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 600; color: #121c28; margin-bottom: 16px; svg { color: #003527; } }
 .job-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
 .job-logo { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; flex-shrink: 0; }
-.job-name { font-size: 28px; font-weight: 700; color: #303133; letter-spacing: -0.5px; margin-bottom: 4px; }
-.job-company-name { font-size: 16px; color: #606266; margin-bottom: 4px; }
-.job-location { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #909399; }
-.job-tags { display: flex; gap: 8px; flex-wrap: wrap; }
-.tag-primary { font-size: 12px; padding: 4px 14px; border-radius: 4px; background: #dbeafe; color: #1e3a8a; font-weight: 600; }
-.tag-neutral { font-size: 12px; padding: 4px 14px; border-radius: 4px; background: #f3f4f5; color: #606266; }
-.job-desc { p { font-size: 14px; color: #606266; line-height: 1.8; } }
+.job-name { font-size: 28px; font-weight: 700; color: #121c28; letter-spacing: -0.5px; margin-bottom: 4px; }
+.job-company-name { font-size: 16px; color: #404944; margin-bottom: 4px; }
+.job-location { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #404944; }
+.job-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.tag-primary { font-size: 12px; padding: 4px 14px; border-radius: 4px; background: #003527; color: #fff; font-weight: 600; }
+.tag-neutral { font-size: 12px; padding: 4px 14px; border-radius: 4px; background: #f3f4f5; color: #404944; }
+.company-info-bar { display: flex; gap: 20px; padding-top: 16px; border-top: 1px solid #e8e8e8; }
+.company-info-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #404944; svg { color: #003527; } }
+.job-desc { p { font-size: 14px; color: #404944; line-height: 1.8; } }
+.gap-analysis { margin-top: 20px; padding-top: 20px; border-top: 1px solid #e8e8e8; }
+.gap-heading { font-size: 15px; font-weight: 600; color: #121c28; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.gap-analysis .gap-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.gap-analysis .gap-item { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; background: #f8f9fa; font-size: 13px; }
+.gap-analysis .gap-name { font-weight: 600; color: #121c28; }
+.gap-analysis .gap-level { font-size: 10px; padding: 1px 6px; border-radius: 999px; font-weight: 600; &.must { background: #f8d7da; color: #721c24; } &.nice { background: #fff3cd; color: #856404; } &.bonus { background: #d4edda; color: #155724; } }
+.gap-analysis .gap-empty { display: flex; align-items: center; gap: 8px; padding: 12px 0; color: #bfc9c3; svg { color: #bfc9c3; } p { font-size: 13px; margin: 0; } }
+.gap-chart-wrapper { margin-top: 16px; }
 .skills-grid { display: flex; flex-wrap: wrap; gap: 10px; }
-.skill-badge { font-size: 14px; padding: 6px 18px; border-radius: 6px; background: #dbeafe; color: #1e3a8a; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.skill-badge { font-size: 14px; padding: 6px 18px; border-radius: 6px; background: #003527; color: #fff; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
 .skill-level { font-size: 10px; padding: 1px 6px; border-radius: 3px; background: rgba(30,58,138,0.12); font-weight: 700; }
 .benefits-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.benefit-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; background: #f8f9fa; font-size: 13px; font-weight: 500; color: #303133; svg { color: #1a3a5c; } }
-.detail-sidebar .sticky-area { position: sticky; top: 80px; }
+.benefit-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; background: #f8f9fa; font-size: 13px; font-weight: 500; color: #121c28; svg { color: #003527; } }
 .gap-list { display: flex; flex-direction: column; gap: 10px; }
 .gap-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: 6px; background: #f8f9fa; font-size: 13px; }
-.gap-name { font-weight: 600; color: #303133; }
+.gap-name { font-weight: 600; color: #121c28; }
 .gap-level { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600; &.must { background: #f8d7da; color: #721c24; } &.nice { background: #fff3cd; color: #856404; } &.bonus { background: #d4edda; color: #155724; } }
-.gap-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 0; color: #c0c4cc; svg { color: #c0c4cc; } p { font-size: 13px; text-align: center; line-height: 1.5; } }
-.action-row { display: flex; gap: 12px; margin-bottom: 16px; }
-.apply-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 0; border-radius: 999px; background: #1a3a5c; color: #fff; font-size: 15px; font-weight: 600; border: none; cursor: pointer; transition: all 0.3s; &:hover:not(:disabled) { background: #24507a; transform: translateY(-1px); } &.applied, &:disabled { background: #d4edda; color: #155724; cursor: default; } }
-.company-info-grid { display: flex; flex-direction: column; gap: 12px; }
-.company-row { display: flex; justify-content: space-between; font-size: 14px; color: #909399; }
-.company-val { color: #303133; font-weight: 500; }
-@media (max-width: 900px) { .detail-layout { grid-template-columns: 1fr; } .detail-sidebar { order: -1; } .benefits-grid { grid-template-columns: repeat(2, 1fr); } }
+.gap-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 0; color: #bfc9c3; svg { color: #bfc9c3; } p { font-size: 13px; text-align: center; line-height: 1.5; } }
+.apply-btn { width: 100%; max-width: 800px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 0; border-radius: 999px; background: #003527; color: #fff; font-size: 15px; font-weight: 600; border: none; cursor: pointer; transition: all 0.3s; &:hover:not(:disabled) { background: #064e3b; box-shadow: 0 4px 12px rgba(0, 53, 39, 0.3); } &.applied, &:disabled { background: #d4edda; color: #155724; cursor: default; } }
+.fixed-footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px 24px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-top: 1px solid #e8e8e8; display: flex; justify-content: center; z-index: 100; }
+.detail-page { padding-bottom: 80px; }
+@media (max-width: 900px) { .benefits-grid { grid-template-columns: repeat(2, 1fr); } .company-info-bar { flex-wrap: wrap; } }
 </style>

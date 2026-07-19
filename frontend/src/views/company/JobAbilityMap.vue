@@ -278,46 +278,46 @@ onUnmounted(() => {
   width: 38px; height: 38px;
   display: flex; align-items: center; justify-content: center;
   border-radius: 10px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #bfc9c3;
   background: #fff;
-  color: #606266;
+  color: #404944;
   cursor: pointer;
   transition: all 0.2s;
-  &:hover { border-color: #1a3a5c; color: #1a3a5c; }
+  &:hover { border-color: #003527; color: #003527; }
 }
 
 .header-text {
-  h1 { font-size: 28px; font-weight: 700; color: #303133; margin: 0 0 2px 0; }
-  .subtitle { font-size: 14px; color: #909399; }
+  h1 { font-size: 28px; font-weight: 700; color: #121c28; margin: 0 0 2px 0; }
+  .subtitle { font-size: 14px; color: #404944; }
 }
 
 .job-info-card {
   background: #fff;
   border-radius: 12px;
   padding: 20px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #bfc9c3;
   margin-bottom: 20px;
 
   .job-header {
     display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
-    h3 { font-size: 18px; font-weight: 600; color: #303133; margin: 0; }
-    svg { color: #1a3a5c; }
+    h3 { font-size: 18px; font-weight: 600; color: #121c28; margin: 0; }
+    svg { color: #003527; }
   }
 
   .job-meta {
     display: flex; flex-wrap: wrap; gap: 12px;
     .meta-item {
-      padding: 4px 12px; border-radius: 4px; background: #f0f4f9; color: #606266; font-size: 13px;
+      padding: 4px 12px; border-radius: 4px; background: #f0f4f9; color: #404944; font-size: 13px;
     }
   }
 }
 
-.loading-state { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 80px 0; color: #909399; }
+.loading-state { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 80px 0; color: #404944; }
 .error-state { text-align: center; padding: 60px 0; color: #f56c6c; }
-.error-state .retry-btn { margin-top: 16px; padding: 10px 24px; border-radius: 8px; background: #1a3a5c; color: #fff; border: none; cursor: pointer; }
+.error-state .retry-btn { margin-top: 16px; padding: 10px 24px; border-radius: 8px; background: #003527; color: #fff; border: none; cursor: pointer; }
 
-.card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e5e7eb; }
-.card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; h3 { font-size: 15px; font-weight: 600; color: #303133; } svg { color: #1a3a5c; } }
+.card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #bfc9c3; }
+.card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; h3 { font-size: 15px; font-weight: 600; color: #121c28; } svg { color: #003527; } }
 
 .graph-layout { width: 100%; margin-bottom: 20px; }
 .graph-main { min-height: 0; }
@@ -325,42 +325,42 @@ onUnmounted(() => {
 
 .legend { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
 .legend-group { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.legend-label { font-size: 12px; color: #909399; font-weight: 600; }
-.legend-item { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #606266; }
+.legend-label { font-size: 12px; color: #404944; font-weight: 600; }
+.legend-item { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #404944; }
 .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
 
 .graph-sidebar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.stat-big { font-size: 36px; font-weight: 700; color: #303133; letter-spacing: -1px; margin-bottom: 16px; }
-.stat-unit { font-size: 14px; font-weight: 500; color: #909399; }
+.stat-big { font-size: 36px; font-weight: 700; color: #121c28; letter-spacing: -1px; margin-bottom: 16px; }
+.stat-unit { font-size: 14px; font-weight: 500; color: #404944; }
 
 .category-list { display: flex; flex-direction: column; gap: 10px; }
 .category-row { display: flex; align-items: center; gap: 8px; }
 .category-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.category-name { flex: 1; font-size: 13px; color: #606266; }
-.category-count { font-size: 13px; font-weight: 600; color: #303133; }
+.category-name { flex: 1; font-size: 13px; color: #404944; }
+.category-count { font-size: 13px; font-weight: 600; color: #121c28; }
 
 .distribution-bars { display: flex; flex-direction: column; gap: 14px; }
 .dist-row { display: flex; flex-direction: column; gap: 6px; }
-.dist-header { display: flex; justify-content: space-between; font-size: 13px; color: #303133; }
-.dist-count { color: #909399; font-size: 12px; }
+.dist-header { display: flex; justify-content: space-between; font-size: 13px; color: #121c28; }
+.dist-count { color: #404944; font-size: 12px; }
 .bar-track { height: 6px; border-radius: 999px; background: #e9ecef; overflow: hidden; }
 .bar-fill { height: 100%; border-radius: 999px; transition: width 0.8s ease; }
 
 .suggestions { display: flex; flex-direction: column; gap: 12px; }
-.suggestion-item { display: flex; gap: 8px; font-size: 13px; color: #606266; line-height: 1.6; }
-.suggestion-icon { color: #1a3a5c; font-weight: 700; }
-.empty-hint { font-size: 13px; color: #909399; }
+.suggestion-item { display: flex; gap: 8px; font-size: 13px; color: #404944; line-height: 1.6; }
+.suggestion-icon { color: #003527; font-weight: 700; }
+.empty-hint { font-size: 13px; color: #404944; }
 
 .empty-graph-card {
-  background: #fff; border-radius: 12px; padding: 40px; border: 1px solid #e5e7eb; text-align: center;
+  background: #fff; border-radius: 12px; padding: 40px; border: 1px solid #bfc9c3; text-align: center;
 
   .empty-content { max-width: 400px; margin: 0 auto; }
-  .empty-icon { width: 64px; height: 64px; color: #c0c4cc; margin-bottom: 16px; }
-  h3 { font-size: 18px; font-weight: 600; color: #303133; margin: 0 0 12px 0; }
-  p { font-size: 14px; color: #909399; line-height: 1.8; margin: 0 0 4px 0; }
+  .empty-icon { width: 64px; height: 64px; color: #bfc9c3; margin-bottom: 16px; }
+  h3 { font-size: 18px; font-weight: 600; color: #121c28; margin: 0 0 12px 0; }
+  p { font-size: 14px; color: #404944; line-height: 1.8; margin: 0 0 4px 0; }
   .empty-btn {
     display: inline-block; margin-top: 20px; padding: 10px 28px; border-radius: 8px; font-size: 14px; font-weight: 600;
-    color: #fff; background: #1a3a5c; text-decoration: none; transition: background 0.25s;
+    color: #fff; background: #003527; text-decoration: none; transition: background 0.25s;
     &:hover { background: #2a5a8c; }
   }
 }

@@ -631,7 +631,7 @@ function saveIntention() {
               <span class="chip-remove" @click="removeSkill(i)"><X :size="10" /></span>
             </span>
           </div>
-          <div v-else style="margin-top: 16px; color: #909399; font-size: 13px; text-align: center;">暂无技能，请在上方输入添加</div>
+          <div v-else style="margin-top: 16px; color: #404944; font-size: 13px; text-align: center;">暂无技能，请在上方输入添加</div>
           <template #footer>
             <el-button @click="dialogState.skill = false">完成</el-button>
           </template>
@@ -733,7 +733,7 @@ function saveIntention() {
   justify-content: center;
   gap: 12px;
   padding: 80px 0;
-  color: #909399;
+  color: #404944;
   font-size: 14px;
 }
 
@@ -752,7 +752,7 @@ function saveIntention() {
   border-radius: 12px;
   padding: 20px 24px;
   margin-bottom: 20px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #bfc9c3;
 }
 
 .completion-header {
@@ -765,13 +765,13 @@ function saveIntention() {
 .completion-label {
   font-size: 14px;
   font-weight: 600;
-  color: #303133;
+  color: #121c28;
 }
 
 .completion-percent {
   font-size: 14px;
   font-weight: 700;
-  color: #1a3a5c;
+  color: #003527;
 }
 
 .bar-track {
@@ -785,7 +785,7 @@ function saveIntention() {
 .bar-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #1a3a5c, #0ea5e9);
+  background: linear-gradient(90deg, #003527, #064e3b);
   transition: width 0.8s ease;
 }
 
@@ -808,7 +808,7 @@ function saveIntention() {
   }
   &.todo {
     background: #f3f4f5;
-    color: #909399;
+    color: #404944;
   }
 }
 
@@ -818,8 +818,8 @@ function saveIntention() {
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 16px;
-  border: 1px solid #e5e7eb;
-  border-bottom: 1px solid #e5e7eb;
+  border: 1px solid #bfc9c3;
+  border-bottom: 1px solid #bfc9c3;
 }
 
 .section-header {
@@ -832,7 +832,7 @@ function saveIntention() {
 .section-title {
   font-size: 20px;
   font-weight: 700;
-  color: #303133;
+  color: #121c28;
 }
 
 .required-badge {
@@ -850,16 +850,16 @@ function saveIntention() {
   align-items: center;
   gap: 4px;
   font-size: 13px;
-  color: #909399;
+  color: #404944;
   background: none;
   border: none;
   cursor: pointer;
   transition: color 0.2s;
-  &:hover { color: #1a3a5c; }
+  &:hover { color: #003527; }
 }
 
 .section-body {
-  color: #303133;
+  color: #121c28;
   font-size: 14px;
   line-height: 1.7;
 }
@@ -875,14 +875,14 @@ function saveIntention() {
   width: 80px;
   height: 80px;
   border-radius: 12px;
-  background: #f5f7fa;
-  border: 1px solid #e5e7eb;
+  background: #f8f9ff;
+  border: 1px solid #bfc9c3;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 32px;
   font-weight: 700;
-  color: #909399;
+  color: #404944;
   flex-shrink: 0;
 }
 
@@ -901,7 +901,7 @@ function saveIntention() {
 .profile-name {
   font-size: 24px;
   font-weight: 700;
-  color: #303133;
+  color: #121c28;
 }
 
 .profile-tag {
@@ -909,8 +909,7 @@ function saveIntention() {
   font-weight: 500;
   padding: 2px 10px;
   border-radius: 4px;
-  background: #dbeafe;
-  color: #1e3a8a;
+  background: #003527; color: #fff;
 }
 
 .profile-meta {
@@ -918,11 +917,11 @@ function saveIntention() {
   align-items: center;
   gap: 4px;
   font-size: 14px;
-  color: #606266;
+  color: #404944;
 }
 
 .sep {
-  color: #dcdfe6;
+  color: #bfc9c3;
   margin: 0 4px;
 }
 
@@ -931,14 +930,14 @@ function saveIntention() {
   align-items: center;
   gap: 6px;
   font-size: 14px;
-  color: #606266;
+  color: #404944;
 }
 
 /* ====== 求职意向 ====== */
 .intention-positions {
   font-size: 15px;
   font-weight: 500;
-  color: #303133;
+  color: #121c28;
   margin-bottom: 12px;
 }
 
@@ -955,13 +954,13 @@ function saveIntention() {
 }
 
 .intention-label {
-  color: #909399;
+  color: #404944;
   width: 70px;
   flex-shrink: 0;
 }
 
 .intention-value {
-  color: #303133;
+  color: #121c28;
 }
 
 /* ====== 教育经历 ====== */
@@ -973,13 +972,13 @@ function saveIntention() {
 .edu-school {
   font-size: 15px;
   font-weight: 600;
-  color: #303133;
+  color: #121c28;
   margin-bottom: 4px;
 }
 
 .edu-detail {
   font-size: 14px;
-  color: #606266;
+  color: #404944;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -987,7 +986,7 @@ function saveIntention() {
 
 .edu-period {
   margin-left: auto;
-  color: #909399;
+  color: #404944;
 }
 
 /* ====== 经历 ====== */
@@ -1001,19 +1000,19 @@ function saveIntention() {
 .exp-title {
   font-size: 15px;
   font-weight: 600;
-  color: #303133;
+  color: #121c28;
   margin-bottom: 4px;
 }
 
 .exp-meta {
   font-size: 13px;
-  color: #909399;
+  color: #404944;
   margin-bottom: 4px;
 }
 
 .exp-desc {
   font-size: 14px;
-  color: #606266;
+  color: #404944;
   line-height: 1.6;
 }
 
@@ -1035,7 +1034,7 @@ function saveIntention() {
   letter-spacing: 0.3px;
 }
 
-.chip-primary { background: #dbeafe; color: #1e3a8a; }
+.chip-primary { background: #003527; color: #fff; }
 .chip-success { background: #d4edda; color: #155724; }
 .chip-neutral { background: #f3f4f5; color: #434656; }
 .chip-warning { background: #fff3cd; color: #856404; }
@@ -1052,12 +1051,12 @@ function saveIntention() {
 .lang-name {
   font-size: 14px;
   font-weight: 500;
-  color: #303133;
+  color: #121c28;
 }
 
 .lang-level {
   font-size: 13px;
-  color: #909399;
+  color: #404944;
 }
 
 /* ====== 添加占位 ====== */
@@ -1067,11 +1066,11 @@ function saveIntention() {
   align-items: center;
   justify-content: center;
   padding: 32px;
-  border: 2px dashed #dcdfe6;
+  border: 2px dashed #bfc9c3;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
-  color: #c0c4cc;
+  color: #bfc9c3;
 
   span {
     font-size: 13px;
@@ -1079,8 +1078,8 @@ function saveIntention() {
   }
 
   &:hover {
-    border-color: #1a3a5c;
-    color: #1a3a5c;
+    border-color: #003527;
+    color: #003527;
     background: rgba(26, 58, 92, 0.02);
   }
 
@@ -1099,7 +1098,7 @@ function saveIntention() {
 /* ====== 证书 ====== */
 .cert-item {
   font-size: 14px;
-  color: #606266;
+  color: #404944;
   margin-bottom: 4px;
 }
 

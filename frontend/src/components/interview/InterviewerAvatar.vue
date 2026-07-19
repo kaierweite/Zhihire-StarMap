@@ -113,7 +113,7 @@ function drawBody(ctx: CanvasRenderingContext2D, cx: number, faceY: number, face
   const jacketGrad = ctx.createLinearGradient(cx - faceWidth * 0.7, jacketY - faceHeight * 0.1, cx + faceWidth * 0.7, jacketY + faceHeight * 0.3)
   jacketGrad.addColorStop(0, '#9ca3af')
   jacketGrad.addColorStop(0.3, '#d1d5db')
-  jacketGrad.addColorStop(0.5, '#e5e7eb')
+  jacketGrad.addColorStop(0.5, '#bfc9c3')
   jacketGrad.addColorStop(0.7, '#d1d5db')
   jacketGrad.addColorStop(1, '#9ca3af')
 

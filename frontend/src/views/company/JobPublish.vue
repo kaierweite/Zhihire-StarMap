@@ -455,68 +455,68 @@ async function handleSubmit() {
   display: flex; align-items: center; gap: 14px; margin-bottom: 24px;
   .back-btn {
     width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
-    border-radius: 10px; border: 1px solid #e5e7eb; background: #fff; color: #606266; cursor: pointer;
+    border-radius: 10px; border: 1px solid #bfc9c3; background: #fff; color: #404944; cursor: pointer;
     transition: all 0.2s;
-    &:hover { border-color: #1a3a5c; color: #1a3a5c; }
+    &:hover { border-color: #003527; color: #003527; }
   }
   .header-text {
-    h1 { font-size: 28px; font-weight: 700; color: #303133; margin: 0 0 2px 0; }
-    .subtitle { font-size: 14px; color: #909399; }
+    h1 { font-size: 28px; font-weight: 700; color: #121c28; margin: 0 0 2px 0; }
+    .subtitle { font-size: 14px; color: #404944; }
   }
 }
 
 .jd-upload-card {
-  background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e5e7eb; margin-bottom: 20px;
-  .jd-upload-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 15px; font-weight: 600; color: #303133; svg { color: #1a3a5c; } }
-  .jd-hint { font-size: 12px; font-weight: 400; color: #909399; }
+  background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #bfc9c3; margin-bottom: 20px;
+  .jd-upload-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 15px; font-weight: 600; color: #121c28; svg { color: #003527; } }
+  .jd-hint { font-size: 12px; font-weight: 400; color: #404944; }
   .jd-upload-area { margin-bottom: 12px; }
   .jd-result {
     padding: 12px; border-radius: 8px; background: #f0f9ff; border: 1px solid #bae6fd;
     .jd-result-header { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: #1e3a8a; margin-bottom: 8px; }
     .jd-skills { margin-top: 8px; }
-    .jd-skills-label { font-size: 13px; color: #606266; display: block; margin-bottom: 6px; }
-    .no-skills { font-size: 13px; color: #909399; margin-top: 4px; }
+    .jd-skills-label { font-size: 13px; color: #404944; display: block; margin-bottom: 6px; }
+    .no-skills { font-size: 13px; color: #404944; margin-top: 4px; }
   }
 }
 
 .form-card {
-  background: #fff; border-radius: 12px; padding: 28px 32px; border: 1px solid #e5e7eb; margin-bottom: 20px;
+  background: #fff; border-radius: 12px; padding: 28px 32px; border: 1px solid #bfc9c3; margin-bottom: 20px;
 }
 
-.form-hint { font-size: 12px; color: #909399; margin-top: 4px; }
+.form-hint { font-size: 12px; color: #404944; margin-top: 4px; }
 
 .skill-section {
   width: 100%;
   .skill-search-bar { display: flex; gap: 8px; margin-bottom: 12px; }
   .skill-search-results {
-    border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px; margin-bottom: 12px; max-height: 200px; overflow-y: auto;
-    .search-result-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: 6px; transition: background 0.15s; &:hover { background: #f5f7fa; } }
+    border: 1px solid #bfc9c3; border-radius: 8px; padding: 8px; margin-bottom: 12px; max-height: 200px; overflow-y: auto;
+    .search-result-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: 6px; transition: background 0.15s; &:hover { background: #f8f9ff; } }
     .skill-info { display: flex; align-items: center; gap: 8px; }
-    .skill-name { font-size: 14px; font-weight: 500; color: #303133; }
-    .skill-category { font-size: 11px; color: #909399; background: #f3f4f5; padding: 1px 6px; border-radius: 3px; }
+    .skill-name { font-size: 14px; font-weight: 500; color: #121c28; }
+    .skill-category { font-size: 11px; color: #404944; background: #f3f4f5; padding: 1px 6px; border-radius: 3px; }
   }
-  .no-results { padding: 12px 0; color: #909399; font-size: 13px; margin-bottom: 8px; }
+  .no-results { padding: 12px 0; color: #404944; font-size: 13px; margin-bottom: 8px; }
   .skills-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
   .skill-item {
     display: flex; align-items: center; justify-content: space-between; gap: 12px;
     padding: 10px 14px; border-radius: 8px; background: #f9fafb; border: 1px solid #eef0f2;
     .skill-info { display: flex; align-items: center; gap: 8px; }
-    .skill-name-tag { font-size: 14px; font-weight: 600; color: #303133; }
-    .skill-category-tag { font-size: 11px; color: #909399; background: #eef0f2; padding: 1px 6px; border-radius: 3px; }
+    .skill-name-tag { font-size: 14px; font-weight: 600; color: #121c28; }
+    .skill-category-tag { font-size: 11px; color: #404944; background: #eef0f2; padding: 1px 6px; border-radius: 3px; }
     .skill-controls { display: flex; align-items: center; gap: 8px; }
   }
-  .no-skills-hint { font-size: 13px; color: #c0c4cc; }
+  .no-skills-hint { font-size: 13px; color: #bfc9c3; }
 }
 
 .form-actions { display: flex; gap: 12px; justify-content: center; padding-top: 8px; }
 
 .tips-card {
-  background: #fff; border-radius: 12px; padding: 20px 24px; border: 1px solid #e5e7eb;
-  h3 { font-size: 16px; font-weight: 600; color: #303133; margin: 0 0 12px 0; }
+  background: #fff; border-radius: 12px; padding: 20px 24px; border: 1px solid #bfc9c3;
+  h3 { font-size: 16px; font-weight: 600; color: #121c28; margin: 0 0 12px 0; }
   ul { margin: 0; padding: 0; list-style: none; }
   li {
-    position: relative; padding-left: 16px; font-size: 13px; color: #606266; line-height: 1.8;
-    &::before { content: ''; position: absolute; left: 0; top: 10px; width: 6px; height: 6px; border-radius: 50%; background: #1a3a5c; }
+    position: relative; padding-left: 16px; font-size: 13px; color: #404944; line-height: 1.8;
+    &::before { content: ''; position: absolute; left: 0; top: 10px; width: 6px; height: 6px; border-radius: 50%; background: #003527; }
   }
 }
 

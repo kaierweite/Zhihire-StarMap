@@ -18,7 +18,7 @@ async function fetchStat() {
     const res = await getAdminStat()
     const data: AdminStat = res.data.data
     stats.value = [
-      { label: '注册用户', value: data.user_count.toLocaleString(), icon: Users, color: '#0ea5e9' },
+      { label: '注册用户', value: data.user_count.toLocaleString(), icon: Users, color: '#064e3b' },
       { label: '注册企业', value: data.company_count.toLocaleString(), icon: Building2, color: '#8b5cf6' },
       { label: '发布岗位', value: data.job_count.toLocaleString(), icon: Briefcase, color: '#198754' },
       { label: '智能匹配', value: data.match_count.toLocaleString(), icon: TrendingUp, color: '#f59e0b' },
@@ -53,15 +53,15 @@ onMounted(() => {
 @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 .fade-up { opacity: 0; animation: fadeUp 0.5s cubic-bezier(0.22,1,0.36,1) forwards; }
 .d1 { animation-delay: 0.08s; } .d2 { animation-delay: 0.15s; }
-.page-title { font-size: 28px; font-weight: 700; color: #303133; margin-bottom: 4px; }
-.page-desc { font-size: 14px; color: #909399; margin-bottom: 24px; }
+.page-title { font-size: 28px; font-weight: 700; color: #121c28; margin-bottom: 4px; }
+.page-desc { font-size: 14px; color: #404944; margin-bottom: 24px; }
 
 .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
-.stat-card { display: flex; align-items: center; gap: 14px; padding: 18px; background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; position: relative; }
+.stat-card { display: flex; align-items: center; gap: 14px; padding: 18px; background: #fff; border-radius: 12px; border: 1px solid #bfc9c3; position: relative; }
 .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .stat-info { flex: 1; }
-.stat-val { font-size: 24px; font-weight: 700; color: #303133; line-height: 1; }
-.stat-label { font-size: 13px; color: #909399; margin-top: 4px; }
+.stat-val { font-size: 24px; font-weight: 700; color: #121c28; line-height: 1; }
+.stat-label { font-size: 13px; color: #404944; margin-top: 4px; }
 
 @media (max-width: 768px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
 </style>

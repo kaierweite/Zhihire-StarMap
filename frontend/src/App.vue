@@ -11,7 +11,7 @@ body {
   margin: 0;
   font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont,
     'Segoe UI', Roboto, sans-serif;
-  background-color: #f5f7fa;
-  color: #303133;
+  background-color: #f8f9ff;
+  color: #121c28;
 }
 </style>

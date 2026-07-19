@@ -150,35 +150,35 @@ const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.v
 .fade-up { opacity: 0; animation: fadeUp 0.5s cubic-bezier(0.22,1,0.36,1) forwards; }
 .d1 { animation-delay: 0.08s; } .d2 { animation-delay: 0.15s; } .d3 { animation-delay: 0.22s; } .d4 { animation-delay: 0.3s; }
 
-.page-title { font-size: 32px; font-weight: 700; color: #303133; margin-bottom: 6px; }
-.page-desc { font-size: 15px; color: #909399; margin-bottom: 24px; }
+.page-title { font-size: 32px; font-weight: 700; color: #121c28; margin-bottom: 6px; }
+.page-desc { font-size: 15px; color: #404944; margin-bottom: 24px; }
 
 .filter-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
-.search-box { flex: 1; min-width: 240px; display: flex; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid #dcdfe6; border-radius: 8px; background: #fff; input { flex: 1; border: none; outline: none; font-size: 14px; } svg { color: #909399; } &:focus-within { border-color: #1a3a5c; } }
+.search-box { flex: 1; min-width: 240px; display: flex; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid #bfc9c3; border-radius: 8px; background: #fff; input { flex: 1; border: none; outline: none; font-size: 14px; } svg { color: #404944; } &:focus-within { border-color: #003527; } }
 
 .type-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
-.type-tab { padding: 6px 16px; border-radius: 999px; font-size: 13px; font-weight: 500; border: 1px solid #dcdfe6; background: #fff; color: #606266; cursor: pointer; transition: all 0.2s; &:hover { border-color: #1a3a5c; } &.active { background: #1a3a5c; color: #fff; border-color: #1a3a5c; } }
+.type-tab { padding: 6px 16px; border-radius: 999px; font-size: 13px; font-weight: 500; border: 1px solid #bfc9c3; background: #fff; color: #404944; cursor: pointer; transition: all 0.2s; &:hover { border-color: #003527; } &.active { background: #003527; color: #fff; border-color: #003527; } }
 
-.loading-state { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 60px 0; color: #909399; }
-.loading-spinner { width: 36px; height: 36px; border: 3px solid #e5e7eb; border-top-color: #1a3a5c; border-radius: 50%; animation: spin 0.8s linear infinite; }
+.loading-state { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 60px 0; color: #404944; }
+.loading-spinner { width: 36px; height: 36px; border: 3px solid #bfc9c3; border-top-color: #003527; border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .question-list { display: flex; flex-direction: column; gap: 12px; }
-.empty-hint { text-align: center; color: #c0c4cc; padding: 40px 0; font-size: 14px; }
-.question-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e5e7eb; cursor: pointer; transition: all 0.25s; &:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.05); } }
+.empty-hint { text-align: center; color: #bfc9c3; padding: 40px 0; font-size: 14px; }
+.question-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #bfc9c3; cursor: pointer; transition: all 0.25s; &:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.05); } }
 .q-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .q-left { display: flex; gap: 8px; }
-.q-type { font-size: 11px; padding: 2px 10px; border-radius: 4px; font-weight: 600; &.tech { background: #dbeafe; color: #1e3a8a; } &.behavior { background: #d4edda; color: #155724; } &.scenario { background: #fff3cd; color: #856404; } &.resume { background: #e8d5f5; color: #6a1b9a; } }
-.q-no { font-size: 12px; color: #c0c4cc; }
-.q-content { font-size: 14px; color: #303133; line-height: 1.7; margin-bottom: 10px; }
+.q-type { font-size: 11px; padding: 2px 10px; border-radius: 4px; font-weight: 600; &.tech { background: #003527; color: #fff; } &.behavior { background: #d4edda; color: #155724; } &.scenario { background: #fff3cd; color: #856404; } &.resume { background: #e8d5f5; color: #6a1b9a; } }
+.q-no { font-size: 12px; color: #bfc9c3; }
+.q-content { font-size: 14px; color: #121c28; line-height: 1.7; margin-bottom: 10px; }
 .q-footer { display: flex; align-items: center; justify-content: space-between; }
-.q-id { font-size: 12px; color: #c0c4cc; }
-.expand-btn { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #0ea5e9; background: none; border: none; cursor: pointer; font-weight: 600; &:hover { text-decoration: underline; } }
-.q-answer { margin-top: 14px; padding: 14px; border-radius: 8px; background: #f8f9fa; border-left: 3px solid #1a3a5c; }
-.answer-label { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #1a3a5c; margin-bottom: 8px; }
-.q-answer p { font-size: 13px; color: #606266; line-height: 1.7; }
+.q-id { font-size: 12px; color: #bfc9c3; }
+.expand-btn { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #064e3b; background: none; border: none; cursor: pointer; font-weight: 600; &:hover { text-decoration: underline; } }
+.q-answer { margin-top: 14px; padding: 14px; border-radius: 8px; background: #f8f9fa; border-left: 3px solid #003527; }
+.answer-label { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #003527; margin-bottom: 8px; }
+.q-answer p { font-size: 13px; color: #404944; line-height: 1.7; }
 
 .pagination-bar { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 24px; padding: 16px 0; }
-.page-btn { padding: 8px 16px; border-radius: 8px; border: 1px solid #dcdfe6; background: #fff; color: #606266; font-size: 13px; cursor: pointer; transition: all 0.2s; &:hover:not(:disabled) { border-color: #1a3a5c; color: #1a3a5c; } &:disabled { opacity: 0.4; cursor: default; } }
-.page-info { font-size: 13px; color: #909399; }
+.page-btn { padding: 8px 16px; border-radius: 8px; border: 1px solid #bfc9c3; background: #fff; color: #404944; font-size: 13px; cursor: pointer; transition: all 0.2s; &:hover:not(:disabled) { border-color: #003527; color: #003527; } &:disabled { opacity: 0.4; cursor: default; } }
+.page-info { font-size: 13px; color: #404944; }
 </style>

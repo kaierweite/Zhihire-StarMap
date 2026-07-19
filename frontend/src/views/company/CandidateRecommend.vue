@@ -216,35 +216,35 @@ function selectedJobTitle(): string {
 .fade-up { opacity: 0; animation: fadeUp 0.5s cubic-bezier(0.22,1,0.36,1) forwards; }
 .d1 { animation-delay: 0.08s; } .d2 { animation-delay: 0.15s; }
 
-.page-title { font-size: 28px; font-weight: 700; color: #303133; margin-bottom: 6px; }
-.page-desc { font-size: 14px; color: #909399; margin-bottom: 20px; }
+.page-title { font-size: 28px; font-weight: 700; color: #121c28; margin-bottom: 6px; }
+.page-desc { font-size: 14px; color: #404944; margin-bottom: 20px; }
 
 /* 岗位选择器 */
 .job-selector {
   background: #fff; border-radius: 12px; padding: 16px 20px;
-  border: 1px solid #e5e7eb; margin-bottom: 20px;
+  border: 1px solid #bfc9c3; margin-bottom: 20px;
 }
-.selector-label { font-size: 13px; font-weight: 600; color: #303133; margin-bottom: 8px; display: block; }
+.selector-label { font-size: 13px; font-weight: 600; color: #121c28; margin-bottom: 8px; display: block; }
 .selector-row { display: flex; align-items: center; gap: 12px; }
 .job-select {
   flex: 1; max-width: 360px; appearance: none; padding: 8px 32px 8px 12px;
-  border: 1px solid #dcdfe6; border-radius: 8px; font-size: 14px; color: #303133;
+  border: 1px solid #bfc9c3; border-radius: 8px; font-size: 14px; color: #121c28;
   background: #fff; cursor: pointer; outline: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23909399' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: right 8px center;
-  &:focus { border-color: #1a3a5c; }
+  &:focus { border-color: #003527; }
 }
-.hint { font-size: 13px; color: #909399; }
+.hint { font-size: 13px; color: #404944; }
 
 .summary-bar {
-  font-size: 13px; color: #606266; margin-bottom: 14px;
-  strong { color: #303133; }
+  font-size: 13px; color: #404944; margin-bottom: 14px;
+  strong { color: #121c28; }
 }
 
 /* 加载骨架 */
 .loading-state { display: flex; flex-direction: column; gap: 14px; }
 .skeleton-card {
-  background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e5e7eb;
+  background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #bfc9c3;
   display: flex; flex-direction: column; gap: 12px;
 }
 .skeleton-row { border-radius: 4px; background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
@@ -254,29 +254,29 @@ function selectedJobTitle(): string {
 .skeleton-bar { height: 4px; border-radius: 2px; }
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-.retry-btn { margin-top: 12px; padding: 8px 20px; border-radius: 8px; background: #1a3a5c; color: #fff; border: none; cursor: pointer; font-size: 14px; &:hover { background: #24507a; } }
+.retry-btn { margin-top: 12px; padding: 8px 20px; border-radius: 8px; background: #003527; color: #fff; border: none; cursor: pointer; font-size: 14px; &:hover { background: #064e3b; } }
 
 .card-list { display: flex; flex-direction: column; gap: 14px; }
-.card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e5e7eb; transition: all 0.3s; &:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.05); } }
+.card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #bfc9c3; transition: all 0.3s; &:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.05); } }
 .card-main { display: flex; gap: 20px; }
 .card-left { flex: 1; }
 .card-right { display: flex; flex-direction: column; align-items: center; gap: 10px; flex-shrink: 0; width: 100px; }
-.card-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; h3 { font-size: 16px; font-weight: 700; color: #303133; } }
+.card-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; h3 { font-size: 16px; font-weight: 700; color: #121c28; } }
 
 .sub-scores { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
-.ss { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #909399; span:first-child { width: 24px; } }
+.ss { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #404944; span:first-child { width: 24px; } }
 .ss-bar { flex: 1; height: 4px; border-radius: 2px; background: #e9ecef; overflow: hidden; }
-.ss-fill { height: 100%; border-radius: 2px; background: #1a3a5c; transition: width 0.6s; &.edu { background: #0ea5e9; } &.exp { background: #8b5cf6; } &.city { background: #f59e0b; } }
-.ss-val { width: 22px; text-align: right; font-weight: 600; color: #303133; }
-.rationale { font-size: 12px; color: #606266; line-height: 1.6; strong { color: #303133; } }
+.ss-fill { height: 100%; border-radius: 2px; background: #003527; transition: width 0.6s; &.edu { background: #064e3b; } &.exp { background: #8b5cf6; } &.city { background: #f59e0b; } }
+.ss-val { width: 22px; text-align: right; font-weight: 600; color: #121c28; }
+.rationale { font-size: 12px; color: #404944; line-height: 1.6; strong { color: #121c28; } }
 
 .match-circle { width: 56px; height: 56px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 700; &.high { background: rgba(25,135,84,0.12); color: #198754; } &.mid { background: rgba(184,134,11,0.12); color: #b8860b; } &.low { background: rgba(220,53,69,0.12); color: #dc3545; } }
 .match-num { font-size: 18px; line-height: 1; }
 .match-lbl { font-size: 9px; opacity: 0.8; }
 
-.invite-btn { display: flex; align-items: center; gap: 4px; padding: 6px 14px; border-radius: 999px; background: #1a3a5c; color: #fff; font-size: 12px; font-weight: 600; border: none; cursor: pointer; &:hover:not(.invited) { background: #24507a; } &.invited { background: #d4edda; color: #155724; cursor: default; } }
+.invite-btn { display: flex; align-items: center; gap: 4px; padding: 6px 14px; border-radius: 999px; background: #003527; color: #fff; font-size: 12px; font-weight: 600; border: none; cursor: pointer; &:hover:not(.invited) { background: #064e3b; } &.invited { background: #d4edda; color: #155724; cursor: default; } }
 
-.empty-state { text-align: center; padding: 60px 20px; color: #909399; p { font-size: 16px; font-weight: 600; margin-bottom: 4px; } span { font-size: 13px; } }
+.empty-state { text-align: center; padding: 60px 20px; color: #404944; p { font-size: 16px; font-weight: 600; margin-bottom: 4px; } span { font-size: 13px; } }
 
 @media (max-width: 768px) {
   .card-main { flex-direction: column; }

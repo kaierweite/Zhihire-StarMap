@@ -330,9 +330,9 @@ onMounted(loadData)
   display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
 }
 .header-left { display: flex; align-items: center; gap: 12px; }
-h1 { font-size: 28px; font-weight: 700; color: #303133; margin: 0; }
+h1 { font-size: 28px; font-weight: 700; color: #121c28; margin: 0; }
 .total-badge {
-  font-size: 13px; color: #909399; background: #f3f4f5; padding: 4px 12px; border-radius: 999px;
+  font-size: 13px; color: #404944; background: #f3f4f5; padding: 4px 12px; border-radius: 999px;
 }
 
 .stats-row {
@@ -340,30 +340,30 @@ h1 { font-size: 28px; font-weight: 700; color: #303133; margin: 0; }
 }
 .mini-stat {
   flex: 1; background: #fff; border-radius: 10px; padding: 14px 16px;
-  border: 1px solid #e5e7eb; display: flex; flex-direction: column; gap: 2px;
+  border: 1px solid #bfc9c3; display: flex; flex-direction: column; gap: 2px;
   &.open { border-left: 3px solid #27ae60; }
-  &.closed { border-left: 3px solid #909399; }
+  &.closed { border-left: 3px solid #404944; }
   &.draft { border-left: 3px solid #e6a23c; }
 }
-.ms-num { font-size: 22px; font-weight: 700; color: #303133; }
-.ms-lbl { font-size: 12px; color: #909399; }
+.ms-num { font-size: 22px; font-weight: 700; color: #121c28; }
+.ms-lbl { font-size: 12px; color: #404944; }
 
 .toolbar {
   display: flex; align-items: center; gap: 8px;
   padding: 8px 14px; background: #fff; border-radius: 10px;
-  border: 1px solid #e5e7eb; margin-bottom: 16px;
-  svg { color: #909399; }
+  border: 1px solid #bfc9c3; margin-bottom: 16px;
+  svg { color: #404944; }
 }
 .toolbar-search {
   flex: 1; border: none; outline: none; font-size: 13px; background: none;
 }
 
-.table-wrap { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: auto; }
-.loading-hint { text-align: center; padding: 60px; color: #909399; font-size: 14px; }
+.table-wrap { background: #fff; border-radius: 12px; border: 1px solid #bfc9c3; overflow: auto; }
+.loading-hint { text-align: center; padding: 60px; color: #404944; font-size: 14px; }
 
-.job-title { font-weight: 500; color: #303133; }
-.muted { color: #c0c4cc; font-style: italic; }
+.job-title { font-weight: 500; color: #121c28; }
+.muted { color: #bfc9c3; font-style: italic; }
 
-.time-cell { font-family: "SF Mono", "Fira Code", Consolas, monospace; font-size: 12px; color: #606266; }
+.time-cell { font-family: "SF Mono", "Fira Code", Consolas, monospace; font-size: 12px; color: #404944; }
 .actions { display: flex; gap: 4px; }
 </style>

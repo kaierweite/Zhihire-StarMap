@@ -1,4 +1,4 @@
-﻿"""Graph module Pydantic request/response models.
+"""Graph module Pydantic request/response models.
 """
 from pydantic import BaseModel
 
@@ -11,6 +11,8 @@ class GraphNode(BaseModel):
     level_label: str = "none"          # "none" | "beginner" | "intermediate" | "advanced"
     symbolSize: int = 20
     itemStyle: dict | None = None
+    importance: float = 3.0            # Job skill importance (1-5)
+    required_level: str = "NICE"       # Job skill requirement level (MUST/NICE/BONUS)
 
 
 class GraphEdge(BaseModel):

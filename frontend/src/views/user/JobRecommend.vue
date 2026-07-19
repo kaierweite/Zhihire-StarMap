@@ -1,13 +1,25 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
+import { useRouter } from "vue-router"
 import { ElMessage, ElMessageBox } from "element-plus"
 import {
-  MapPin, GraduationCap, Briefcase, Building2, Send, Brain, FileText,
+  MapPin, GraduationCap, Briefcase, Building2, Send, Brain,
   ChevronDown, X, SlidersHorizontal, ArrowUpDown,
 } from "lucide-vue-next"
 import { getRecommendedJobs, applyMatchJob } from "@/api/match"
 import { getJobDetail } from "@/api/job"
 import type { JobDetail as JobDetailType } from "@/api/job"
+
+const router = useRouter()
+
+function goToJobDetail(jobId: number) {
+  router.push(`/user/jobs/${jobId}`)
+}
+
+function goToInterview() {
+  router.push("/user/interview")
+}
+
 
 const filterCity = ref("")
 const filterEdu = ref("")
@@ -20,6 +32,9 @@ const pageSize = 5
 const loading = ref(true)
 const error = ref("")
 
+
+
+
 const jobTypeMap: Record<string, string> = {
   FULL_TIME: "全职", PART_TIME: "兼职", INTERN: "实习",
 }
@@ -28,7 +43,7 @@ interface Job {
   id: number; resume_id: number; title: string; company: string
   logo: string; logoColor: string; city: string; exp: string; edu: string
   salary: string; salaryNum: number; type: string
-  companyType: string; industry: string; companySize: string
+  companyType: string; industry: string; companySize: string; isCampus: boolean
   score: number; tags: string[]; tagTypes: string[]
   skillScore: number; eduScore: number; expScore: number; cityScore: number
   rationale: string; graphHints: string[]; applied: boolean
@@ -69,7 +84,8 @@ async function fetchRecommendations() {
         type: detail?.job_type ? (jobTypeMap[detail.job_type] || detail.job_type) : "",
         salary: detail?.salary_min != null && detail.salary_min > 0 ? Math.round(detail.salary_min / 1000) + "-" + (detail.salary_max && detail.salary_max > 0 ? Math.round(detail.salary_max / 1000) : "?") + "K" : "",
         salaryNum: detail?.salary_min ?? 0,
-        companyType: "", industry: "", companySize: "",
+        companyType: job.company_type || "", industry: job.industry || "", companySize: job.scale || "",
+        isCampus: detail?.is_campus || false,
         tags: ["AI推荐"], tagTypes: ["ai"],
         logo: (job.company_name || "未").charAt(0), logoColor: "#dbeafe",
         applied: false,
@@ -195,31 +211,36 @@ async function handleApply(job: Job) {
         </div>
 
         <div class="job-list">
-          <div v-for="job in pagedJobs" :key="job.id" class="job-card fade-up">
-            <div class="job-card-inner">
-              <div class="job-left">
-                <div class="job-header">
-                  <h3 class="job-title">
-                    {{ job.title }}
-                    <span v-for="(tag, idx) in job.tags" :key="tag" class="job-tag" :class="job.tagTypes[idx]">{{ tag }}</span>
-                  </h3>
+          <div v-for="job in pagedJobs" :key="job.id" class="job-card fade-up" @click="goToJobDetail(job.id)">
+            <div class="card-inner">
+              <div class="card-left">
+                <div class="card-title-row">
+                  <span class="card-title">{{ job.title }}</span>
+                  <span v-if="job.city" class="tag-city">「{{ job.city }}」</span>
+                  <span v-if="job.isCampus" class="tag-campus">校招网申</span>
+                  <span v-if="job.companyType" class="tag-company-type">{{ job.companyType }}</span>
                 </div>
-                <div class="job-meta-row">
-                  <span class="job-meta">{{ job.exp || "经验不限" }}</span>
-                  <span class="job-meta-dot">·</span>
-                  <span class="job-meta">{{ job.edu || "学历不限" }}</span>
-                  <span class="job-meta-dot">·</span>
-                  <span class="job-meta">{{ job.type || "全职" }}</span>
-                  <span class="job-meta-dot">·</span>
-                  <span class="job-meta">{{ job.city || "不限" }}</span>
+                <div class="card-tags">
+                  <span class="chip">{{ job.exp || "经验不限" }}</span>
+                  <span class="chip">{{ job.edu || "学历不限" }}</span>
+                  <span class="chip">{{ job.type || "全职" }}</span>
                 </div>
-                <div class="company-row">
+                <div class="card-company">
                   <div class="company-logo" :style="{ background: job.logoColor }">{{ job.logo }}</div>
-                  <span class="company-name">{{ job.company }}</span>
+                  <div class="company-info">
+                    <span class="company-name">{{ job.company }}</span>
+                    <span v-if="job.industry || job.companySize || job.companyType" class="company-meta">
+                      <template v-if="job.industry">{{ job.industry }}</template>
+                      <template v-if="job.industry && job.companySize"> | </template>
+                      <template v-if="job.companySize">{{ job.companySize }}</template>
+                      <template v-if="(job.industry || job.companySize) && job.companyType"> | </template>
+                      <template v-if="job.companyType">{{ job.companyType }}</template>
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <div class="job-center">
+              <div class="card-center">
                 <div class="match-dashboard">
                   <div class="circle-scores">
                     <div class="circle-score-item">
@@ -266,20 +287,14 @@ async function handleApply(job: Job) {
                 </div>
               </div>
 
-              <div class="job-right">
-                <span v-if="job.salary" class="job-salary">{{ job.salary }}</span>
-                <div class="job-actions">
-                  <button
-                    class="action-btn apply"
-                    :class="{ applied: job.applied }"
-                    :disabled="job.applied"
-                    @click="handleApply(job)"
-                  >
-                    <Send :size="14" /> {{ job.applied ? "已投递" : "投递简历" }}
-                  </button>
-                  <button class="action-btn interview" title="模拟面试"><Brain :size="14" /> AI模拟面试</button>
-                  <router-link :to="`/user/jobs/${job.id}`" class="action-btn detail"><FileText :size="14" /> 查看详情</router-link>
-                </div>
+              <div class="card-right">
+                <span v-if="job.salary" class="card-salary">{{ job.salary }}</span>
+                <button class="apply-btn normal-btn" :class="{ applied: job.applied }" :disabled="job.applied" @click.stop="handleApply(job)">
+                  <Send :size="14" /> {{ job.applied ? "已投递" : "立即投递" }}
+                </button>
+                <button class="apply-btn interview-btn" @click.stop="goToInterview">
+                  <Brain :size="14" /> AI模拟面试
+                </button>
               </div>
             </div>
           </div>
@@ -296,6 +311,8 @@ async function handleApply(job: Job) {
           <button class="page-btn" :disabled="currentPage >= totalPages" @click="currentPage++">&gt;</button>
         </div>
       </template>
+
+      <AbilityGapChart :visible="showGapChart" :job-id="selectedJobId" @close="closeGapChart" />
     </div>
   </div>
 </template>
@@ -308,11 +325,11 @@ async function handleApply(job: Job) {
 .fade-up { opacity: 0; animation: fadeUp 0.5s cubic-bezier(0.22,1,0.36,1) forwards; }
 .d1 { animation-delay: 0.08s; } .d2 { animation-delay: 0.15s; }
 
-.page-title { font-size: 36px; font-weight: 700; color: #303133; letter-spacing: -1px; margin-bottom: 6px; }
-.page-desc { font-size: 16px; color: #909399; margin-bottom: 24px; }
+.page-title { font-size: 36px; font-weight: 700; color: #121c28; letter-spacing: -1px; margin-bottom: 6px; }
+.page-desc { font-size: 16px; color: #404944; margin-bottom: 24px; }
 
 .loading-state { display: flex; flex-direction: column; gap: 12px; }
-.skeleton-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e5e7eb; display: flex; flex-direction: column; gap: 12px; }
+.skeleton-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #bfc9c3; display: flex; flex-direction: column; gap: 12px; }
 .skeleton-row { border-radius: 4px; background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
 .skeleton-title { height: 20px; width: 60%; }
 .skeleton-meta { height: 14px; width: 40%; }
@@ -322,52 +339,55 @@ async function handleApply(job: Job) {
 
 .retry-btn { margin-top: 12px; padding: 8px 20px; border-radius: 8px; background: #003527; color: #fff; border: none; cursor: pointer; font-size: 14px; &:hover { background: #064e3b; } }
 
-.filter-bar { background: #fff; border-radius: 12px; padding: 16px 20px; border: 1px solid #e5e7eb; margin-bottom: 20px; }
+.filter-bar { width: 1200px; margin: 0 auto 20px; background: #fff; border-radius: 12px; padding: 16px 20px; border: 1px solid #bfc9c3; }
 .filter-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.filter-select { appearance: none; padding: 6px 28px 6px 10px; border: 1px solid #dcdfe6; border-radius: 8px; font-size: 12px; color: #606266; background: #fff; cursor: pointer; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23909399' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 6px center; transition: border-color 0.2s; &:focus { border-color: #003527; } }
+.filter-select { appearance: none; padding: 6px 28px 6px 10px; border: 1px solid #bfc9c3; border-radius: 8px; font-size: 12px; color: #404944; background: #fff; cursor: pointer; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23909399' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 6px center; transition: border-color 0.2s; &:focus { border-color: #003527; } }
 .sort-select { font-weight: 600; }
 .clear-btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; border: 1px solid #f56c6c; background: none; color: #f56c6c; font-size: 12px; cursor: pointer; transition: all 0.2s; &:hover { background: #f56c6c; color: #fff; } }
-.filter-count { font-size: 13px; color: #909399; margin-top: 10px; }
+.filter-count { font-size: 13px; color: #404944; margin-top: 10px; }
 
-.job-list { display: flex; flex-direction: column; gap: 16px; }
-.job-card { background: #fff; border-radius: 16px; border: 1px solid #e5e7eb; padding: 20px; transition: all 0.3s; &:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.08); } }
-.job-card-inner { display: flex; gap: 24px; align-items: stretch; }
-.job-left { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.job-header { display: flex; align-items: center; margin-bottom: 8px; }
-.job-title { font-size: 16px; font-weight: 700; color: #003527; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.job-tag { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; &.ai { background: rgba(14,165,233,0.1); color: #0ea5e9; } &.hot { background: rgba(239,68,68,0.1); color: #ef4444; } &.new { background: rgba(16,185,129,0.1); color: #10b981; } &.urgent { background: rgba(245,158,11,0.1); color: #f59e0b; } }
-.job-meta-row { display: flex; align-items: center; gap: 4px; margin-bottom: 10px; flex-wrap: wrap; }
-.job-meta { font-size: 12px; color: #606266; }
-.job-meta-dot { color: #dcdfe6; margin: 0 4px; }
-.company-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #606266; }
-.company-logo { width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
-.company-name { font-weight: 500; color: #303133; }
+.job-list { padding: 0; display: flex; flex-direction: column; gap: 16px; max-width: 1200px; margin: 0 auto; }
+.job-card { width: 100%; padding: 20px 24px; background: #fff; border-radius: 16px; border: 1px solid #e8ecf1; cursor: pointer; transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.job-card:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.10); transform: translateY(-2px); border-color: #d0d5dd; }
+.job-card:hover .card-title { color: #003527; }
+.card-inner { display: flex; gap: 24px; align-items: stretch; }
+.card-left { flex: 1; min-width: 0; display: flex; flex-direction: column; margin-top: 3px; }
+.card-title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.card-title { font-size: 18px; font-weight: 700; color: #121c28; transition: color 0.2s; }
+.tag-city { font-size: 13px; color: #404944; font-weight: 500; }
+.tag-campus { font-size: 11px; padding: 2px 10px; border-radius: 4px; background: #fff3cd; color: #856404; font-weight: 600; }
+.tag-company-type { font-size: 11px; padding: 2px 10px; border-radius: 4px; background: #003527; color: #fff; font-weight: 600; }
+.card-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.chip { font-size: 12px; padding: 3px 12px; border-radius: 4px; background: #f3f4f5; color: #404944; }
+.card-company { display: flex; align-items: center; gap: 10px; }
+.company-logo { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; flex-shrink: 0; }
+.company-info { display: flex; flex-direction: column; gap: 2px; }
+.company-name { font-size: 14px; font-weight: 600; color: #121c28; }
+.company-meta { font-size: 12px; color: #404944; }
 
-.job-center { flex: 1.2; min-width: 0; display: flex; flex-direction: column; }
-.match-dashboard { background: #ffffff; border-radius: 12px; padding: 14px; flex: 1; display: flex; flex-direction: column; }
+.card-center { flex: 1.2; min-width: 0; display: flex; flex-direction: column; }
+.match-dashboard { background: #ffffff; border-radius: 12px; padding: 14px; flex: 1; display: flex; flex-direction: column; margin-top: 3px; }
 .circle-scores { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; flex: 1; }
 .circle-score-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .score-circle { width: 52px; height: 52px; }
-.circle-bg { fill: none; stroke: #e5e7eb; stroke-width: 4; }
-.circle-fill { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dasharray 0.6s ease; &.skill { stroke: #1a3a5c; } &.exp { stroke: #0ea5e9; } &.city { stroke: #f59e0b; } &.edu { stroke: #8b5cf6; } &.main.match-high { stroke: #198754; } &.main.match-mid { stroke: #b8860b; } &.main.match-low { stroke: #dc3545; } }
-.circle-text { font-size: 10px; font-weight: 700; fill: #303133; }
-.circle-text-num { font-size: 12px; font-weight: 700; fill: #303133; }
-.circle-text-label { font-size: 7px; font-weight: 600; fill: #909399; }
-.circle-label { font-size: 10px; color: #909399; }
+.circle-bg { fill: none; stroke: #bfc9c3; stroke-width: 4; }
+.circle-fill { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dasharray 0.6s ease; &.skill { stroke: #003527; } &.exp { stroke: #064e3b; } &.city { stroke: #f59e0b; } &.edu { stroke: #8b5cf6; } &.main.match-high { stroke: #198754; } &.main.match-mid { stroke: #b8860b; } &.main.match-low { stroke: #dc3545; } }
+.circle-text { font-size: 10px; font-weight: 700; fill: #121c28; }
+.circle-label { font-size: 10px; color: #404944; }
 
-.job-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex-shrink: 0; width: 130px; }
-.job-salary { font-size: 18px; font-weight: 700; color: #003527; white-space: nowrap; }
+.card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 14px; flex-shrink: 0; padding-left: 24px; min-width: 160px; }
+.card-salary { font-size: 22px; font-weight: 700; color: #c0392b; white-space: nowrap; }
+.apply-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 24px; border-radius: 999px; border: 1px solid #bfc9c3; background: #fff; color: #404944; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.25s; width: 100%; }
+.apply-btn.normal-btn:hover:not(.applied):not(:disabled) { background: #003527; color: #fff; border-color: #003527; }
+.apply-btn.applied, .apply-btn:disabled { background: #d4edda; color: #155724; border-color: #d4edda; cursor: default; }
+.apply-btn.interview-btn { border-color: #6366f1; color: #6366f1; }
+.apply-btn.interview-btn:hover { background: #6366f1; color: #fff; border-color: #6366f1; }
 
-.job-actions { display: flex; flex-direction: column; gap: 6px; width: 100%; }
-.action-btn { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; border: none; white-space: nowrap; }
-.action-btn.apply { background: rgba(255,255,255,0.9); color: #003527; border: 1px solid #003527; &:hover:not(.applied) { background: #003527; color: #fff; border-color: #003527; } &.applied { background: #d4edda; color: #155724; cursor: default; border-color: transparent; } }
-.action-btn.interview { background: rgba(14,165,233,0.08); color: #0ea5e9; border: 1px solid rgba(14,165,233,0.2); &:hover { background: rgba(14,165,233,0.15); } }
-.action-btn.detail { background: #fff; color: #606266; border: 1px solid #dcdfe6; &:hover { border-color: #003527; color: #003527; } }
 
-.empty-state { text-align: center; padding: 60px 20px; color: #909399; p { font-size: 16px; font-weight: 600; margin-bottom: 4px; } span { font-size: 13px; } }
+.empty-state { text-align: center; padding: 60px 20px; color: #404944; p { font-size: 16px; font-weight: 600; margin-bottom: 4px; } span { font-size: 13px; } }
 
 .pagination { display: flex; justify-content: center; gap: 6px; margin-top: 28px; }
-.page-btn { min-width: 36px; height: 36px; border-radius: 8px; border: 1px solid #dcdfe6; background: #fff; color: #606266; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; &:hover:not(:disabled) { border-color: #003527; color: #003527; } &.active { background: #003527; color: #fff; border-color: #003527; } &:disabled { opacity: 0.4; cursor: default; } }
+.page-btn { min-width: 36px; height: 36px; border-radius: 8px; border: 1px solid #bfc9c3; background: #fff; color: #404944; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; &:hover:not(:disabled) { border-color: #003527; color: #003527; } &.active { background: #003527; color: #fff; border-color: #003527; } &:disabled { opacity: 0.4; cursor: default; } }
 
 @media (max-width: 900px) {
   .job-card-inner { flex-direction: column; }

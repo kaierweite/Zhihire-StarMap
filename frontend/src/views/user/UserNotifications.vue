@@ -209,54 +209,54 @@ onUnmounted(() => {
 
 .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
 .header-left { display: flex; align-items: center; gap: 12px; }
-.page-title { font-size: 32px; font-weight: 700; color: #303133; letter-spacing: -0.5px; }
+.page-title { font-size: 32px; font-weight: 700; color: #121c28; letter-spacing: -0.5px; }
 .unread-badge {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 28px; height: 28px; border-radius: 50%; background: #1a3a5c; color: #fff;
+  width: 28px; height: 28px; border-radius: 50%; background: #003527; color: #fff;
   font-size: 13px; font-weight: 700;
 }
 .mark-btn {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 16px; border-radius: 6px; border: 1px solid #dcdfe6;
-  background: #fff; color: #606266; font-size: 13px; cursor: pointer;
+  padding: 6px 16px; border-radius: 6px; border: 1px solid #bfc9c3;
+  background: #fff; color: #404944; font-size: 13px; cursor: pointer;
   transition: all 0.2s;
-  &:hover { border-color: #1a3a5c; color: #1a3a5c; }
+  &:hover { border-color: #003527; color: #003527; }
 }
 
 .filter-tabs {
-  display: flex; gap: 0; border-bottom: 1px solid #e5e7eb; margin-bottom: 20px;
+  display: flex; gap: 0; border-bottom: 1px solid #bfc9c3; margin-bottom: 20px;
 }
 .filter-tab {
-  padding: 10px 20px; font-size: 14px; font-weight: 500; color: #909399;
+  padding: 10px 20px; font-size: 14px; font-weight: 500; color: #404944;
   background: none; border: none; border-bottom: 2px solid transparent;
   cursor: pointer; transition: all 0.2s;
-  &:hover { color: #1a3a5c; }
-  &.active { color: #1a3a5c; font-weight: 700; border-bottom-color: #1a3a5c; }
+  &:hover { color: #003527; }
+  &.active { color: #003527; font-weight: 700; border-bottom-color: #003527; }
 }
 
 .loading-state { display: flex; justify-content: center; padding: 60px 0; }
-.loader-text { font-size: 14px; color: #909399; }
+.loader-text { font-size: 14px; color: #404944; }
 
 .notif-list { display: flex; flex-direction: column; gap: 12px; }
 .notif-card {
   display: flex; gap: 14px; padding: 18px 20px;
-  background: #fff; border-radius: 12px; border: 1px solid #e5e7eb;
+  background: #fff; border-radius: 12px; border: 1px solid #bfc9c3;
   cursor: pointer; transition: all 0.25s;
   &:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.05); transform: translateY(-1px); }
-  &.unread { border-left: 3px solid #1a3a5c; }
+  &.unread { border-left: 3px solid #003527; }
 }
-.notif-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #303133; }
+.notif-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #121c28; }
 .notif-body { flex: 1; min-width: 0; }
-.notif-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; h3 { font-size: 15px; font-weight: 600; color: #303133; } }
-.unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #1a3a5c; flex-shrink: 0; }
-.notif-content { font-size: 13px; color: #606266; line-height: 1.6; margin-bottom: 10px; }
+.notif-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; h3 { font-size: 15px; font-weight: 600; color: #121c28; } }
+.unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #003527; flex-shrink: 0; }
+.notif-content { font-size: 13px; color: #404944; line-height: 1.6; margin-bottom: 10px; }
 .notif-footer { display: flex; align-items: center; gap: 12px; }
-.notif-time { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #c0c4cc; }
+.notif-time { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #bfc9c3; }
 .notif-tag { font-size: 11px; padding: 2px 10px; border-radius: 4px; font-weight: 600; }
-.tag-interview { background: #dbeafe; color: #1e3a8a; }
+.tag-interview { background: #003527; color: #fff; }
 .tag-application { background: #d4edda; color: #155724; }
-.tag-system { background: #f3f4f5; color: #606266; }
+.tag-system { background: #f3f4f5; color: #404944; }
 
-.empty-state { text-align: center; padding: 60px 20px; color: #c0c4cc; p { font-size: 16px; margin-top: 12px; } }
-.empty-icon { color: #dcdfe6; }
+.empty-state { text-align: center; padding: 60px 20px; color: #bfc9c3; p { font-size: 16px; margin-top: 12px; } }
+.empty-icon { color: #bfc9c3; }
 </style>

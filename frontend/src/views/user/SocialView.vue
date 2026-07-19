@@ -102,7 +102,7 @@ const skillCount = () => graph.value?.nodes.length ?? 0
           <h3 class="section-title"><Compass :size="18" /> 职业规划摘要</h3>
           <div class="plan-target">
             <Briefcase :size="16" /> 目标：<strong>{{ plan.target_role }}</strong>
-            <span class="plan-score" :style="{ color: plan.score >= 80 ? '#198754' : plan.score >= 60 ? '#1a3a5c' : '#e67e22' }">{{ plan.score }}%</span>
+            <span class="plan-score" :style="{ color: plan.score >= 80 ? '#198754' : plan.score >= 60 ? '#003527' : '#e67e22' }">{{ plan.score }}%</span>
           </div>
           <p class="plan-rationale">{{ plan.rationale?.slice(0, 120) }}...</p>
           <router-link to="/user/career-plan" class="plan-link">查看完整规划 <ChevronRight :size="14" /></router-link>
@@ -115,48 +115,48 @@ const skillCount = () => graph.value?.nodes.length ?? 0
 <style scoped lang="scss">
 .social-page { padding: 24px 16px; }
 .social-container { max-width: 800px; margin: 0 auto; }
-.page-title { font-size: 24px; font-weight: 700; color: #303133; margin-bottom: 20px; }
+.page-title { font-size: 24px; font-weight: 700; color: #121c28; margin-bottom: 20px; }
 
-.loading-state { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 80px 0; color: #909399; }
+.loading-state { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 80px 0; color: #404944; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-.spin { animation: spin 1s linear infinite; color: #1a3a5c; }
+.spin { animation: spin 1s linear infinite; color: #003527; }
 
-.card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; padding: 20px 24px; margin-bottom: 16px; }
+.card { background: #fff; border-radius: 12px; border: 1px solid #bfc9c3; padding: 20px 24px; margin-bottom: 16px; }
 
 /* Profile Card */
 .profile-card { display: flex; align-items: center; gap: 20px; }
-.avatar-circle { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #1a3a5c, #0ea5e9); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; flex-shrink: 0; }
+.avatar-circle { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #003527, #064e3b); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; flex-shrink: 0; }
 .profile-info { flex: 1; min-width: 0; }
-.profile-name { font-size: 20px; font-weight: 700; color: #303133; margin: 0 0 2px; }
-.profile-bio { font-size: 13px; color: #909399; margin: 0 0 8px; }
+.profile-name { font-size: 20px; font-weight: 700; color: #121c28; margin: 0 0 2px; }
+.profile-bio { font-size: 13px; color: #404944; margin: 0 0 8px; }
 .profile-tags { display: flex; flex-wrap: wrap; gap: 4px; }
-.tag { font-size: 11px; padding: 2px 8px; border-radius: 4px; background: #f0f2f5; color: #606266; }
+.tag { font-size: 11px; padding: 2px 8px; border-radius: 4px; background: #f0f2f5; color: #404944; }
 
 /* Stats Grid */
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-.stat-card { display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; padding: 16px 18px; text-decoration: none; transition: all .2s; &:hover { border-color: #1a3a5c; transform: translateY(-1px); } }
+.stat-card { display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 12px; border: 1px solid #bfc9c3; padding: 16px 18px; text-decoration: none; transition: all .2s; &:hover { border-color: #003527; transform: translateY(-1px); } }
 .stat-icon { flex-shrink: 0; }
-.stat-icon.resume { color: #1a3a5c; }
-.stat-icon.graph { color: #0ea5e9; }
+.stat-icon.resume { color: #003527; }
+.stat-icon.graph { color: #064e3b; }
 .stat-icon.plan { color: #f59e0b; }
 .stat-icon.job { color: #10b981; }
-.stat-num { font-size: 22px; font-weight: 700; color: #303133; }
-.stat-num.muted { color: #c0c4cc; }
-.stat-label { font-size: 12px; color: #909399; }
-.stat-arrow { margin-left: auto; color: #c0c4cc; }
+.stat-num { font-size: 22px; font-weight: 700; color: #121c28; }
+.stat-num.muted { color: #bfc9c3; }
+.stat-label { font-size: 12px; color: #404944; }
+.stat-arrow { margin-left: auto; color: #bfc9c3; }
 
 /* Quick Links */
 .quick-links { margin-bottom: 16px; }
-.section-title { display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 600; color: #303133; margin: 0 0 12px; }
+.section-title { display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 600; color: #121c28; margin: 0 0 12px; }
 .link-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.link-item { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 8px; background: #fff; border: 1px solid #e5e7eb; font-size: 13px; color: #606266; text-decoration: none; transition: all .2s; &:hover { border-color: #1a3a5c; color: #1a3a5c; } }
+.link-item { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 8px; background: #fff; border: 1px solid #bfc9c3; font-size: 13px; color: #404944; text-decoration: none; transition: all .2s; &:hover { border-color: #003527; color: #003527; } }
 
 /* Plan Card */
 .plan-card { }
-.plan-target { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #303133; margin-bottom: 8px; }
+.plan-target { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #121c28; margin-bottom: 8px; }
 .plan-score { margin-left: auto; font-weight: 700; font-size: 18px; }
-.plan-rationale { font-size: 13px; color: #606266; line-height: 1.6; margin: 0 0 10px; }
-.plan-link { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: #1a3a5c; font-weight: 600; text-decoration: none; &:hover { text-decoration: underline; } }
+.plan-rationale { font-size: 13px; color: #404944; line-height: 1.6; margin: 0 0 10px; }
+.plan-link { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: #003527; font-weight: 600; text-decoration: none; &:hover { text-decoration: underline; } }
 
 @media (max-width: 640px) {
   .stats-grid, .link-grid { grid-template-columns: 1fr; }

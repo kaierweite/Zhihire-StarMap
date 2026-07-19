@@ -57,7 +57,7 @@ function initSunburstChart(data: UserGraphResult) {
 
   const root = data.sunburst_data || {
     name: '能力图谱',
-    itemStyle: { color: '#1a3a5c' },
+    itemStyle: { color: '#003527' },
     children: data.categories.map((c) => ({ name: c.name, itemStyle: { color: c.color }, children: [] })),
   }
 
@@ -68,7 +68,7 @@ function initSunburstChart(data: UserGraphResult) {
       borderColor: '#e8e8e8',
       borderWidth: 1,
       padding: [12, 16],
-      textStyle: { color: '#303133', fontSize: 13 },
+      textStyle: { color: '#121c28', fontSize: 13 },
       formatter: function(params: any) {
         const name = params.name || '';
         const val = params.value || 0;
@@ -280,13 +280,13 @@ watch(() => gapExpanded.value, (val) => {
 
 <style scoped lang="scss">
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-.spin { animation: spin 1s linear infinite; color: #1a3a5c; }
+.spin { animation: spin 1s linear infinite; color: #003527; }
 
 .ability-section {
   position: relative;
   background: #fff;
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #bfc9c3;
   padding: 16px 20px;
   margin-bottom: 16px;
   transition: all 0.3s;
@@ -301,45 +301,45 @@ watch(() => gapExpanded.value, (val) => {
   display: flex; align-items: center; gap: 10px;
   margin-bottom: 12px;
 }
-.section-title { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; color: #303133; margin: 0; flex-shrink: 0; svg { color: #1a3a5c; } }
-.section-summary { font-size: 12px; color: #909399; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
-.section-summary strong { color: #1a3a5c; }
+.section-title { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; color: #121c28; margin: 0; flex-shrink: 0; svg { color: #003527; } }
+.section-summary { font-size: 12px; color: #404944; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.section-summary strong { color: #003527; }
 
-.center-state { text-align: center; padding: 32px 0; color: #909399; font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 10px; &.err { color: #f56c6c; } }
-.retry-btn { padding: 6px 16px; border-radius: 6px; border: 1px solid #1a3a5c; background: none; color: #1a3a5c; font-size: 13px; cursor: pointer; &:hover { background: #1a3a5c; color: #fff; } }
+.center-state { text-align: center; padding: 32px 0; color: #404944; font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 10px; &.err { color: #f56c6c; } }
+.retry-btn { padding: 6px 16px; border-radius: 6px; border: 1px solid #003527; background: none; color: #003527; font-size: 13px; cursor: pointer; &:hover { background: #003527; color: #fff; } }
 
 .chart-area { margin-bottom: 10px; }
 .chart-box { width: 100%; min-height: 500px; height: calc(100vh - 420px); max-height: 750px; border-radius: 10px; background: #fafbfc; border: 1px solid #f0f0f0; transition: all 0.3s; }
 .chart-box.maximized { height: calc(100vh - 120px); max-height: none; }
-.empty-chart { height: 120px; display: flex; align-items: center; justify-content: center; color: #909399; font-size: 14px; background: #fafbfc; border-radius: 8px; border: 1px solid #eef0f2; }
+.empty-chart { height: 120px; display: flex; align-items: center; justify-content: center; color: #404944; font-size: 14px; background: #fafbfc; border-radius: 8px; border: 1px solid #eef0f2; }
 
-.legend-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 8px; font-size: 12px; color: #606266; }
+.legend-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 8px; font-size: 12px; color: #404944; }
 .legend-chip { display: inline-flex; align-items: center; gap: 4px; }
 .legend-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-.legend-hint { font-size: 11px; color: #c0c4cc; margin-left: auto; }
+.legend-hint { font-size: 11px; color: #bfc9c3; margin-left: auto; }
 
-.tip-row { display: flex; align-items: center; gap: 6px; padding: 8px 14px; margin-bottom: 10px; border-radius: 6px; background: rgba(245,158,11,0.06); border-left: 3px solid #f59e0b; font-size: 13px; color: #606266; }
+.tip-row { display: flex; align-items: center; gap: 6px; padding: 8px 14px; margin-bottom: 10px; border-radius: 6px; background: rgba(245,158,11,0.06); border-left: 3px solid #f59e0b; font-size: 13px; color: #404944; }
 .tip-icon { color: #f59e0b; flex-shrink: 0; }
-.tip-text strong { color: #303133; }
+.tip-text strong { color: #121c28; }
 
-.gap-toggle { display: flex; align-items: center; gap: 8px; padding: 10px 14px; margin-bottom: 8px; border-radius: 6px; background: #f8f9fa; border: 1px solid #eef0f2; cursor: pointer; font-size: 14px; font-weight: 600; color: #303133; transition: all 0.2s; user-select: none; }
-.gap-toggle:hover { border-color: #1a3a5c; color: #1a3a5c; }
-.gap-toggle svg { color: #1a3a5c; }
+.gap-toggle { display: flex; align-items: center; gap: 8px; padding: 10px 14px; margin-bottom: 8px; border-radius: 6px; background: #f8f9fa; border: 1px solid #eef0f2; cursor: pointer; font-size: 14px; font-weight: 600; color: #121c28; transition: all 0.2s; user-select: none; }
+.gap-toggle:hover { border-color: #003527; color: #003527; }
+.gap-toggle svg { color: #003527; }
 .toggle-arrow { font-size: 10px; margin-left: auto; transition: transform 0.25s; }
 .toggle-arrow.open { transform: rotate(90deg); }
 
 .gap-body { padding: 4px 0 10px; }
 .gap-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-.gap-label { font-size: 13px; font-weight: 600; color: #303133; white-space: nowrap; }
-.role-cat-tag { font-size: 11px; color: #909399; margin-left: 6px; }
-.gap-placeholder { text-align: center; padding: 28px 0; color: #909399; }
+.gap-label { font-size: 13px; font-weight: 600; color: #121c28; white-space: nowrap; }
+.role-cat-tag { font-size: 11px; color: #404944; margin-left: 6px; }
+.gap-placeholder { text-align: center; padding: 28px 0; color: #404944; }
 .gap-placeholder p { font-size: 13px; margin-top: 8px; }
 
 .gap-stats { margin-bottom: 12px; }
-.target-job { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #303133; margin-bottom: 10px; }
-.match-badge { padding: 2px 10px; border-radius: 999px; background: #1a3a5c; color: #fff; font-size: 12px; font-weight: 600; }
+.target-job { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #121c28; margin-bottom: 10px; }
+.match-badge { padding: 2px 10px; border-radius: 999px; background: #003527; color: #fff; font-size: 12px; font-weight: 600; }
 .gap-cards { display: flex; gap: 16px; }
-.cov-card { font-size: 13px; color: #606266; }
+.cov-card { font-size: 13px; color: #404944; }
 .cov-card .cov-num { font-size: 22px; font-weight: 700; margin-right: 4px; }
 .cov-card.matched .cov-num { color: #155724; }
 .cov-card.miss .cov-num { color: #991b1b; }
@@ -354,12 +354,12 @@ watch(() => gapExpanded.value, (val) => {
 .skill-tag.must { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
 .skill-tag.nice { background: #fffbeb; color: #856404; border: 1px solid #fde68a; }
 
-.gap-ai-tip { display: flex; align-items: flex-start; gap: 8px; padding: 8px 14px; border-radius: 8px; background: rgba(14,165,233,0.04); border-left: 3px solid #0ea5e9; font-size: 13px; color: #606266; }
-.gap-ai-tip svg { color: #0ea5e9; flex-shrink: 0; margin-top: 1px; }
-.gap-ai-tip strong { color: #303133; }
+.gap-ai-tip { display: flex; align-items: flex-start; gap: 8px; padding: 8px 14px; border-radius: 8px; background: rgba(14,165,233,0.04); border-left: 3px solid #064e3b; font-size: 13px; color: #404944; }
+.gap-ai-tip svg { color: #064e3b; flex-shrink: 0; margin-top: 1px; }
+.gap-ai-tip strong { color: #121c28; }
 
-.hint-icon { color: #c0c4cc; }
-.fullscreen-close { position: fixed; top: 16px; right: 24px; z-index: 1001; width: 40px; height: 40px; border-radius: 50%; border: none; background: rgba(0,0,0,0.06); color: #303133; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.hint-icon { color: #bfc9c3; }
+.fullscreen-close { position: fixed; top: 16px; right: 24px; z-index: 1001; width: 40px; height: 40px; border-radius: 50%; border: none; background: rgba(0,0,0,0.06); color: #121c28; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
 @media (max-width: 640px) {
   .chart-box { min-height: 320px; height: 50vh; }

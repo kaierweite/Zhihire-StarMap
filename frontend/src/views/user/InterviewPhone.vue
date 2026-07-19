@@ -280,10 +280,10 @@ onUnmounted(() => { recognition?.abort(); synth?.cancel() })
 .header-sub { font-size: 12px; color: rgba(255,255,255,0.5); }
 .end-btn { display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 6px; background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); font-size: 12px; cursor: pointer; &:hover { background: rgba(239,68,68,0.25); } }
 .dialing-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 40px 20px; }
-.avatar-ring { width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #1a3a5c, #0ea5e9); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 40px rgba(14,165,233,0.3); }
+.avatar-ring { width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #003527, #064e3b); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 40px rgba(14,165,233,0.3); }
 .caller-name { font-size: 22px; font-weight: 700; margin-top: 8px; }
 .caller-status { font-size: 14px; color: rgba(255,255,255,0.6); }
-.dialing-pulse { display: flex; gap: 8px; margin: 12px 0; span { width: 10px; height: 10px; border-radius: 50%; background: #0ea5e9; animation: dialPulse 1.4s infinite; &:nth-child(2) { animation-delay: 0.2s; } &:nth-child(3) { animation-delay: 0.4s; } } }
+.dialing-pulse { display: flex; gap: 8px; margin: 12px 0; span { width: 10px; height: 10px; border-radius: 50%; background: #064e3b; animation: dialPulse 1.4s infinite; &:nth-child(2) { animation-delay: 0.2s; } &:nth-child(3) { animation-delay: 0.4s; } } }
 @keyframes dialPulse { 0%, 100% { transform: scale(0.5); opacity: 0.3; } 50% { transform: scale(1); opacity: 1; } }
 .answer-btn { display: flex; align-items: center; gap: 10px; padding: 14px 36px; border-radius: 999px; border: none; background: #22c55e; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; &:hover { background: #16a34a; } }
 .call-screen { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px 16px 24px; gap: 16px; overflow: hidden; }
@@ -316,11 +316,11 @@ onUnmounted(() => { recognition?.abort(); synth?.cancel() })
 .ctrl-btn { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.1); color: #fff; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; &:hover { background: rgba(255,255,255,0.2); } &:disabled { opacity: 0.3; cursor: not-allowed; } &.active { background: rgba(239,68,68,0.3); color: #ef4444; } &.big { width: 56px; height: 56px; } &.recording { background: rgba(239,68,68,0.4); color: #ef4444; box-shadow: 0 0 20px rgba(239,68,68,0.3); } }
 .ctrl-btn.answer-btn.big { background: #22c55e; color: #fff; &:hover { background: #16a34a; } &.recording:hover { background: #dc2626; } }
 .finished-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 40px 20px; }
-.result-ring { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #1a3a5c, #0ea5e9); display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 40px rgba(14,165,233,0.3); }
+.result-ring { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #003527, #064e3b); display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 40px rgba(14,165,233,0.3); }
 .result-score { font-size: 36px; font-weight: 700; }
 .result-label { font-size: 12px; color: rgba(255,255,255,0.7); }
 .finished-screen h2 { font-size: 22px; font-weight: 700; }
 .finished-screen p { font-size: 14px; color: rgba(255,255,255,0.6); }
 .result-actions { display: flex; gap: 12px; margin-top: 8px; }
-.action-btn { display: flex; align-items: center; gap: 6px; padding: 10px 24px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; font-size: 14px; cursor: pointer; &:hover { background: rgba(255,255,255,0.1); } &.primary { background: #1a3a5c; border-color: #1a3a5c; &:hover { background: #24507a; } } }
+.action-btn { display: flex; align-items: center; gap: 6px; padding: 10px 24px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; font-size: 14px; cursor: pointer; &:hover { background: rgba(255,255,255,0.1); } &.primary { background: #003527; border-color: #003527; &:hover { background: #064e3b; } } }
 </style>

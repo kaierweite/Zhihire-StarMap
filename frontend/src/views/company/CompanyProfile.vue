@@ -248,22 +248,22 @@ onMounted(loadProfile)
   display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;
 }
 .header-left { display: flex; align-items: center; gap: 14px; }
-.header-icon { color: #1a3a5c; }
-h1 { font-size: 28px; font-weight: 700; color: #303133; margin: 0 0 2px 0; }
-.subtitle { font-size: 14px; color: #909399; }
-.loading-hint { text-align: center; padding: 60px; color: #909399; font-size: 14px; }
+.header-icon { color: #003527; }
+h1 { font-size: 28px; font-weight: 700; color: #121c28; margin: 0 0 2px 0; }
+.subtitle { font-size: 14px; color: #404944; }
+.loading-hint { text-align: center; padding: 60px; color: #404944; font-size: 14px; }
 
 .content-grid { display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start; }
 
 .form-card {
-  background: #fff; border-radius: 12px; padding: 28px; border: 1px solid #e5e7eb;
+  background: #fff; border-radius: 12px; padding: 28px; border: 1px solid #bfc9c3;
 }
 
 .side-card { display: flex; flex-direction: column; gap: 16px; }
 
 .audit-card, .info-card {
-  background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e5e7eb;
-  h3 { font-size: 15px; font-weight: 700; color: #303133; margin: 0 0 12px 0; }
+  background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #bfc9c3;
+  h3 { font-size: 15px; font-weight: 700; color: #121c28; margin: 0 0 12px 0; }
 }
 
 .audit-status { margin-bottom: 12px; }
@@ -274,7 +274,7 @@ h1 { font-size: 28px; font-weight: 700; color: #303133; margin: 0 0 2px 0; }
 .audit-reason { background: #fff2f0; color: #cf1322; }
 .audit-ok { background: #f6ffed; color: #389e0d; }
 .audit-pending { background: #fffbe6; color: #d48806; }
-.audit-hint { font-size: 12px; color: #909399; line-height: 1.5; margin: 0; }
+.audit-hint { font-size: 12px; color: #404944; line-height: 1.5; margin: 0; }
 
 @media (max-width: 860px) { .content-grid { grid-template-columns: 1fr; } }
 </style>

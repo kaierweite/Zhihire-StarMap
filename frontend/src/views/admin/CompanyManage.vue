@@ -178,7 +178,7 @@ onMounted(fetchData)
 
     <!-- Reject Reason Dialog -->
     <el-dialog v-model="rejectDialogVisible" title="拒绝企业审核" width="420px">
-      <p style="font-size:13px;color:#606266;margin-bottom:12px">请输入拒绝原因，企业端将收到此反馈：</p>
+      <p style="font-size:13px;color:#404944;margin-bottom:12px">请输入拒绝原因，企业端将收到此反馈：</p>
       <el-input
         v-model="rejectReason"
         type="textarea"
@@ -203,32 +203,32 @@ onMounted(fetchData)
 .spinning { animation: spin 1s linear infinite; }
 
 .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
-h1 { font-size: 28px; font-weight: 700; color: #303133; margin: 0 0 4px 0; }
-.page-desc { font-size: 14px; color: #909399; margin: 0; }
+h1 { font-size: 28px; font-weight: 700; color: #121c28; margin: 0 0 4px 0; }
+.page-desc { font-size: 14px; color: #404944; margin: 0; }
 .refresh-btn {
   display: flex; align-items: center; gap: 4px; padding: 8px 14px; border-radius: 8px;
-  border: 1px solid #dcdfe6; background: #fff; color: #606266; font-size: 13px; font-weight: 500; cursor: pointer;
-  &:hover:not(:disabled) { border-color: #1a3a5c; color: #1a3a5c; }
+  border: 1px solid #bfc9c3; background: #fff; color: #404944; font-size: 13px; font-weight: 500; cursor: pointer;
+  &:hover:not(:disabled) { border-color: #003527; color: #003527; }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
 .filter-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-.search-box { flex: 1; min-width: 200px; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid #dcdfe6; border-radius: 8px; background: #fff; input { flex: 1; border: none; outline: none; font-size: 13px; } svg { color: #909399; } &:focus-within { border-color: #1a3a5c; } }
-.sel { padding: 8px 10px; border: 1px solid #dcdfe6; border-radius: 8px; font-size: 12px; background: #fff; outline: none; }
-.count { font-size: 13px; color: #909399; white-space: nowrap; }
+.search-box { flex: 1; min-width: 200px; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid #bfc9c3; border-radius: 8px; background: #fff; input { flex: 1; border: none; outline: none; font-size: 13px; } svg { color: #404944; } &:focus-within { border-color: #003527; } }
+.sel { padding: 8px 10px; border: 1px solid #bfc9c3; border-radius: 8px; font-size: 12px; background: #fff; outline: none; }
+.count { font-size: 13px; color: #404944; white-space: nowrap; }
 
-.table { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
+.table { background: #fff; border-radius: 12px; border: 1px solid #bfc9c3; overflow: hidden; }
 .th, .tr { display: flex; align-items: center; padding: 12px 16px; font-size: 13px; }
-.th { background: #f8f9fa; font-weight: 600; color: #909399; border-bottom: 1px solid #e5e7eb; }
-.tr { border-bottom: 1px solid #f0f0f0; color: #606266; transition: background 0.2s; &:hover { background: #f8f9fa; } &:last-child { border-bottom: none; } &.rejected { opacity: 0.55; } }
-.c-name { flex: 2; strong { color: #303133; } }
+.th { background: #f8f9fa; font-weight: 600; color: #404944; border-bottom: 1px solid #bfc9c3; }
+.tr { border-bottom: 1px solid #f0f0f0; color: #404944; transition: background 0.2s; &:hover { background: #f8f9fa; } &:last-child { border-bottom: none; } &.rejected { opacity: 0.55; } }
+.c-name { flex: 2; strong { color: #121c28; } }
 .c-info { flex: 1.5; }
 .c-contact { flex: 1.8; }
 .c-status { flex: 1; }
-.c-date { flex: 1; display: flex; align-items: center; gap: 4px; font-size: 12px; color: #c0c4cc; }
+.c-date { flex: 1; display: flex; align-items: center; gap: 4px; font-size: 12px; color: #bfc9c3; }
 .c-act { flex: 1.5; display: flex; justify-content: flex-end; }
 
-.info-text, .contact-text { font-size: 12px; color: #909399; }
+.info-text, .contact-text { font-size: 12px; color: #404944; }
 .contact-text { font-size: 12px; }
 
 .status-tag { font-size: 11px; padding: 2px 10px; border-radius: 4px; font-weight: 600; white-space: nowrap; &.pending { background: #fff3cd; color: #856404; } &.approved { background: #d4edda; color: #155724; } &.rejected { background: #f8d7da; color: #721c24; } }
@@ -237,7 +237,7 @@ h1 { font-size: 28px; font-weight: 700; color: #303133; margin: 0 0 4px 0; }
 .approve-btn, .reject-btn { display: inline-flex; align-items: center; gap: 3px; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
 .approve-btn { background: #198754; color: #fff; border: none; &:hover { background: #157347; } }
 .reject-btn { background: #fff; color: #dc3545; border: 1px solid #dc3545; &:hover { background: #dc3545; color: #fff; } }
-.act-done { font-size: 12px; color: #c0c4cc; &.muted { opacity: 0.7; } }
+.act-done { font-size: 12px; color: #bfc9c3; &.muted { opacity: 0.7; } }
 
 .pagination-wrap { display: flex; justify-content: center; margin-top: 16px; }
 

@@ -187,11 +187,11 @@ onMounted(loadDashboard)
   align-items: baseline;
   gap: 12px;
   margin-bottom: 24px;
-  h1 { font-size: 28px; font-weight: 700; color: #303133; margin: 0; }
-  .subtitle { font-size: 14px; color: #909399; }
+  h1 { font-size: 28px; font-weight: 700; color: #121c28; margin: 0; }
+  .subtitle { font-size: 14px; color: #404944; }
 }
 .loading-hint {
-  text-align: center; padding: 40px; color: #909399; font-size: 14px;
+  text-align: center; padding: 40px; color: #404944; font-size: 14px;
 }
 
 .stats-grid {
@@ -207,16 +207,16 @@ onMounted(loadDashboard)
   padding: 20px;
   background: #fff;
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #bfc9c3;
   cursor: pointer;
   transition: all 0.2s;
-  &:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.04); border-color: #1a3a5c; }
+  &:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.04); border-color: #003527; }
 }
 .stat-icon {
   width: 48px; height: 48px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; color: #fff;
-  &.bg-blue { background: #1a3a5c; }
+  &.bg-blue { background: #003527; }
   &.bg-green { background: #2d7d46; }
   &.bg-orange { background: #d97706; }
 }
@@ -224,10 +224,10 @@ onMounted(loadDashboard)
   display: flex; flex-direction: column;
 }
 .stat-value {
-  font-size: 28px; font-weight: 700; color: #303133; line-height: 1.2;
+  font-size: 28px; font-weight: 700; color: #121c28; line-height: 1.2;
 }
 .stat-label {
-  font-size: 13px; color: #909399;
+  font-size: 13px; color: #404944;
 }
 
 .section {
@@ -238,7 +238,7 @@ onMounted(loadDashboard)
   align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
-  h2 { font-size: 18px; font-weight: 600; color: #303133; margin: 0; }
+  h2 { font-size: 18px; font-weight: 600; color: #121c28; margin: 0; }
 }
-.muted { color: #c0c4cc; font-style: italic; }
+.muted { color: #bfc9c3; font-style: italic; }
 </style>

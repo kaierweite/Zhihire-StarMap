@@ -142,32 +142,32 @@ onMounted(loadCompanyJobs)
 @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 .fade-up { opacity: 0; animation: fadeUp 0.5s cubic-bezier(0.22,1,0.36,1) forwards; }
 .d1 { animation-delay: 0.08s; } .d2 { animation-delay: 0.15s; }
-.page-title { font-size: 28px; font-weight: 700; color: #303133; margin-bottom: 6px; }
-.page-desc { font-size: 14px; color: #909399; margin-bottom: 20px; }
+.page-title { font-size: 28px; font-weight: 700; color: #121c28; margin-bottom: 6px; }
+.page-desc { font-size: 14px; color: #404944; margin-bottom: 20px; }
 
-.filter-card { background: #fff; border-radius: 12px; padding: 16px 20px; border: 1px solid #e5e7eb; margin-bottom: 20px; }
+.filter-card { background: #fff; border-radius: 12px; padding: 16px 20px; border: 1px solid #bfc9c3; margin-bottom: 20px; }
 .filter-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.job-selector { display: flex; align-items: center; gap: 8px; margin-right: 8px; label { font-size: 13px; font-weight: 600; color: #303133; white-space: nowrap; } }
-.job-sel { padding: 8px 10px; border: 1px solid #dcdfe6; border-radius: 8px; font-size: 13px; background: #fff; outline: none; min-width: 160px; &:focus { border-color: #1a3a5c; } }
-.hint { font-size: 12px; color: #909399; }
-.search-box { flex: 1; min-width: 180px; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid #dcdfe6; border-radius: 8px; background: #fff; input { flex: 1; border: none; outline: none; font-size: 13px; } svg { color: #909399; } &:focus-within { border-color: #1a3a5c; } }
-.sel { padding: 8px 10px; border: 1px solid #dcdfe6; border-radius: 8px; font-size: 12px; background: #fff; outline: none; &:focus { border-color: #1a3a5c; } }
+.job-selector { display: flex; align-items: center; gap: 8px; margin-right: 8px; label { font-size: 13px; font-weight: 600; color: #121c28; white-space: nowrap; } }
+.job-sel { padding: 8px 10px; border: 1px solid #bfc9c3; border-radius: 8px; font-size: 13px; background: #fff; outline: none; min-width: 160px; &:focus { border-color: #003527; } }
+.hint { font-size: 12px; color: #404944; }
+.search-box { flex: 1; min-width: 180px; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid #bfc9c3; border-radius: 8px; background: #fff; input { flex: 1; border: none; outline: none; font-size: 13px; } svg { color: #404944; } &:focus-within { border-color: #003527; } }
+.sel { padding: 8px 10px; border: 1px solid #bfc9c3; border-radius: 8px; font-size: 12px; background: #fff; outline: none; &:focus { border-color: #003527; } }
 .clear-btn { display: flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; border: 1px solid #f56c6c; background: none; color: #f56c6c; font-size: 12px; cursor: pointer; &:hover { background: #f56c6c; color: #fff; } }
-.filter-count { font-size: 13px; color: #909399; margin-top: 10px; }
+.filter-count { font-size: 13px; color: #404944; margin-top: 10px; }
 
-.loading-hint, .empty-hint { text-align: center; padding: 60px; color: #909399; font-size: 14px; }
+.loading-hint, .empty-hint { text-align: center; padding: 60px; color: #404944; font-size: 14px; }
 
 .talent-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-.talent-card { background: #fff; border-radius: 12px; padding: 18px; border: 1px solid #e5e7eb; transition: all 0.3s; &:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.06); transform: translateY(-2px); } }
+.talent-card { background: #fff; border-radius: 12px; padding: 18px; border: 1px solid #bfc9c3; transition: all 0.3s; &:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.06); transform: translateY(-2px); } }
 .talent-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.talent-avatar { width: 40px; height: 40px; border-radius: 50%; background: #dbeafe; color: #1a3a5c; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; flex-shrink: 0; }
-.talent-info { flex: 1; h3 { font-size: 15px; font-weight: 600; color: #303133; } p { font-size: 12px; color: #909399; } }
+.talent-avatar { width: 40px; height: 40px; border-radius: 50%; background: #dbeafe; color: #003527; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; flex-shrink: 0; }
+.talent-info { flex: 1; h3 { font-size: 15px; font-weight: 600; color: #121c28; } p { font-size: 12px; color: #404944; } }
 .match-badge { font-size: 14px; font-weight: 700; padding: 4px 10px; border-radius: 999px; &.high { background: rgba(25,135,84,0.12); color: #198754; } &.mid { background: rgba(184,134,11,0.12); color: #b8860b; } &.low { background: rgba(220,53,69,0.12); color: #dc3545; } }
-.talent-meta { font-size: 12px; color: #909399; margin-bottom: 8px; span { display: flex; align-items: center; gap: 3px; } }
+.talent-meta { font-size: 12px; color: #404944; margin-bottom: 8px; span { display: flex; align-items: center; gap: 3px; } }
 .talent-skills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
 .skill-tag { font-size: 11px; padding: 2px 10px; border-radius: 4px; &.hit { background: #d4edda; color: #155724; } &.miss { background: #f8d7da; color: #721c24; } }
-.rationale { font-size: 12px; color: #606266; line-height: 1.6; margin: 0 0 12px 0; }
-.invite-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 8px; border-radius: 999px; background: #1a3a5c; color: #fff; font-size: 13px; font-weight: 600; border: none; cursor: pointer; &:hover { background: #24507a; } }
+.rationale { font-size: 12px; color: #404944; line-height: 1.6; margin: 0 0 12px 0; }
+.invite-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 8px; border-radius: 999px; background: #003527; color: #fff; font-size: 13px; font-weight: 600; border: none; cursor: pointer; &:hover { background: #064e3b; } }
 
 @media (max-width: 900px) { .talent-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 600px) { .talent-grid { grid-template-columns: 1fr; } }

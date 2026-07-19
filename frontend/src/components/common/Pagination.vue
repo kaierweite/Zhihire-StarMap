@@ -51,7 +51,7 @@ function goTo(p: number) {
 
 .page-info {
   font-size: 13px;
-  color: #909399;
+  color: #404944;
   margin-right: 12px;
 }
 
@@ -59,9 +59,9 @@ function goTo(p: number) {
   min-width: 34px;
   height: 34px;
   border-radius: 6px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid #bfc9c3;
   background: #fff;
-  color: #606266;
+  color: #404944;
   font-size: 13px;
   cursor: pointer;
   display: flex;
@@ -69,14 +69,14 @@ function goTo(p: number) {
   justify-content: center;
   transition: all 0.2s;
 
-  &:hover:not(:disabled) { border-color: #1a3a5c; color: #1a3a5c; }
-  &.active { background: #1a3a5c; color: #fff; border-color: #1a3a5c; }
+  &:hover:not(:disabled) { border-color: #003527; color: #003527; }
+  &.active { background: #003527; color: #fff; border-color: #003527; }
   &:disabled { opacity: 0.4; cursor: default; }
 }
 
 .page-ellipsis {
   font-size: 13px;
-  color: #c0c4cc;
+  color: #bfc9c3;
   padding: 0 4px;
 }
 </style>

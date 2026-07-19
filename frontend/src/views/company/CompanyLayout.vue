@@ -53,7 +53,7 @@ onUnmounted(() => {
         <h2 v-show="!collapsed" class="logo">智聘星图</h2>
         <button class="collapse-btn" @click="collapsed = !collapsed"><Menu :size="18" /></button>
       </div>
-      <el-menu :default-active="route.path" :collapse="collapsed" router class="sidebar-menu" background-color="#1a3a5c" text-color="#cbd5e1" active-text-color="#0ea5e9">
+      <el-menu :default-active="route.path" :collapse="collapsed" router class="sidebar-menu" background-color="#003527" text-color="#cbd5e1" active-text-color="#064e3b">
         <el-menu-item v-for="item in menuItems" :key="item.path" :index="item.path">
           <el-icon><component :is="item.icon" :size="18" /></el-icon>
           <template #title>{{ item.label }}</template>
@@ -89,14 +89,14 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 .company-layout { height: 100vh; }
-.sidebar { background-color: #1a3a5c; transition: width 0.3s; overflow: hidden; }
+.sidebar { background-color: #003527; transition: width 0.3s; overflow: hidden; }
 .sidebar-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; color: #fff; }
 .logo { font-size: 18px; font-weight: 700; white-space: nowrap; }
 .collapse-btn { background: none; border: none; color: #cbd5e1; cursor: pointer; padding: 4px; border-radius: 6px; &:hover { background: rgba(255,255,255,0.1); } }
 .sidebar-menu { border-right: none; }
-.top-header { display: flex; align-items: center; justify-content: space-between; background: #fff; border-bottom: 1px solid #e5e7eb; padding: 0 24px; }
+.top-header { display: flex; align-items: center; justify-content: space-between; background: #fff; border-bottom: 1px solid #bfc9c3; padding: 0 24px; }
 .header-right { display: flex; align-items: center; gap: 12px; }
-.icon-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: #606266; transition: all 0.2s; &:hover { background: #f5f7fa; color: #1a3a5c; } }
+.icon-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: #404944; transition: all 0.2s; &:hover { background: #f8f9ff; color: #003527; } }
 
 .notif-btn { position: relative; }
 .notif-dot {
@@ -109,8 +109,8 @@ onUnmounted(() => {
   box-shadow: 0 0 0 2px #fff;
 }
 
-.user-badge { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: background 0.2s; &:hover { background: #f5f7fa; } }
-.avatar { width: 30px; height: 30px; border-radius: 50%; background: #1a3a5c; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
-.username { font-size: 13px; font-weight: 500; color: #303133; }
+.user-badge { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: background 0.2s; &:hover { background: #f8f9ff; } }
+.avatar { width: 30px; height: 30px; border-radius: 50%; background: #003527; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+.username { font-size: 13px; font-weight: 500; color: #121c28; }
 .main-content { background-color: #f8f9fa; padding: 24px; overflow-y: auto; }
 </style>

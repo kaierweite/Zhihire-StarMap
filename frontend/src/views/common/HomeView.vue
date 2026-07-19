@@ -452,11 +452,11 @@ function goDashboard() {
 .category-section { padding: 48px 0; }
 .category-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
 .category-grid { display: grid; grid-template-columns: 300px 1fr; gap: 24px; margin-top: 10px; }
-.category-sidebar { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.04); overflow: hidden; }
-.cat-tabs { display: flex; border-bottom: 1px solid #e5e7eb; }
+.category-sidebar { background: #fff; border-radius: 12px; border: 1px solid #bfc9c3; box-shadow: 0 1px 4px rgba(0,0,0,0.04); overflow: hidden; }
+.cat-tabs { display: flex; border-bottom: 1px solid #bfc9c3; }
 .cat-tab { flex: 1; padding: 12px 0; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-align: center; cursor: pointer; border: none; background: none; color: #404944; transition: all 0.2s; &:first-child { border-right: 1px solid #bfc9c3; } &.active { color: #003527; border-bottom: 2px solid #064e3b; background: rgba(6,78,59,0.05); } &:hover:not(.active) { color: #121c28; } }
 .cat-list { padding: 8px 0; }
-.cat-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; cursor: pointer; transition: all 0.2s; &:hover, &.hovered { background: #f5f7fa; } }
+.cat-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; cursor: pointer; transition: all 0.2s; &:hover, &.hovered { background: #f8f9ff; } }
 .cat-item-left { display: flex; align-items: center; gap: 10px; }
 .cat-emoji { font-size: 16px; }
 .cat-name { font-size: 14px; font-weight: 500; color: #121c28; }

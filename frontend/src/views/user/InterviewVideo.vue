@@ -566,7 +566,7 @@ onUnmounted(() => {
     font-size: 16px;
     font-weight: 600;
     margin: 0;
-    color: #1a3a5c;
+    color: #003527;
   }
 }
 
@@ -594,7 +594,7 @@ onUnmounted(() => {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #1a3a5c, #0ea5e9);
+  background: linear-gradient(135deg, #003527, #064e3b);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -761,7 +761,7 @@ onUnmounted(() => {
   input {
     width: 18px;
     height: 18px;
-    accent-color: #0ea5e9;
+    accent-color: #064e3b;
   }
 }
 
@@ -772,7 +772,7 @@ onUnmounted(() => {
   padding: 14px 40px;
   border-radius: 999px;
   border: none;
-  background: #0ea5e9;
+  background: #064e3b;
   color: #fff;
   font-size: 16px;
   font-weight: 600;
@@ -1269,7 +1269,7 @@ onUnmounted(() => {
 
 .status-text {
   font-size: 14px;
-  color: #0ea5e9;
+  color: #064e3b;
   font-weight: 500;
 }
 
@@ -1292,7 +1292,7 @@ onUnmounted(() => {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #1a3a5c, #0ea5e9);
+  background: linear-gradient(135deg, #003527, #064e3b);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1348,11 +1348,11 @@ onUnmounted(() => {
   }
   
   &.primary {
-    background: #1a3a5c;
-    border-color: #1a3a5c;
+    background: #003527;
+    border-color: #003527;
     
     &:hover {
-      background: #24507a;
+      background: #064e3b;
     }
   }
 }
@@ -1386,9 +1386,9 @@ onUnmounted(() => {
   border-bottom: 2px solid transparent;
   
   &.active {
-    color: #1a3a5c;
+    color: #003527;
     font-weight: 600;
-    border-bottom-color: #1a3a5c;
+    border-bottom-color: #003527;
   }
 }
 
@@ -1447,7 +1447,7 @@ onUnmounted(() => {
     flex-direction: row-reverse;
     
     .msg-content {
-      background: #1a3a5c;
+      background: #003527;
       color: #fff;
       border-radius: 12px 0 12px 12px;
       
@@ -1480,7 +1480,7 @@ onUnmounted(() => {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #1a3a5c, #0ea5e9);
+    background: linear-gradient(135deg, #003527, #064e3b);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1524,7 +1524,7 @@ onUnmounted(() => {
   outline: none;
   
   &:focus {
-    border-color: #1a3a5c;
+    border-color: #003527;
   }
   
   &::placeholder {
@@ -1536,7 +1536,7 @@ onUnmounted(() => {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: #1a3a5c;
+  background: #003527;
   color: #fff;
   border: none;
   display: flex;
@@ -1545,7 +1545,7 @@ onUnmounted(() => {
   cursor: pointer;
   
   &:hover:not(:disabled) {
-    background: #24507a;
+    background: #064e3b;
   }
   
   &:disabled {
@@ -1588,7 +1588,7 @@ onUnmounted(() => {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #1a3a5c, #0ea5e9);
+  background: linear-gradient(135deg, #003527, #064e3b);
   display: flex;
   align-items: center;
   justify-content: center;

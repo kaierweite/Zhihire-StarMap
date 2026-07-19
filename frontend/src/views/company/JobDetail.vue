@@ -391,47 +391,47 @@ onMounted(() => {
 .fade-up { opacity: 0; animation: fadeUp 0.4s cubic-bezier(0.22,1,0.36,1) forwards; }
 .d1 { animation-delay: 0.08s; }
 
-.loading-hint { text-align: center; padding: 60px; color: #909399; font-size: 14px; }
+.loading-hint { text-align: center; padding: 60px; color: #404944; font-size: 14px; }
 
 .header {
   display: flex; align-items: flex-start; gap: 16px; margin-bottom: 24px;
 }
 .back-btn {
   width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
-  border-radius: 10px; border: 1px solid #e5e7eb; background: #fff; color: #606266;
+  border-radius: 10px; border: 1px solid #bfc9c3; background: #fff; color: #404944;
   cursor: pointer; flex-shrink: 0; margin-top: 4px;
-  &:hover { border-color: #1a3a5c; color: #1a3a5c; }
+  &:hover { border-color: #003527; color: #003527; }
 }
 .header-info { flex: 1; }
 .title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
-.title-row h1 { font-size: 24px; font-weight: 700; color: #303133; margin: 0; }
-.meta-row { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: #909399; align-items: center; }
+.title-row h1 { font-size: 24px; font-weight: 700; color: #121c28; margin: 0; }
+.meta-row { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: #404944; align-items: center; }
 .header-actions { display: flex; gap: 8px; flex-shrink: 0; margin-top: 4px; }
 
 .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .card {
-  background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e5e7eb;
+  background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #bfc9c3;
 }
-.card-title { font-size: 16px; font-weight: 700; color: #303133; margin: 0 0 12px 0; }
+.card-title { font-size: 16px; font-weight: 700; color: #121c28; margin: 0 0 12px 0; }
 
-.desc-content { font-size: 14px; color: #606266; line-height: 1.7; white-space: pre-wrap; }
+.desc-content { font-size: 14px; color: #404944; line-height: 1.7; white-space: pre-wrap; }
 
 .benefits-list { display: flex; flex-wrap: wrap; gap: 8px; }
-.benefit-tag { font-size: 12px; padding: 4px 12px; border-radius: 999px; background: #dbeafe; color: #1e3a8a; }
+.benefit-tag { font-size: 12px; padding: 4px 12px; border-radius: 999px; background: #003527; color: #fff; }
 
 .skills-area { margin-bottom: 8px; }
 .skills-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
 .skill-item {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fafbfc;
+  padding: 8px 12px; border: 1px solid #bfc9c3; border-radius: 8px; background: #fafbfc;
 }
 .skill-left { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.skill-name { font-size: 13px; font-weight: 600; color: #303133; }
-.skill-cat { font-size: 11px; color: #909399; padding: 1px 6px; background: #f3f4f5; border-radius: 4px; }
-.imp { font-size: 11px; color: #909399; }
+.skill-name { font-size: 13px; font-weight: 600; color: #121c28; }
+.skill-cat { font-size: 11px; color: #404944; padding: 1px 6px; background: #f3f4f5; border-radius: 4px; }
+.imp { font-size: 11px; color: #404944; }
 
 .add-skill-row { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
-.skill-results { border: 1px solid #e5e7eb; border-radius: 8px; max-height: 160px; overflow-y: auto; margin-top: 6px; }
+.skill-results { border: 1px solid #bfc9c3; border-radius: 8px; max-height: 160px; overflow-y: auto; margin-top: 6px; }
 .skill-option {
   display: flex; align-items: center; gap: 8px; padding: 8px 12px; cursor: pointer;
   border-bottom: 1px solid #f3f4f5; font-size: 13px;
@@ -443,32 +443,32 @@ onMounted(() => {
 .app-list { display: flex; flex-direction: column; gap: 8px; }
 .app-item {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px;
+  padding: 10px 12px; border: 1px solid #bfc9c3; border-radius: 8px;
   gap: 8px;
 }
 .app-info { flex: 1; min-width: 0; }
 .app-name-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-.app-name { font-size: 13px; font-weight: 600; color: #303133; }
-.app-meta { display: flex; gap: 10px; font-size: 11px; color: #909399; flex-wrap: wrap; }
+.app-name { font-size: 13px; font-weight: 600; color: #121c28; }
+.app-meta { display: flex; gap: 10px; font-size: 11px; color: #404944; flex-wrap: wrap; }
 .app-actions { display: flex; gap: 4px; flex-shrink: 0; }
 
 /* ---- Candidates ---- */
 .cand-list { display: flex; flex-direction: column; gap: 10px; }
 .cand-item {
-  border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px;
+  border: 1px solid #bfc9c3; border-radius: 8px; padding: 12px;
 }
 .cand-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 .cand-avatar {
-  width: 32px; height: 32px; border-radius: 50%; background: #1a3a5c; color: #fff;
+  width: 32px; height: 32px; border-radius: 50%; background: #003527; color: #fff;
   display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0;
 }
 .cand-info { display: flex; flex-direction: column; gap: 2px; }
-.cand-name { font-size: 13px; font-weight: 600; color: #303133; }
-.cand-score { font-size: 12px; &.high { color: #67c23a; } &.mid { color: #e6a23c; } &.low { color: #909399; } }
+.cand-name { font-size: 13px; font-weight: 600; color: #121c28; }
+.cand-score { font-size: 12px; &.high { color: #67c23a; } &.mid { color: #e6a23c; } &.low { color: #404944; } }
 .cand-skills { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
-.cand-skill { font-size: 11px; color: #606266; background: #f3f4f5; padding: 2px 8px; border-radius: 4px; }
+.cand-skill { font-size: 11px; color: #404944; background: #f3f4f5; padding: 2px 8px; border-radius: 4px; }
 
-.empty-hint { text-align: center; padding: 20px; color: #c0c4cc; font-size: 13px; }
+.empty-hint { text-align: center; padding: 20px; color: #bfc9c3; font-size: 13px; }
 
 @media (max-width: 768px) { .grid-2col { grid-template-columns: 1fr; } }
 </style>

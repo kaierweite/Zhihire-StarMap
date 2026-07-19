@@ -1,4 +1,4 @@
-﻿"""图谱业务服务模块。
+"""图谱业务服务模块。
 """
 import json
 import logging
@@ -43,9 +43,14 @@ async def get_job_graph(db: AsyncSession, job_id: int) -> GraphResult:
     G = await get_or_build_graph(db)
     job_skills = await job_skill_repository.list_by_job(db, job_id)
     job_skill_ids: set[str] = set()
+    skill_importance: dict[str, float] = {}
+    skill_required_level: dict[str, str] = {}
     for js, sk in job_skills:
-        job_skill_ids.add(str(sk.id))
-    result = build_job_graph(G, job_skill_ids)
+        sid = str(sk.id)
+        job_skill_ids.add(sid)
+        skill_importance[sid] = js.importance
+        skill_required_level[sid] = js.required_level
+    result = build_job_graph(G, job_skill_ids, skill_importance, skill_required_level)
     # 构建旭日图数据
     result.sunburst_data = build_job_sunburst(G, job_skill_ids)
     await ability_graph_repository.upsert(db, "JOB", job_id, json.dumps(result.model_dump(), ensure_ascii=False))
